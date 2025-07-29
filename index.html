@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chris Cruz - AI Strategist & Full-Stack Builder | ChrisCruz.nyc</title>
+    <meta name="description" content="Chris Cruz - AI strategist, full-stack builder, and automation expert helping founders integrate AI-powered workflows. Based in NYC.">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0066ff;
+            --primary-dark: #0052cc;
+            --secondary: #00d4ff;
+            --accent: #ff6b35;
+            --text-primary: #1a1a1a;
+            --text-secondary: #666;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8faff;
+            --bg-dark: #0a0a0a;
+            --gradient-1: linear-gradient(135deg, #0066ff 0%, #00d4ff 100%);
+            --gradient-2: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-3: linear-gradient(135deg, #ff6b35 0%, #f7931e 100%);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        /* Smooth scroll */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: var(--gradient-1);
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            animation: float 20s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            color: white;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+            font-weight: 500;
+            animation: slideDown 0.8s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero h1 {
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin-bottom: 3rem;
+            opacity: 0.8;
+            animation: fadeInUp 1s ease-out 0.6s both;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.8s both;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: var(--bg-primary);
+            color: var(--primary);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            z-index: 1000;
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+            transform: translateY(-100%);
+        }
+
+        .nav.visible {
+            transform: translateY(0);
+        }
+
+        .nav-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        /* Sections */
+        .section {
+            padding: 5rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: clamp(2.5rem, 5vw, 3.5rem);
+            font-weight: 700;
+            margin-bottom: 3rem;
+            text-align: center;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            width: 100px;
+            height: 4px;
+            background: var(--gradient-1);
+            position: absolute;
+            bottom: -1rem;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+        }
+
+        /* About Section */
+        .about {
+            background: var(--bg-secondary);
+            margin: 0;
+            padding: 5rem 0;
+        }
+
+        .about-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .about-image {
+            position: relative;
+        }
+
+        .about-image::before {
+            content: '';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: 20px;
+            bottom: 20px;
+            background: var(--gradient-2);
+            border-radius: 20px;
+            z-index: -1;
+        }
+
+        .profile-placeholder {
+            width: 100%;
+            height: 400px;
+            background: var(--gradient-3);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 4rem;
+            font-weight: 700;
+        }
+
+        .about-text {
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: var(--text-secondary);
+        }
+
+        .about-text p {
+            margin-bottom: 1.5rem;
+        }
+
+        /* Experience Timeline */
+        .timeline {
+            position: relative;
+            margin: 3rem 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 30px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gradient-1);
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 3rem;
+            padding-left: 4rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 21px;
+            top: 0;
+            width: 18px;
+            height: 18px;
+            background: var(--primary);
+            border-radius: 50%;
+            border: 4px solid var(--bg-primary);
+            box-shadow: 0 0 0 4px var(--primary);
+        }
+
+        .timeline-content {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 102, 255, 0.1);
+        }
+
+        .timeline-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .timeline-subtitle {
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        /* Skills Section */
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .skill-card {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 102, 255, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .skill-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .skill-category {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .skill-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .skill-tag {
+            background: var(--bg-secondary);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            border: 1px solid rgba(0, 102, 255, 0.2);
+        }
+
+        /* Values Section */
+        .values {
+            background: var(--bg-dark);
+            color: white;
+            margin: 0;
+            padding: 5rem 0;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .value-card {
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .value-quote {
+            font-size: 1.3rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--secondary);
+        }
+
+        .value-description {
+            opacity: 0.8;
+        }
+
+        /* Recent Work Highlight */
+        .recent-work {
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.05) 0%, rgba(0, 212, 255, 0.05) 100%);
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 3rem 0;
+            border: 1px solid rgba(0, 102, 255, 0.1);
+        }
+
+        .work-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .work-description {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+
+        .work-highlights {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .highlight-item {
+            background: var(--bg-primary);
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .highlight-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .highlight-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        /* Contact Section */
+        .contact {
+            background: var(--bg-secondary);
+            margin: 0;
+            padding: 5rem 0;
+            text-align: center;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .contact-item {
+            background: var(--bg-primary);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .contact-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .contact-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--bg-dark);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .about-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+
+            .timeline::before {
+                left: 15px;
+            }
+
+            .timeline-item {
+                padding-left: 3rem;
+            }
+
+            .timeline-item::before {
+                left: 6px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+        }
+
+        /* Scroll animations */
+        .animate-on-scroll {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .animate-on-scroll.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="nav" id="nav">
+        <div class="nav-content">
+            <div class="logo">Chris Cruz</div>
+            <ul class="nav-links">
+                <li><a href="#about">About</a></li>
+                <li><a href="#experience">Experience</a></li>
+                <li><a href="#skills">Skills</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-badge">🚀 Recently spoke at AI NYC on AI-Powered Investing</div>
+            <h1>Chris Cruz</h1>
+            <div class="hero-subtitle">AI Strategist & Full-Stack Builder</div>
+            <p class="hero-description">
+                Helping founders and teams integrate GPT-powered workflows into how they work and build. 
+                From 0 to 200 employees, van life to Wall Street, I bridge the gap between human creativity and AI potential.
+            </p>
+            <div class="cta-buttons">
+                <a href="#contact" class="btn btn-primary">
+                    Get In Touch
+                    <span>→</span>
+                </a>
+                <a href="#recent-work" class="btn btn-secondary">
+                    See Recent Work
+                    <span>🎯</span>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recent Work Highlight -->
+    <section id="recent-work" class="section">
+        <div class="recent-work animate-on-scroll">
+            <div class="work-title">🎤 AI NYC Speaking Success</div>
+            <div class="work-description">
+                Just delivered a featured presentation on "AI-Powered Investing: How Modern Tools Give Retail the Edge" 
+                at AI NYC's finance series. Showcased how tools like Perplexity, Grok, and automation platforms are 
+                democratizing Wall Street-level investing capabilities for everyday investors.
+            </div>
+            <div class="work-highlights">
+                <div class="highlight-item">
+                    <div class="highlight-number">200+</div>
+                    <div class="highlight-label">Finance professionals reached</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-number">5</div>
+                    <div class="highlight-label">AI tools demonstrated</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-number">Live</div>
+                    <div class="highlight-label">Workflow demos</div>
+                </div>
+                <div class="highlight-item">
+                    <div class="highlight-number">NYC</div>
+                    <div class="highlight-label">Civic Hall venue</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="about-content">
+            <div class="about-image animate-on-scroll">
+                <div class="profile-placeholder">CC</div>
+            </div>
+            <div class="about-text animate-on-scroll">
+                <h2 class="section-title" style="text-align: left; margin-bottom: 2rem;">About Me</h2>
+                <p>I'm Chris Cruz — a full-stack builder, automation nerd, and AI strategist based in New York.</p>
+                <p>I've worked across both startups and corporate giants, helped scale a venture-backed company from 0 to 200 people, built van life rigs, and spoken at AI NYC. Now, I run a boutique AI agency helping founders and teams integrate GPT-powered workflows into how they work and build.</p>
+                <p>My journey started in Pleasantville, New York, took me through Minnesota, and brought me back to the city that never sleeps. Along the way, I've learned that the best solutions come from combining human creativity with smart automation.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Experience Section -->
+    <section id="experience" class="section">
+        <h2 class="section-title animate-on-scroll">My Journey</h2>
+        <div class="timeline">
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-title">🌱 Early Life & Education</div>
+                    <div class="timeline-subtitle">University of Pennsylvania Graduate</div>
+                    <p>Born in Pleasantville, raised in Minnesota. Studied Philosophy, Politics, and Economics (PPE). Founded a bike rental company to help students move faster across campus. Learned responsibility and resilience early after reuniting with siblings and helping raise my sister.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-title">🚀 Entrepreneurship</div>
+                    <div class="timeline-subtitle">Venture for America Fellow & Co-Founder</div>
+                    <p>Selected as a Venture for America fellow. Co-founded a venture-backed startup that grew from 2 to 200 employees with First Round Capital as an investor. Learned how to hire, fire, fundraise, and build from the ground up.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-title">🏢 Corporate & Fintech</div>
+                    <div class="timeline-subtitle">JPMorgan Chase - AI/ML Data Scientist</div>
+                    <p>Leading automation and AI initiatives in home lending and transaction enrichment. Shipped large-scale data pipelines, search systems, internal GPT copilots, and modernization architecture for financial infrastructure.</p>
+                </div>
+            </div>
+
+            <div class="timeline-item animate-on-scroll">
+                <div class="timeline-content">
+                    <div class="timeline-title">🎤 Speaking & Thought Leadership</div>
+                    <div class="timeline-subtitle">AI NYC Featured Speaker</div>
+                    <p>Featured talk at AI NYC on "AI-Powered Investing," showcasing how AI tools democratize Wall Street-level capabilities for retail investors. Focus on practical AI, human creativity, and workflow design.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Skills Section -->
+    <section id="skills" class="section">
+        <h2 class="section-title animate-on-scroll">Skills & Stack</h2>
+        <div class="skills-grid">
+            <div class="skill-card animate-on-scroll">
+                <div class="skill-category">Languages & Development</div>
+                <div class="skill-list">
+                    <span class="skill-tag">Python</span>
+                    <span class="skill-tag">JavaScript</span>
+                    <span class="skill-tag">HTML</span>
+                    <span class="skill-tag">CSS</span>
+                </div>
+            </div>
+
+            <div class="skill-card animate-on-scroll">
+                <div class="skill-category">AI Tools & Platforms</div>
+                <div class="skill-list">
+                    <span class="skill-tag">OpenAI</span>
+                    <span class="skill-tag">Claude</span>
+                    <span class="skill-tag">Perplexity</span>
+                    <span class="skill-tag">GPTs</span>
+                    <span class="skill-tag">Langchain</span>
+                </div>
+            </div>
+
+            <div class="skill-card animate-on-scroll">
+                <div class="skill-category">Automation & No-Code</div>
+                <div class="skill-list">
+                    <span class="skill-tag">Zapier</span>
+                    <span class="skill-tag">Airtable</span>
+                    <span class="skill-tag">Retool</span>
+                    <span class="skill-tag">Firebase</span>
+                </div>
+            </div>
+
+            <div class="skill-card animate-on-scroll">
+                <div class="skill-category">Core Strengths</div>
+                <div class="skill-list">
+                    <span class="skill-tag">Systems Thinking</span>
+                    <span class="skill-tag">Automation Design</span>
+                    <span class="skill-tag">AI Copilots</span>
+                    <span class="skill-tag">Rapid Prototyping</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values Section -->
+    <section class="values">
+        <div class="section">
+            <h2 class="section-title animate-on-scroll" style="color: white;">Personal Values</h2>
+            <div class="values-grid">
+                <div class="value-card animate-on-scroll">
+                    <div class="value-quote">Autonomy > Stagnation</div>
+                    <div class="value-description">Freedom to innovate and create beats staying in comfort zones</div>
+                </div>
+                <div class="value-card animate-on-scroll">
+                    <div class="value-quote">Playful Invention > Passive Consumption</div>
+                    <div class="value-description">Building and experimenting trumps endless scrolling</div>
+                </div>
+                <div class="value-card animate-on-scroll">
+                    <div class="value-quote">Execution > Inspiration</div>
+                    <div class="value-description">Shipping beats planning. Done is better than perfect.</div>
+                </div>
+                <div class="value-card animate-on-scroll">
+                    <div class="value-quote">Start Small. Ship Often.</div>
+                    <div class="value-description">Iterate relentlessly. Learn fast, fail fast, improve fast.</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Beyond Work Section -->
+    <section class="section">
+        <h2 class="section-title animate-on-scroll">Beyond Work</h2>
+        <div class="skills-grid">
+            <div class="skill-card animate-on-scroll">
+                <div class="skill-category">🕺 Life & Adventures</div>
+                <p>Salsa dancer and EDM concert junkie. Built a van and lived on the road. Travel addict with Ecuador as my favorite country.</p>
+            </div>
+            <div class="skill-card animate-on-scroll">
+                <div class="skill-category">📚 Learning & Growth</div>
+                <p>Avid reader of productivity books. Always exploring new ways to optimize workflows and human potential.</p>
+            </div>
+            <div class="skill-card animate-on-scroll">
+                <div class="skill-category">🍽️ Social & Community</div>
+                <p>Social dining app explorer: Cuculi, 222, Timeleft. Building connections through shared experiences.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="section">
+            <h2 class="section-title animate-on-scroll">Let's Connect</h2>
+            <div class="contact-grid">
+                <div class="contact-item animate-on-scroll">
+                    <div class="contact-icon">📎</div>
+                    <h3>Résumé</h3>
+                    <p>Download my full resume with detailed experience and projects.</p>
+                    <a href="#" class="btn btn-primary" style="margin-top: 1rem;">Download PDF</a>
+                </div>
+                <div class="contact-item animate-on-scroll">
+                    <div class="contact-icon">🎙️</div>
+                    <h3>Speaking</h3>
+                    <p>Available for talks on AI, automation, and building in the future of work.</p>
+                    <a href="mailto:chris@chriscruz.nyc?subject=Speaking Inquiry" class="btn btn-primary" style="margin-top: 1rem;">Book a Talk</a>
+                </div>
+                <div class="contact-item animate-on-scroll">
+                    <div class="contact-icon">📬</div>
+                    <h3>Get In Touch</h3>
+                    <p>Ready to integrate AI into your workflows? Let's build something together.</p>
+                    <a href="mailto:chris@chriscruz.nyc" class="btn btn-primary" style="margin-top: 1rem;">Say Hello</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 Chris Cruz. Built in NYC with ⚡ and ☕</p>
+    </footer>
+
+    <script>
+        // Navigation scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('nav');
+            if (window.scrollY > 100) {
+                nav.classList.add('visible');
+            } else {
+                nav.classList.remove('visible');
+            }
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Scroll animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all elements with animate-on-scroll class
+        document.addEventListener('DOMContentLoaded', () => {
+            const animatedElements = document.querySelectorAll('.animate-on-scroll');
+            animatedElements.forEach(el => observer.observe(el));
+        });
+
+        // Add some interactive hover effects
+        document.querySelectorAll('.skill-card, .contact-item, .timeline-content').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Dynamic text effect for hero
+        const heroSubtitle = document.querySelector('.hero-subtitle');
+        const titles = [
+            'AI Strategist & Full-Stack Builder',
+            'Automation Expert & Workflow Designer', 
+            'GPT Integration Specialist',
+            'AI NYC Featured Speaker'
+        ];
+        
+        let currentTitle = 0;
+        
+        setInterval(() => {
+            heroSubtitle.style.opacity = '0';
+            setTimeout(() => {
+                currentTitle = (currentTitle + 1) % titles.length;
+                heroSubtitle.textContent = titles[currentTitle];
+                heroSubtitle.style.opacity = '0.9';
+            }, 300);
+        }, 4000);
+
+        // Add particle effect to hero background
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.style.position = 'absolute';
+            particle.style.width = Math.random() * 4 + 2 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.background = 'rgba(255, 255, 255, 0.3)';
+            particle.style.borderRadius = '50%';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = '100%';
+            particle.style.pointerEvents = 'none';
+            particle.style.animation = `floatUp ${Math.random() * 3 + 5}s linear forwards`;
+            
+            document.querySelector('.hero').appendChild(particle);
+            
+            setTimeout(() => {
+                particle.remove();
+            }, 8000);
+        }
+
+        // Add floating particles
+        setInterval(createParticle, 2000);
+
+        // Add CSS for particle animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes floatUp {
+                to {
+                    transform: translateY(-100vh) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html> 
