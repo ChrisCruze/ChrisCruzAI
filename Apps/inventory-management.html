@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .modal {
+            display: none;
+        }
+        .modal.active {
+            display: flex;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2">Inventory Home</h1>
+            <p class="text-gray-600">Keep track of where everything belongs.</p>
+        </header>
+
+        <!-- Metrics -->
+        <div id="metrics" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold text-gray-700 mb-2">Total Items</h2>
+                <p id="total-items" class="text-3xl font-bold text-blue-600">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-lg font-semibold text-gray-700 mb-2">Items with a Place</h2>
+                <p id="placed-percentage" class="text-3xl font-bold text-green-600">0%</p>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap gap-4 mb-8">
+            <button id="add-item-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Add New Item</button>
+            <button id="add-place-btn" class="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Add New Place</button>
+            <button id="review-items-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-6 rounded-lg shadow-md transition-transform transform hover:scale-105">Review Unplaced Items</button>
+        </div>
+
+        <!-- Items List -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">All Items</h2>
+            <div id="items-list" class="space-y-4">
+                <!-- Items will be dynamically inserted here -->
+                <p class="text-gray-500">No items yet. Add one to get started!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Item Modal -->
+    <div id="add-item-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6">Add a New Item</h2>
+            <input id="item-name-input" type="text" placeholder="Enter item name (e.g., Remote Control)" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-blue-500">
+            <div class="flex justify-end gap-4">
+                <button id="cancel-add-item" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancel</button>
+                <button id="save-item" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Save Item</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Place Modal -->
+    <div id="add-place-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-6">Add a New Place</h2>
+            <input id="place-name-input" type="text" placeholder="Enter place name (e.g., TV Shelf)" class="w-full p-3 border border-gray-300 rounded-lg mb-4 focus:outline-none focus:ring-2 focus:ring-green-500">
+            <div class="flex justify-end gap-4">
+                <button id="cancel-add-place" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancel</button>
+                <button id="save-place" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg">Save Place</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Review/Assign Place Modal -->
+    <div id="review-modal" class="modal fixed inset-0 bg-black bg-opacity-50 items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-4">Find a Home</h2>
+            <p class="mb-6">Where does the <strong id="review-item-name" class="text-blue-600"></strong> belong?</p>
+            <select id="place-select-review" class="w-full p-3 border border-gray-300 rounded-lg mb-6 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                <!-- Places will be populated here -->
+            </select>
+            <div class="flex justify-end gap-4">
+                <button id="cancel-review" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg">Cancel</button>
+                <button id="save-item-place-review" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg">Assign Place</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+            measurementId: "G-LVHF0VP8RM"
+        };
+
+        // --- Initialize Firebase ---
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const itemsRef = database.ref('items');
+        const placesRef = database.ref('places');
+
+        // --- Global State ---
+        let allItems = {};
+        let allPlaces = {};
+        let currentReviewItemId = null;
+
+        // --- DOM Elements ---
+        const addItemBtn = document.getElementById('add-item-btn');
+        const addPlaceBtn = document.getElementById('add-place-btn');
+        const reviewItemsBtn = document.getElementById('review-items-btn');
+        
+        const addItemModal = document.getElementById('add-item-modal');
+        const addPlaceModal = document.getElementById('add-place-modal');
+        const reviewModal = document.getElementById('review-modal');
+
+        const saveItemBtn = document.getElementById('save-item');
+        const cancelAddItemBtn = document.getElementById('cancel-add-item');
+        const itemNameInput = document.getElementById('item-name-input');
+        
+        const savePlaceBtn = document.getElementById('save-place');
+        const cancelAddPlaceBtn = document.getElementById('cancel-add-place');
+        const placeNameInput = document.getElementById('place-name-input');
+        
+        const cancelReviewBtn = document.getElementById('cancel-review');
+        const saveItemPlaceReviewBtn = document.getElementById('save-item-place-review');
+        const reviewItemNameEl = document.getElementById('review-item-name');
+        const placeSelectReview = document.getElementById('place-select-review');
+
+        const itemsListEl = document.getElementById('items-list');
+        const totalItemsEl = document.getElementById('total-items');
+        const placedPercentageEl = document.getElementById('placed-percentage');
+
+
+        // --- Modal Logic ---
+        function openModal(modal) {
+            modal.classList.add('active');
+        }
+
+        function closeModal(modal) {
+            modal.classList.remove('active');
+        }
+
+        addItemBtn.addEventListener('click', () => openModal(addItemModal));
+        addPlaceBtn.addEventListener('click', () => openModal(addPlaceModal));
+        
+        cancelAddItemBtn.addEventListener('click', () => closeModal(addItemModal));
+        cancelAddPlaceBtn.addEventListener('click', () => closeModal(addPlaceModal));
+        cancelReviewBtn.addEventListener('click', () => closeModal(reviewModal));
+
+        // --- Data Handling ---
+        
+        // Save new item
+        saveItemBtn.addEventListener('click', () => {
+            const itemName = itemNameInput.value.trim();
+            if (itemName) {
+                const newItemRef = itemsRef.push();
+                newItemRef.set({
+                    name: itemName,
+                    placeId: '' // Initially no place
+                });
+                itemNameInput.value = '';
+                closeModal(addItemModal);
+            }
+        });
+
+        // Save new place
+        savePlaceBtn.addEventListener('click', () => {
+            const placeName = placeNameInput.value.trim();
+            if (placeName) {
+                const newPlaceRef = placesRef.push();
+                newPlaceRef.set({
+                    name: placeName
+                });
+                placeNameInput.value = '';
+                closeModal(addPlaceModal);
+            }
+        });
+
+        // Assign place to item
+        function assignPlaceToItem(itemId, placeId) {
+            itemsRef.child(itemId).update({ placeId: placeId });
+        }
+
+        // --- Rendering ---
+        
+        function renderItems() {
+            itemsListEl.innerHTML = ''; // Clear current list
+            const itemIds = Object.keys(allItems);
+
+            if (itemIds.length === 0) {
+                itemsListEl.innerHTML = '<p class="text-gray-500">No items yet. Add one to get started!</p>';
+                return;
+            }
+
+            itemIds.forEach(itemId => {
+                const item = allItems[itemId];
+                const place = item.placeId ? allPlaces[item.placeId] : null;
+
+                const itemEl = document.createElement('div');
+                itemEl.className = 'flex items-center justify-between bg-gray-50 p-4 rounded-lg border border-gray-200';
+                
+                const itemNameEl = document.createElement('span');
+                itemNameEl.className = 'font-medium text-lg';
+                itemNameEl.textContent = item.name;
+
+                const placeContainer = document.createElement('div');
+                
+                if (place) {
+                     placeContainer.innerHTML = `
+                        <span class="text-gray-500 mr-2">is at</span>
+                        <span class="font-semibold text-green-700 bg-green-100 py-1 px-3 rounded-full">${place.name}</span>
+                    `;
+                } else {
+                    const assignBtn = document.createElement('button');
+                    assignBtn.textContent = 'Find a Home';
+                    assignBtn.className = 'bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg text-sm';
+                    assignBtn.onclick = () => startReviewProcess(itemId);
+                    placeContainer.appendChild(assignBtn);
+                }
+
+                itemEl.appendChild(itemNameEl);
+                itemEl.appendChild(placeContainer);
+                itemsListEl.appendChild(itemEl);
+            });
+        }
+        
+        function updateMetrics() {
+            const totalItems = Object.keys(allItems).length;
+            const placedItems = Object.values(allItems).filter(item => item.placeId).length;
+            
+            totalItemsEl.textContent = totalItems;
+            
+            const percentage = totalItems > 0 ? Math.round((placedItems / totalItems) * 100) : 0;
+            placedPercentageEl.textContent = `${percentage}%`;
+        }
+
+        function populatePlaceSelect(selectElement) {
+            selectElement.innerHTML = '<option value="">Select a place...</option>';
+            for (const placeId in allPlaces) {
+                const option = document.createElement('option');
+                option.value = placeId;
+                option.textContent = allPlaces[placeId].name;
+                selectElement.appendChild(option);
+            }
+        }
+
+        // --- Review Flow ---
+        function startReviewProcess(itemId) {
+            currentReviewItemId = itemId;
+            const item = allItems[itemId];
+            reviewItemNameEl.textContent = item.name;
+            populatePlaceSelect(placeSelectReview);
+            openModal(reviewModal);
+        }
+
+        reviewItemsBtn.addEventListener('click', () => {
+            const unplacedItemIds = Object.keys(allItems).filter(id => !allItems[id].placeId);
+            if (unplacedItemIds.length > 0) {
+                startReviewProcess(unplacedItemIds[0]);
+            } else {
+                alert('Great! All items have a home.');
+            }
+        });
+
+        saveItemPlaceReviewBtn.addEventListener('click', () => {
+            const selectedPlaceId = placeSelectReview.value;
+            if (currentReviewItemId && selectedPlaceId) {
+                assignPlaceToItem(currentReviewItemId, selectedPlaceId);
+                closeModal(reviewModal);
+                
+                // Check if there are more unplaced items to review
+                const unplacedItemIds = Object.keys(allItems).filter(id => !allItems[id].placeId && id !== currentReviewItemId);
+                if (unplacedItemIds.length > 0) {
+                   setTimeout(() => startReviewProcess(unplacedItemIds[0]), 300); // slight delay for smoother UI
+                }
+
+            } else if (!selectedPlaceId) {
+                alert("Please select a place.");
+            }
+        });
+
+
+        // --- Firebase Listeners ---
+        itemsRef.on('value', (snapshot) => {
+            allItems = snapshot.val() || {};
+            renderItems();
+            updateMetrics();
+        });
+
+        placesRef.on('value', (snapshot) => {
+            allPlaces = snapshot.val() || {};
+            // Re-render items in case a place name changed
+            renderItems();
+        });
+
+        // --- Initial Load ---
+        window.onload = () => {
+            // The 'on' listeners will handle the initial data load.
+        };
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Knowledge Workflow</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* A lighter gray background */
+        }
+        /* Animation for modals */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.98); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes slideInUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-content {
+            animation: fadeIn 0.2s ease-out;
+        }
+        .topic-card {
+            animation: slideInUp 0.3s ease-out forwards;
+            opacity: 0;
+        }
+        /* Custom scrollbar for modal */
+        .modal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+        .modal-body::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .modal-body::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 10px;
+        }
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: #9ca3af;
+        }
+        .sort-btn-active {
+            background-color: #3b82f6;
+            color: white;
+        }
+        /* Styles for the rendered markdown in the modal */
+        .markdown-view h1, .markdown-view h2, .markdown-view h3 {
+            font-weight: bold;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+        .markdown-view h1 { font-size: 1.875rem; }
+        .markdown-view h2 { font-size: 1.5rem; }
+        .markdown-view h3 { font-size: 1.25rem; }
+        .markdown-view p { margin-bottom: 1rem; }
+        .markdown-view ul { list-style-type: disc; margin-left: 1.5rem; margin-bottom: 1rem; }
+        .markdown-view blockquote { border-left: 4px solid #e5e7eb; padding-left: 1rem; margin-left: 0; font-style: italic; color: #6b7280; }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="app" class="container mx-auto p-4 md:p-8">
+
+        <!-- Header -->
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-4xl font-bold text-gray-900">Knowledge Workflow</h1>
+                <p class="text-lg text-gray-600 mt-1">Your central hub for research and discovery.</p>
+            </div>
+             <button onclick="showAddTopicModal()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition-transform transform hover:scale-105">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                New Topic
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="space-y-12">
+            <!-- Metrics Dashboard -->
+            <section id="metrics-dashboard">
+                <!-- Metrics will be rendered here -->
+            </section>
+            
+            <!-- Research Topics -->
+            <section id="topics-section">
+                 <!-- Topics list will be rendered here -->
+            </section>
+
+            <!-- Workflow Steps Manager -->
+            <section id="workflow-section">
+                 <!-- Workflow manager will be rendered here -->
+            </section>
+        </main>
+
+    </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <script>
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+            measurementId: "G-LVHF0VP8RM"
+        };
+
+        // --- Initialize Firebase ---
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // --- App State ---
+        let researchTopics = {};
+        let workflowSteps = {};
+        let isInitialLoad = true;
+        let currentSortOrder = 'modifiedDate'; // Default sort order
+
+        // --- DOM Elements ---
+        const metricsDashboard = document.getElementById('metrics-dashboard');
+        const topicsSection = document.getElementById('topics-section');
+        const workflowSection = document.getElementById('workflow-section');
+        
+        // --- Main Render Function ---
+        function renderApp() {
+            if (isInitialLoad) {
+                topicsSection.innerHTML = `<div class="text-center p-8"><p class="text-gray-500">Loading your research dashboard...</p></div>`;
+                return;
+            }
+
+            renderMetricsDashboard();
+            renderTopicsList();
+            renderWorkflowStepsManager();
+        }
+
+        // --- Component Render Functions ---
+
+        function renderMetricsDashboard() {
+            let totalTopics = 0;
+            let totalSteps = 0;
+            let completedSteps = 0;
+            let topicsNotStarted = 0;
+            let topicsInProgress = 0;
+            let topicsCompleted = 0;
+
+            const topicEntries = Object.values(researchTopics);
+            totalTopics = topicEntries.length;
+
+            topicEntries.forEach(topic => {
+                const topicSteps = topic.steps || {};
+                const stepIds = Object.keys(topicSteps);
+                if (stepIds.length === 0) {
+                    topicsNotStarted++;
+                    return;
+                }
+
+                let topicCompletedSteps = 0;
+                stepIds.forEach(stepId => {
+                    totalSteps++;
+                    if (topicSteps[stepId].status === 'Complete') {
+                        completedSteps++;
+                        topicCompletedSteps++;
+                    }
+                });
+
+                if (topicCompletedSteps === 0) {
+                    topicsNotStarted++;
+                } else if (topicCompletedSteps === stepIds.length) {
+                    topicsCompleted++;
+                } else {
+                    topicsInProgress++;
+                }
+            });
+
+            const overallCompletion = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : 0;
+
+            metricsDashboard.innerHTML = `
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Dashboard Overview</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-sm font-medium text-gray-500">Total Topics</h3>
+                        <p class="text-3xl font-bold text-gray-900 mt-2">${totalTopics}</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-sm font-medium text-gray-500">Overall Progress</h3>
+                        <p class="text-3xl font-bold text-green-600 mt-2">${overallCompletion}%</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-sm font-medium text-gray-700">Topics In Progress</h3>
+                        <p class="text-3xl font-bold text-yellow-600 mt-2">${topicsInProgress}</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-md border border-gray-200">
+                        <h3 class="text-sm font-medium text-gray-700">Topics Completed</h3>
+                        <p class="text-3xl font-bold text-blue-600 mt-2">${topicsCompleted}</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTopicsList() {
+            let topicsHtml = '';
+            const topicsArray = Object.entries(researchTopics);
+
+            // Sorting Logic
+            topicsArray.sort(([, a], [, b]) => {
+                switch (currentSortOrder) {
+                    case 'name':
+                        return a.name.localeCompare(b.name);
+                    case 'createdDate':
+                        return new Date(b.createdDate) - new Date(a.createdDate);
+                    case 'progress':
+                        const progressA = a.steps ? (Object.values(a.steps).filter(s => s.status === 'Complete').length / Object.keys(a.steps).length) : 0;
+                        const progressB = b.steps ? (Object.values(b.steps).filter(s => s.status === 'Complete').length / Object.keys(b.steps).length) : 0;
+                        return (progressB || 0) - (progressA || 0);
+                    case 'modifiedDate':
+                    default:
+                        return new Date(b.modifiedDate) - new Date(a.modifiedDate);
+                }
+            });
+
+            if (topicsArray.length === 0) {
+                topicsHtml = `<div class="bg-white rounded-xl shadow-lg p-8 text-center text-gray-500">No research topics yet. Click 'New Topic' to get started.</div>`;
+            } else {
+                let delay = 0;
+                for (const [id, topic] of topicsArray) {
+                    const topicSteps = topic.steps || {};
+                    const stepIdsInTopic = Object.keys(topicSteps);
+                    
+                    // Calculate progress
+                    let completedCount = 0;
+                    stepIdsInTopic.forEach(stepId => {
+                        if (topicSteps[stepId]?.status === 'Complete') completedCount++;
+                    });
+                    const percentage = stepIdsInTopic.length > 0 ? Math.round((completedCount / stepIdsInTopic.length) * 100) : 0;
+
+                    // Gather all links
+                    let allLinksHtml = '';
+                    stepIdsInTopic.forEach(stepId => {
+                        const urls = topicSteps[stepId]?.urls || {};
+                        Object.values(urls).forEach(link => {
+                            allLinksHtml += `<a href="${link.url}" target="_blank" onclick="event.stopPropagation()" class="flex-shrink-0 bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded-full hover:bg-blue-200">${link.name}</a>`;
+                        });
+                    });
+                    const linksContainer = allLinksHtml ? `
+                        <div class="mt-3">
+                            <div class="flex flex-wrap items-center gap-2">
+                                ${allLinksHtml}
+                            </div>
+                        </div>
+                    ` : '';
+
+                    // Gather "Not Started" steps
+                    const notStartedSteps = stepIdsInTopic
+                        .filter(stepId => topicSteps[stepId]?.status === 'Not Started' && workflowSteps[stepId])
+                        .map(stepId => workflowSteps[stepId].name)
+                        .join(', ');
+                    
+                    const notStartedHtml = notStartedSteps ? `
+                        <div class="mt-3 text-xs text-gray-500">
+                            <span class="font-semibold">Up Next:</span> ${notStartedSteps}
+                        </div>
+                    ` : '';
+
+                    topicsHtml += `
+                        <div class="topic-card bg-white p-6 rounded-xl shadow-md border border-gray-200 flex flex-col justify-between" style="animation-delay: ${delay}ms">
+                            <div class="cursor-pointer flex-grow" onclick="showTopicDetailModal('${id}')">
+                                <div class="flex justify-between items-start">
+                                    <h3 class="text-xl font-bold text-gray-900">${topic.name}</h3>
+                                    <span class="text-sm text-gray-500">Modified: ${new Date(topic.modifiedDate).toLocaleDateString()}</span>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="flex justify-between items-center mb-1">
+                                        <span class="text-xs font-medium text-gray-600">${completedCount} / ${stepIdsInTopic.length} Steps</span>
+                                        <span class="text-xs font-bold text-gray-800">${percentage}%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-200 rounded-full h-2">
+                                        <div class="bg-green-600 h-2 rounded-full" style="width: ${percentage}%"></div>
+                                    </div>
+                                </div>
+                                ${notStartedHtml}
+                                ${linksContainer}
+                            </div>
+                            <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                                <button onclick="showMarkdownModal('${id}')" title="View Markdown" class="text-gray-500 hover:text-blue-600 hover:bg-blue-100 p-2 rounded-full transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M10 12a2 2 0 100-4 2 2 0 000 4z" /><path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.022 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" /></svg>
+                                </button>
+                                <button onclick="copyMarkdownToClipboard(this, '${id}')" title="Copy Markdown" class="copy-btn text-gray-500 hover:text-green-600 hover:bg-green-100 p-2 rounded-full transition-colors">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M7 9a2 2 0 012-2h6a2 2 0 012 2v6a2 2 0 01-2 2H9a2 2 0 01-2-2V9z" /><path d="M4 3a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H4z" /></svg>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                    delay += 50; // Stagger animation
+                }
+            }
+
+            const sortButtons = `
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="text-sm font-medium text-gray-600">Sort by:</span>
+                    <button onclick="setSortOrder('modifiedDate')" class="sort-btn px-3 py-1 text-sm rounded-full transition-colors ${currentSortOrder === 'modifiedDate' ? 'sort-btn-active' : 'bg-gray-200 hover:bg-gray-300'}">Last Updated</button>
+                    <button onclick="setSortOrder('createdDate')" class="sort-btn px-3 py-1 text-sm rounded-full transition-colors ${currentSortOrder === 'createdDate' ? 'sort-btn-active' : 'bg-gray-200 hover:bg-gray-300'}">Created</button>
+                    <button onclick="setSortOrder('name')" class="sort-btn px-3 py-1 text-sm rounded-full transition-colors ${currentSortOrder === 'name' ? 'sort-btn-active' : 'bg-gray-200 hover:bg-gray-300'}">Name</button>
+                    <button onclick="setSortOrder('progress')" class="sort-btn px-3 py-1 text-sm rounded-full transition-colors ${currentSortOrder === 'progress' ? 'sort-btn-active' : 'bg-gray-200 hover:bg-gray-300'}">Progress</button>
+                </div>
+            `;
+
+            topicsSection.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-4">Research Topics</h2>
+                    ${sortButtons}
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    ${topicsHtml}
+                </div>
+            `;
+        }
+        
+        function renderWorkflowStepsManager() {
+            let stepsListHtml = '';
+            const sortedSteps = Object.entries(workflowSteps).sort(([,a],[,b]) => a.name.localeCompare(b.name));
+
+            for (const [id, step] of sortedSteps) {
+                const nameDisplay = step.url 
+                    ? `<a href="${step.url}" target="_blank" class="text-blue-600 hover:underline">${step.name}</a>` 
+                    : step.name;
+
+                stepsListHtml += `
+                    <tr class="border-b border-gray-200">
+                        <td class="py-3 px-4 font-medium">${nameDisplay}</td>
+                        <td class="py-3 px-4 text-sm text-gray-600">${step.description}</td>
+                        <td class="py-3 px-4 text-right space-x-2">
+                            <button onclick="showEditStepModal('${id}')" class="text-blue-500 hover:text-blue-700 font-semibold text-sm">Edit</button>
+                            <button onclick="deleteWorkflowStep('${id}')" class="text-red-500 hover:text-red-700 font-semibold text-sm">Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }
+
+            workflowSection.innerHTML = `
+                <div class="bg-white rounded-xl shadow-lg p-6 border border-gray-200">
+                    <h2 class="text-2xl font-semibold mb-4">Manage Workflow Steps</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Add Step Form -->
+                        <div>
+                            <h3 class="font-semibold text-lg mb-3">Add a New Step</h3>
+                            <form id="add-step-form" class="space-y-4">
+                                <div>
+                                    <label for="step-name" class="block text-sm font-medium text-gray-700">Step Name</label>
+                                    <input type="text" id="step-name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="step-desc" class="block text-sm font-medium text-gray-700">Description</label>
+                                    <input type="text" id="step-desc" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                </div>
+                                <div>
+                                    <label for="step-url" class="block text-sm font-medium text-gray-700">Default URL (Optional)</label>
+                                    <input type="url" id="step-url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                </div>
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Add Step</button>
+                            </form>
+                        </div>
+                        <!-- Steps List -->
+                        <div>
+                             <h3 class="font-semibold text-lg mb-3">Existing Steps</h3>
+                             <div class="overflow-x-auto border rounded-lg">
+                                <table class="w-full text-left">
+                                    <thead class="bg-gray-50">
+                                        <tr class="border-b border-gray-200">
+                                            <th class="py-2 px-4 font-semibold text-sm">Name</th>
+                                            <th class="py-2 px-4 font-semibold text-sm">Description</th>
+                                            <th class="py-2 px-4"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        ${stepsListHtml || '<tr><td colspan="3" class="text-center py-4 text-gray-500">No steps created yet.</td></tr>'}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('add-step-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const nameInput = document.getElementById('step-name');
+                const descInput = document.getElementById('step-desc');
+                const urlInput = document.getElementById('step-url');
+                addWorkflowStep(nameInput.value, descInput.value, urlInput.value);
+                nameInput.value = '';
+                descInput.value = '';
+                urlInput.value = '';
+            });
+        }
+        
+        // --- UI Interaction Functions ---
+        function setSortOrder(order) {
+            currentSortOrder = order;
+            renderTopicsList();
+        }
+
+        function autoExpand(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        // --- Markdown & Copy Functions ---
+        function generateMarkdown(topicId) {
+            const topic = researchTopics[topicId];
+            if (!topic) return '';
+
+            let md = `# ${topic.name}\n\n`;
+            md += `## Prompt\n\n> ${topic.prompt.replace(/\n/g, '\n> ')}\n\n`;
+            md += `## Workflow Steps\n\n`;
+
+            const topicSteps = topic.steps || {};
+            const stepIdsInTopic = Object.keys(topicSteps);
+            const sortedStepIds = Object.keys(workflowSteps)
+                .filter(id => stepIdsInTopic.includes(id))
+                .sort((a,b) => workflowSteps[a].name.localeCompare(workflowSteps[b].name));
+            
+            if (sortedStepIds.length === 0) {
+                md += "No workflow steps for this topic.\n";
+            } else {
+                sortedStepIds.forEach(stepId => {
+                    const stepDef = workflowSteps[stepId];
+                    const topicStep = topicSteps[stepId];
+                    if (!stepDef || !topicStep) return;
+
+                    md += `### ${stepDef.name}\n\n`;
+                    md += `- **Status:** ${topicStep.status}\n`;
+                    if (topicStep.notes) {
+                        md += `- **Notes:** ${topicStep.notes}\n`;
+                    }
+                    const urls = topicStep.urls || {};
+                    if (Object.keys(urls).length > 0) {
+                        md += `- **Links:**\n`;
+                        Object.values(urls).forEach(link => {
+                            md += `  - [${link.name}](${link.url})\n`;
+                        });
+                    }
+                    md += `\n`;
+                });
+            }
+            return md;
+        }
+
+        function copyMarkdownToClipboard(button, topicId) {
+            const markdown = generateMarkdown(topicId);
+            const textarea = document.createElement('textarea');
+            textarea.value = markdown;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+
+            const originalIcon = button.innerHTML;
+            button.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>`;
+            setTimeout(() => {
+                button.innerHTML = originalIcon;
+            }, 2000);
+        }
+
+        function showMarkdownModal(topicId) {
+            closeModal();
+            const markdown = generateMarkdown(topicId);
+            const htmlContent = marked.parse(markdown);
+
+            const modalHtml = `
+                <div id="modal-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50 p-4" onclick="if (event.target === this) closeModal()">
+                    <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl mx-auto flex flex-col modal-content" style="height: 80vh;">
+                        <div class="flex justify-between items-center p-4 border-b">
+                            <h2 class="text-xl font-bold text-gray-900">Markdown View</h2>
+                            <button onclick="closeModal()" class="text-gray-500 hover:text-gray-800 p-1 rounded-full">&times;</button>
+                        </div>
+                        <div class="p-6 overflow-y-auto modal-body markdown-view">
+                            ${htmlContent}
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+        }
+
+        // --- Modal Functions ---
+
+        function closeModal() {
+            const modal = document.getElementById('modal-backdrop');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        function showConfirmationModal(message, onConfirm) {
+            closeModal();
+            const modalHtml = `
+                <div id="modal-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50 p-4">
+                    <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm mx-auto modal-content">
+                        <p class="text-lg text-gray-800 mb-6">${message}</p>
+                        <div class="flex justify-end gap-3">
+                            <button onclick="closeModal()" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg">Cancel</button>
+                            <button id="confirm-ok-btn" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg">Confirm</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.getElementById('confirm-ok-btn').onclick = () => { onConfirm(); closeModal(); };
+        }
+        
+        function renderStepSelector(selectedStepIds = []) {
+            let checkboxesHtml = '';
+            const sortedSteps = Object.entries(workflowSteps).sort(([,a],[,b]) => a.name.localeCompare(b.name));
+
+            if (sortedSteps.length === 0) return '<p class="text-sm text-gray-500">No workflow steps have been created yet.</p>';
+            
+            for (const [id, step] of sortedSteps) {
+                checkboxesHtml += `
+                    <div class="flex items-start p-3 rounded-lg hover:bg-gray-50">
+                        <input id="step-checkbox-${id}" name="workflow_steps" type="checkbox" value="${id}" ${selectedStepIds.includes(id) ? 'checked' : ''} class="focus:ring-blue-500 h-4 w-4 text-blue-600 border-gray-300 rounded mt-1">
+                        <div class="ml-3 text-sm">
+                            <label for="step-checkbox-${id}" class="font-medium text-gray-800 cursor-pointer">${step.name}</label>
+                            <p class="text-gray-500">${step.description}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            return `<div class="space-y-2 border rounded-lg p-2 max-h-60 overflow-y-auto">${checkboxesHtml}</div>`;
+        }
+
+        function showTopicDetailModal(topicId) {
+            closeModal();
+            const topic = researchTopics[topicId];
+            if (!topic) return;
+
+            const topicSteps = topic.steps || {};
+            const stepIdsInTopic = Object.keys(topicSteps);
+            let stepsHtml = '';
+            const sortedStepIds = Object.keys(workflowSteps)
+                .filter(id => stepIdsInTopic.includes(id))
+                .sort((a,b) => workflowSteps[a].name.localeCompare(workflowSteps[b].name));
+
+            for (const stepId of sortedStepIds) {
+                const stepDef = workflowSteps[stepId];
+                const topicStep = topicSteps[stepId];
+                if (!stepDef || !topicStep) continue;
+
+                const stepNameDisplay = stepDef.url 
+                    ? `<a href="${stepDef.url}" target="_blank" class="text-blue-600 hover:underline">${stepDef.name}</a>` 
+                    : stepDef.name;
+                
+                let urlsHtml = Object.entries(topicStep.urls || {}).map(([urlId, urlData]) => `
+                    <li class="flex justify-between items-center py-1.5 px-2 rounded-md hover:bg-gray-100">
+                        <a href="${urlData.url}" target="_blank" class="text-blue-600 hover:underline truncate text-sm" title="${urlData.url}">${urlData.name}</a>
+                        <button onclick="deleteTopicStepUrl('${topicId}', '${stepId}', '${urlId}')" class="text-red-500 hover:text-red-700 text-xs font-semibold ml-4">Delete</button>
+                    </li>
+                `).join('');
+
+                stepsHtml += `
+                    <div class="bg-gray-50 p-4 rounded-lg shadow-sm mb-4 border">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <h4 class="text-lg font-semibold">${stepNameDisplay}</h4>
+                                <p class="text-gray-500 text-sm mt-1">${stepDef.description}</p>
+                            </div>
+                            <button onclick="saveTopicStepNotes('${topicId}', '${stepId}')" class="bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-1 px-3 rounded-lg flex-shrink-0">Save Notes</button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Status</label>
+                                <select id="status-${topicId}-${stepId}" onchange="autoSaveStatus('${topicId}', '${stepId}')" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                                    <option ${topicStep.status === 'Not Started' ? 'selected' : ''}>Not Started</option>
+                                    <option ${topicStep.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
+                                    <option ${topicStep.status === 'Complete' ? 'selected' : ''}>Complete</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700">Notes</label>
+                                <textarea id="notes-${topicId}-${stepId}" oninput="autoExpand(this)" rows="1" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 overflow-hidden resize-none">${topicStep.notes || ''}</textarea>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <h5 class="text-sm font-semibold text-gray-600">Associated Links</h5>
+                                <button onclick="showAddUrlModal('${topicId}', '${stepId}')" class="text-blue-500 hover:text-blue-700 text-xs font-semibold">Add Link</button>
+                            </div>
+                            <ul class="bg-white p-2 rounded-md border text-sm space-y-1">
+                                ${urlsHtml || '<li class="text-xs text-gray-400 text-center py-1">No links added yet.</li>'}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+
+            const modalHtml = `
+                <div id="modal-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50 p-4" onclick="if (event.target === this) closeModal()">
+                    <div class="bg-white rounded-xl shadow-2xl w-full max-w-4xl mx-auto flex flex-col modal-content" style="height: 90vh;">
+                        <!-- Modal Header -->
+                        <div class="flex justify-between items-center p-6 border-b">
+                            <h2 class="text-2xl font-bold text-gray-900">${topic.name}</h2>
+                            <div class="flex items-center gap-2">
+                                <button onclick="showEditTopicModal('${topicId}')" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg">Edit</button>
+                                <button onclick="closeModal()" class="text-gray-500 hover:text-gray-800 p-1 rounded-full"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                            </div>
+                        </div>
+                        <!-- Modal Body -->
+                        <div class="p-6 space-y-6 overflow-y-auto modal-body flex-grow">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-2 text-gray-800">Prompt</h3>
+                                <p class="text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded-md border">${topic.prompt}</p>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold mb-4 text-gray-800 border-t pt-6">Workflow Progress</h3>
+                                ${stepsHtml || '<p class="text-gray-500">No workflow steps selected for this topic.</p>'}
+                            </div>
+                        </div>
+                        <!-- Modal Footer -->
+                        <div class="p-4 border-t flex justify-end bg-gray-50 rounded-b-xl">
+                            <button onclick="deleteTopic('${topicId}')" class="text-sm text-red-600 hover:text-red-800 hover:bg-red-100 font-semibold py-2 px-3 rounded-lg transition-colors">Delete Topic</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            // Set initial height for all textareas
+            document.querySelectorAll('textarea').forEach(textarea => autoExpand(textarea));
+        }
+
+        function showAddTopicModal() {
+            closeModal();
+            const modalHtml = `
+                <div id="modal-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50 p-4">
+                    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl mx-auto max-h-full overflow-y-auto modal-content">
+                        <h2 class="text-2xl font-bold mb-6">New Research Topic</h2>
+                        <form id="add-topic-form" class="space-y-6">
+                            <div>
+                                <label for="topic-name" class="block text-sm font-medium text-gray-700">Name</label>
+                                <input type="text" id="topic-name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="topic-prompt" class="block text-sm font-medium text-gray-700">Prompt</label>
+                                <textarea id="topic-prompt" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                            </div>
+                            <div class="border-t pt-6">
+                                <h3 class="text-lg font-medium text-gray-900">Select Workflow Steps</h3>
+                                <div class="mt-4">${renderStepSelector()}</div>
+                            </div>
+                            <div class="flex justify-end mt-8 gap-3">
+                                <button type="button" onclick="closeModal()" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg">Cancel</button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Create Topic</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.getElementById('add-topic-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const selectedStepIds = Array.from(document.querySelectorAll('input[name="workflow_steps"]:checked')).map(cb => cb.value);
+                addTopic(
+                    document.getElementById('topic-name').value, 
+                    document.getElementById('topic-prompt').value,
+                    selectedStepIds
+                );
+                closeModal();
+            });
+        }
+
+        function showEditTopicModal(topicId) {
+            closeModal();
+            const topic = researchTopics[topicId];
+            if (!topic) return;
+            
+            const modalHtml = `
+                <div id="modal-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50 p-4">
+                    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-2xl mx-auto max-h-full overflow-y-auto modal-content">
+                        <h2 class="text-2xl font-bold mb-6">Edit Research Topic</h2>
+                        <form id="edit-topic-form" class="space-y-6">
+                            <div>
+                                <label for="topic-name" class="block text-sm font-medium text-gray-700">Name</label>
+                                <input type="text" id="topic-name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="${topic.name}">
+                            </div>
+                            <div>
+                                <label for="topic-prompt" class="block text-sm font-medium text-gray-700">Prompt</label>
+                                <textarea id="topic-prompt" rows="4" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm">${topic.prompt}</textarea>
+                            </div>
+                            <div class="border-t pt-6">
+                                <h3 class="text-lg font-medium text-gray-900">Select Workflow Steps</h3>
+                                <div class="mt-4">${renderStepSelector(Object.keys(topic.steps || {}))}</div>
+                            </div>
+                            <div class="flex justify-end mt-8 gap-3">
+                                <button type="button" onclick="showTopicDetailModal('${topicId}')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg">Cancel</button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.getElementById('edit-topic-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const selectedStepIds = Array.from(document.querySelectorAll('input[name="workflow_steps"]:checked')).map(cb => cb.value);
+                updateTopic(
+                    topicId,
+                    document.getElementById('topic-name').value,
+                    document.getElementById('topic-prompt').value,
+                    selectedStepIds
+                );
+            });
+        }
+        
+        function showEditStepModal(stepId) {
+            closeModal();
+            const step = workflowSteps[stepId];
+            if (!step) return;
+
+            const modalHtml = `
+                <div id="modal-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50 p-4">
+                    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg mx-auto modal-content">
+                        <h2 class="text-2xl font-bold mb-6">Edit Workflow Step</h2>
+                        <form id="edit-step-form" class="space-y-4">
+                            <div>
+                                <label for="step-name" class="block text-sm font-medium text-gray-700">Step Name</label>
+                                <input type="text" id="step-name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="${step.name}">
+                            </div>
+                            <div>
+                                <label for="step-desc" class="block text-sm font-medium text-gray-700">Description</label>
+                                <input type="text" id="step-desc" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="${step.description}">
+                            </div>
+                            <div>
+                                <label for="step-url" class="block text-sm font-medium text-gray-700">Default URL (Optional)</label>
+                                <input type="url" id="step-url" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" value="${step.url || ''}">
+                            </div>
+                            <div class="flex justify-end pt-4 gap-3">
+                                <button type="button" onclick="closeModal()" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg">Cancel</button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.getElementById('edit-step-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                updateWorkflowStep(stepId, document.getElementById('step-name').value, document.getElementById('step-desc').value, document.getElementById('step-url').value);
+                closeModal();
+            });
+        }
+        
+        function showAddUrlModal(topicId, stepId) {
+            closeModal();
+            const stepDef = workflowSteps[stepId];
+            const modalHtml = `
+                <div id="modal-backdrop" class="fixed inset-0 bg-gray-900 bg-opacity-60 flex items-center justify-center z-50 p-4">
+                    <div class="bg-white rounded-lg shadow-xl p-8 w-full max-w-lg mx-auto modal-content">
+                        <h2 class="text-2xl font-bold mb-2">Add Link for: ${stepDef.name}</h2>
+                        <form id="add-url-form" class="mt-6 space-y-4">
+                            <div>
+                                <label for="url-name" class="block text-sm font-medium text-gray-700">Link Name</label>
+                                <input type="text" id="url-name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="e.g., Google Docs">
+                            </div>
+                            <div>
+                                <label for="url-link" class="block text-sm font-medium text-gray-700">URL</label>
+                                <input type="url" id="url-link" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="https://...">
+                            </div>
+                            <div class="flex justify-end pt-4 gap-3">
+                                <button type="button" onclick="showTopicDetailModal('${topicId}')" class="bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2 px-4 border border-gray-300 rounded-lg">Cancel</button>
+                                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Add Link</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            document.getElementById('add-url-form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                addTopicStepUrl(topicId, stepId, document.getElementById('url-name').value, document.getElementById('url-link').value);
+            });
+        }
+
+        // --- Firebase CRUD Functions ---
+
+        function addTopic(name, prompt, selectedStepIds) {
+            const newTopicRef = database.ref('researchTopics').push();
+            const now = new Date().toISOString();
+            const newSteps = {};
+            selectedStepIds.forEach(stepId => {
+                newSteps[stepId] = { status: 'Not Started', notes: '', urls: {} };
+            });
+            newTopicRef.set({
+                id: newTopicRef.key, name, prompt,
+                createdDate: now, modifiedDate: now, steps: newSteps
+            });
+        }
+        
+        function updateTopic(topicId, name, prompt, selectedStepIds) {
+            const topicRef = database.ref('researchTopics/' + topicId);
+            topicRef.update({ name, prompt, modifiedDate: new Date().toISOString() });
+
+            const existingSteps = researchTopics[topicId].steps || {};
+            selectedStepIds.forEach(stepId => {
+                if (!existingSteps[stepId]) {
+                    topicRef.child('steps').child(stepId).set({ status: 'Not Started', notes: '', urls: {} });
+                }
+            });
+            Object.keys(existingSteps).forEach(stepId => {
+                if (!selectedStepIds.includes(stepId)) {
+                    topicRef.child('steps').child(stepId).remove();
+                }
+            });
+            showTopicDetailModal(topicId); // Refresh the modal view
+        }
+
+        function deleteTopic(topicId) {
+            showConfirmationModal('Are you sure you want to delete this topic?', () => {
+                database.ref('researchTopics/' + topicId).remove();
+                closeModal();
+            });
+        }
+
+        function autoSaveStatus(topicId, stepId) {
+            const newStatus = document.getElementById(`status-${topicId}-${stepId}`).value;
+            database.ref(`researchTopics/${topicId}/steps/${stepId}/status`).set(newStatus);
+            database.ref(`researchTopics/${topicId}/modifiedDate`).set(new Date().toISOString());
+        }
+
+        function saveTopicStepNotes(topicId, stepId) {
+            const notes = document.getElementById(`notes-${topicId}-${stepId}`).value;
+            database.ref(`researchTopics/${topicId}/steps/${stepId}/notes`).set(notes);
+            database.ref(`researchTopics/${topicId}/modifiedDate`).set(new Date().toISOString());
+        }
+        
+        function addTopicStepUrl(topicId, stepId, name, url) {
+            database.ref(`researchTopics/${topicId}/steps/${stepId}/urls`).push({ name, url });
+            
+            const currentStatus = researchTopics[topicId]?.steps?.[stepId]?.status;
+            if (currentStatus === 'Not Started') {
+                 database.ref(`researchTopics/${topicId}/steps/${stepId}/status`).set('In Progress');
+            } else {
+                database.ref(`researchTopics/${topicId}/modifiedDate`).set(new Date().toISOString());
+            }
+
+            showTopicDetailModal(topicId); // Refresh the modal
+        }
+
+        function deleteTopicStepUrl(topicId, stepId, urlId) {
+             showConfirmationModal('Delete this link?', () => {
+                database.ref(`researchTopics/${topicId}/steps/${stepId}/urls/${urlId}`).remove();
+                database.ref(`researchTopics/${topicId}/modifiedDate`).set(new Date().toISOString());
+            });
+        }
+
+        function addWorkflowStep(name, description, url) {
+            database.ref('workflowSteps').push().set({ name, description, url: url || "" });
+        }
+
+        function updateWorkflowStep(stepId, name, description, url) {
+            database.ref('workflowSteps/' + stepId).update({ name, description, url: url || "" });
+        }
+
+        function deleteWorkflowStep(stepId) {
+            showConfirmationModal('Delete this workflow step? This cannot be undone.', () => {
+                database.ref('workflowSteps/' + stepId).remove();
+            });
+        }
+
+        // --- Data Listeners ---
+        function listenForData() {
+            const topicsRef = database.ref('researchTopics');
+            const stepsRef = database.ref('workflowSteps');
+
+            const initialFetch = Promise.all([ topicsRef.once('value'), stepsRef.once('value') ]);
+
+            initialFetch.then(([topicsSnapshot, stepsSnapshot]) => {
+                researchTopics = topicsSnapshot.val() || {};
+                workflowSteps = stepsSnapshot.val() || {};
+                isInitialLoad = false;
+                renderApp();
+                
+                // Attach realtime listeners after initial load
+                topicsRef.on('value', (snapshot) => {
+                    researchTopics = snapshot.val() || {};
+                    renderApp();
+                    // If a modal is open, refresh its content
+                    const modal = document.querySelector('#modal-backdrop .modal-content');
+                    if (modal && window.currentOpenTopicId) {
+                        showTopicDetailModal(window.currentOpenTopicId);
+                    }
+                });
+                stepsRef.on('value', (snapshot) => {
+                    workflowSteps = snapshot.val() || {};
+                    renderApp();
+                });
+            });
+        }
+
+        // --- Initialization ---
+        window.addEventListener('load', () => {
+            renderApp();
+            listenForData();
+        });
+
+        // Store the currently open topic ID to refresh its modal on data change
+        let currentOpenTopicId = null;
+        const originalShowTopicDetailModal = showTopicDetailModal;
+        showTopicDetailModal = (topicId) => {
+            window.currentOpenTopicId = topicId;
+            originalShowTopicDetailModal(topicId);
+        };
+
+        const originalCloseModal = closeModal;
+        closeModal = () => {
+            window.currentOpenTopicId = null;
+            originalCloseModal();
+        }
+    </script>
+</body>
+</html>

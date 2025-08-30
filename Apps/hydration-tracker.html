@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Public Hydration Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .hidden {
+            display: none;
+        }
+        #hydration-progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        .modal-overlay {
+            transition: opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md mx-auto bg-white rounded-2xl shadow-xl p-6 md:p-8">
+        <header class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-blue-600">Public Hydration Tracker</h1>
+            <p class="text-gray-500 mt-1">A shared goal to rehydrate smart, together.</p>
+        </header>
+
+        <!-- Step 1: Weight Input -->
+        <div id="weight-input-section" class="hidden">
+            <div class="bg-gray-50 p-6 rounded-lg">
+                <h2 class="text-xl font-semibold mb-4 text-center">Start a New Public Session</h2>
+                <div class="space-y-4">
+                    <input type="number" id="pre-run-weight" placeholder="Pre-run weight (lbs)" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <input type="number" id="post-run-weight" placeholder="Post-run weight (lbs)" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <button id="calculate-goal-btn" class="w-full mt-6 bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+                    Calculate Goal
+                </button>
+            </div>
+        </div>
+
+        <!-- Step 2: Hydration Tracking -->
+        <div id="hydration-section" class="hidden">
+            <!-- Hydration Goal & Progress -->
+            <div class="text-center mb-6">
+                <div class="flex justify-between items-center">
+                     <h2 class="text-lg font-medium text-gray-600">Public Hydration Goal</h2>
+                     <button id="new-session-btn" class="text-sm bg-red-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-red-600 transition-colors">New Session</button>
+                </div>
+                <p id="hydration-goal" class="text-3xl font-bold text-gray-800"></p>
+                <p id="hydration-goal-liters" class="text-lg text-gray-500 -mt-1"></p>
+                <div class="w-full bg-gray-200 rounded-full h-4 mt-4 overflow-hidden">
+                    <div id="hydration-progress-bar" class="bg-green-500 h-4 rounded-full"></div>
+                </div>
+                <p id="progress-text" class="text-sm text-gray-500 mt-2 font-medium"></p>
+                <p id="progress-text-liters" class="text-sm text-gray-500"></p>
+            </div>
+
+            <!-- Session Info Panel -->
+            <div id="session-info-section" class="hidden mt-6 text-center bg-blue-50 p-4 rounded-lg space-y-3">
+                <div>
+                    <p class="text-sm font-medium text-blue-800">Session Elapsed Time</p>
+                    <h4 id="session-timer" class="text-2xl font-bold text-blue-600">00:00:00</h4>
+                </div>
+                <div class="border-t border-blue-200 pt-3">
+                    <p class="text-sm font-medium text-blue-800">Paced Consumption (50 oz/hr)</p>
+                    <p id="paced-consumption" class="text-lg font-semibold text-blue-700">0 oz</p>
+                </div>
+                <div class="border-t border-blue-200 pt-3">
+                    <p class="text-sm font-medium text-blue-800">Est. Completion Time</p>
+                    <p id="estimated-completion" class="text-lg font-semibold text-blue-700">--:-- --</p>
+                </div>
+            </div>
+
+            <!-- Log a Drink & Timer -->
+            <div class="bg-gray-50 p-6 rounded-lg mt-6">
+                <h3 class="text-xl font-semibold mb-4 text-center">Log a Drink</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center space-x-3">
+                        <input type="number" id="water-amount" placeholder="Amount (oz)" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="log-drink-btn" class="flex-shrink-0 bg-green-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors w-32">
+                            Start
+                        </button>
+                    </div>
+                    <input type="text" id="drink-note" placeholder="Note (e.g., Water, Gatorade)" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <!-- Timer Display -->
+            <div id="timer-display" class="hidden mt-6 text-center bg-blue-50 p-6 rounded-lg">
+                <p class="text-lg font-medium text-blue-800">Drinking Time:</p>
+                <h3 id="timer" class="text-5xl font-bold text-blue-600 mt-2">0:00</h3>
+            </div>
+        </div>
+
+        <!-- Step 3: Hydration Log -->
+        <div id="log-section" class="mt-8">
+            <div class="flex justify-between items-center mb-4 border-t pt-6">
+                <h2 class="text-xl font-semibold">Public Hydration Log</h2>
+                <button id="copy-logs-btn" class="text-sm bg-gray-500 text-white font-semibold py-1 px-3 rounded-lg hover:bg-gray-600 transition-colors flex items-center space-x-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
+                        <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
+                        <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
+                    </svg>
+                    <span>Copy</span>
+                </button>
+            </div>
+            <ul id="hydration-log" class="space-y-3">
+                 <li class="text-center text-gray-500">The public hydration log will appear here.</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirmation-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+            <h3 class="text-lg font-semibold mb-4">Are you sure?</h3>
+            <p class="text-gray-600 mb-6">Starting a new public session will clear all current data for everyone.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancel-new-session-btn" class="px-6 py-2 rounded-lg bg-gray-200 text-gray-800 hover:bg-gray-300 transition-colors">Cancel</button>
+                <button id="confirm-new-session-btn" class="px-6 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors">Yes, Start New</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="alert-modal" class="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-sm text-center">
+            <p id="alert-message" class="text-gray-700 mb-6"></p>
+            <button id="close-alert-btn" class="px-8 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors">OK</button>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, set, onValue, remove, push, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+            measurementId: "G-LVHF0VP8RM"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        
+        // --- Firebase References ---
+        const sessionStateRef = ref(database, 'publicSession/state');
+        const sessionLogRef = ref(database, 'publicSession/log');
+
+        // --- DOM Elements ---
+        const weightInputSection = document.getElementById('weight-input-section');
+        const hydrationSection = document.getElementById('hydration-section');
+        const sessionInfoSection = document.getElementById('session-info-section');
+        const preRunWeightInput = document.getElementById('pre-run-weight');
+        const postRunWeightInput = document.getElementById('post-run-weight');
+        const calculateGoalBtn = document.getElementById('calculate-goal-btn');
+        const newSessionBtn = document.getElementById('new-session-btn');
+        const hydrationGoalEl = document.getElementById('hydration-goal');
+        const hydrationGoalLitersEl = document.getElementById('hydration-goal-liters');
+        const hydrationProgressBar = document.getElementById('hydration-progress-bar');
+        const progressText = document.getElementById('progress-text');
+        const progressTextLitersEl = document.getElementById('progress-text-liters');
+        const waterAmountInput = document.getElementById('water-amount');
+        const drinkNoteInput = document.getElementById('drink-note');
+        const logDrinkBtn = document.getElementById('log-drink-btn');
+        const timerDisplay = document.getElementById('timer-display');
+        const timerEl = document.getElementById('timer');
+        const sessionTimerEl = document.getElementById('session-timer');
+        const pacedConsumptionEl = document.getElementById('paced-consumption');
+        const estimatedCompletionEl = document.getElementById('estimated-completion');
+        const hydrationLog = document.getElementById('hydration-log');
+        const copyLogsBtn = document.getElementById('copy-logs-btn');
+        const confirmationModal = document.getElementById('confirmation-modal');
+        const confirmNewSessionBtn = document.getElementById('confirm-new-session-btn');
+        const cancelNewSessionBtn = document.getElementById('cancel-new-session-btn');
+        const alertModal = document.getElementById('alert-modal');
+        const alertMessage = document.getElementById('alert-message');
+        const closeAlertBtn = document.getElementById('close-alert-btn');
+
+        // --- App State ---
+        let appState = {
+            totalHydrationGoal: 0,
+            currentHydration: 0,
+            isTiming: false,
+            startTime: null,
+            timerAmount: 0,
+            localTimerInterval: null,
+            sessionStartTime: null,
+            sessionTimerInterval: null,
+        };
+
+        // --- Event Listeners ---
+        calculateGoalBtn.addEventListener('click', calculateAndSaveSession);
+        newSessionBtn.addEventListener('click', () => confirmationModal.classList.remove('hidden'));
+        logDrinkBtn.addEventListener('click', handleLogDrinkClick);
+        copyLogsBtn.addEventListener('click', copyLogsToClipboard);
+        cancelNewSessionBtn.addEventListener('click', () => confirmationModal.classList.add('hidden'));
+        confirmNewSessionBtn.addEventListener('click', startNewSession);
+        closeAlertBtn.addEventListener('click', () => alertModal.classList.add('hidden'));
+
+        // --- Functions ---
+        
+        function showAlert(message) {
+            alertMessage.textContent = message;
+            alertModal.classList.remove('hidden');
+        }
+
+        function ozToLiters(ounces) {
+            return ounces * 0.0295735;
+        }
+
+        /**
+         * Main listener for all session state changes from Firebase.
+         */
+        onValue(sessionStateRef, (snapshot) => {
+            const state = snapshot.val();
+            
+            if (appState.localTimerInterval) clearInterval(appState.localTimerInterval);
+            if (appState.sessionTimerInterval) clearInterval(appState.sessionTimerInterval);
+            appState.localTimerInterval = null;
+            appState.sessionTimerInterval = null;
+
+            if (state && state.totalHydrationGoal) {
+                appState.totalHydrationGoal = state.totalHydrationGoal;
+                appState.isTiming = state.isTiming || false;
+                appState.startTime = state.startTime ? new Date(state.startTime) : null;
+                appState.timerAmount = state.timerAmount || 0;
+                appState.sessionStartTime = state.sessionStartTime ? new Date(state.sessionStartTime) : null;
+
+                hydrationGoalEl.textContent = `${state.totalHydrationGoal} oz`;
+                hydrationGoalLitersEl.textContent = `(${ozToLiters(state.totalHydrationGoal).toFixed(2)} L)`;
+                hydrationSection.classList.remove('hidden');
+                weightInputSection.classList.add('hidden');
+                
+                if (appState.sessionStartTime) {
+                    sessionInfoSection.classList.remove('hidden');
+                    updateSessionInfo();
+                    appState.sessionTimerInterval = setInterval(updateSessionInfo, 1000);
+                } else {
+                    sessionInfoSection.classList.add('hidden');
+                }
+
+                updateTimerUI();
+                updateProgressUI();
+
+            } else {
+                appState.totalHydrationGoal = 0;
+                appState.isTiming = false;
+                appState.startTime = null;
+                appState.timerAmount = 0;
+                appState.sessionStartTime = null;
+
+                hydrationSection.classList.add('hidden');
+                weightInputSection.classList.remove('hidden');
+                timerDisplay.classList.add('hidden');
+                sessionInfoSection.classList.add('hidden');
+            }
+        });
+        
+        onValue(sessionLogRef, (snapshot) => {
+            const logData = snapshot.val();
+            hydrationLog.innerHTML = '';
+            appState.currentHydration = 0;
+
+            if (logData) {
+                const sessions = Object.values(logData).sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                sessions.forEach(session => {
+                    appState.currentHydration += session.amountOz;
+                    renderLogEntry(session);
+                });
+            } else {
+                hydrationLog.innerHTML = '<li class="text-center text-gray-500">The public hydration log will appear here.</li>';
+            }
+            updateProgressUI();
+        });
+
+        function calculateAndSaveSession() {
+            const preRunWeight = parseFloat(preRunWeightInput.value);
+            const postRunWeight = parseFloat(postRunWeightInput.value);
+
+            if (isNaN(preRunWeight) || isNaN(postRunWeight) || preRunWeight <= postRunWeight) {
+                showAlert('Please enter valid weights. Pre-run weight must be greater than post-run weight.');
+                return;
+            }
+
+            const weightLossLbs = preRunWeight - postRunWeight;
+            const waterLossOz = weightLossLbs * 16;
+            const goal = Math.round(waterLossOz * 1.5);
+
+            const newSessionState = {
+                preRunWeight: preRunWeight,
+                postRunWeight: postRunWeight,
+                totalHydrationGoal: goal,
+                isTiming: false,
+                startTime: null,
+                timerAmount: 0,
+                sessionStartTime: new Date().toISOString(),
+            };
+            set(sessionStateRef, newSessionState);
+        }
+
+        function startNewSession() {
+            if (appState.sessionTimerInterval) clearInterval(appState.sessionTimerInterval);
+            if (appState.localTimerInterval) clearInterval(appState.localTimerInterval);
+            
+            remove(sessionStateRef);
+            remove(sessionLogRef);
+            confirmationModal.classList.add('hidden');
+        }
+        
+        function handleLogDrinkClick() {
+            if (appState.isTiming) {
+                const endTime = new Date();
+                const durationSeconds = Math.round((endTime - appState.startTime) / 1000);
+                const note = drinkNoteInput.value.trim();
+                logHydration(appState.timerAmount, durationSeconds, note);
+                update(sessionStateRef, { isTiming: false, startTime: null, timerAmount: 0 });
+            } else {
+                const waterAmountOz = parseFloat(waterAmountInput.value);
+                 if (isNaN(waterAmountOz) || waterAmountOz <= 0) {
+                    showAlert('Please enter a valid amount of water (in oz) to track.');
+                    return;
+                }
+                update(sessionStateRef, { isTiming: true, startTime: new Date().toISOString(), timerAmount: waterAmountOz });
+            }
+        }
+
+        function updateSessionInfo() {
+            if (!appState.sessionStartTime || !appState.totalHydrationGoal) return;
+
+            const now = new Date();
+            const elapsedMs = now - appState.sessionStartTime;
+
+            const totalSeconds = Math.floor(elapsedMs / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            sessionTimerEl.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+            const elapsedHours = elapsedMs / (1000 * 60 * 60);
+            const expectedConsumption = (elapsedHours * 50).toFixed(1);
+            pacedConsumptionEl.textContent = `${expectedConsumption} oz`;
+
+            const hoursToComplete = appState.totalHydrationGoal / 50;
+            const completionTimeMs = appState.sessionStartTime.getTime() + (hoursToComplete * 60 * 60 * 1000);
+            const completionDate = new Date(completionTimeMs);
+            estimatedCompletionEl.textContent = completionDate.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+        }
+
+        function updateTimerUI() {
+            if (appState.isTiming && appState.startTime) {
+                timerDisplay.classList.remove('hidden');
+                waterAmountInput.value = appState.timerAmount;
+                waterAmountInput.disabled = true;
+                drinkNoteInput.disabled = true;
+                logDrinkBtn.textContent = 'Finish';
+                logDrinkBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+                logDrinkBtn.classList.add('bg-red-600', 'hover:bg-red-700');
+
+                appState.localTimerInterval = setInterval(() => {
+                    const elapsedSeconds = Math.round((new Date() - appState.startTime) / 1000);
+                    const minutes = Math.floor(elapsedSeconds / 60);
+                    let seconds = elapsedSeconds % 60;
+                    seconds = seconds < 10 ? '0' + seconds : seconds;
+                    timerEl.textContent = `${minutes}:${seconds}`;
+                }, 1000);
+
+            } else {
+                timerDisplay.classList.add('hidden');
+                timerEl.textContent = '0:00';
+                waterAmountInput.value = '';
+                drinkNoteInput.value = '';
+                waterAmountInput.disabled = false;
+                drinkNoteInput.disabled = false;
+                logDrinkBtn.textContent = 'Start';
+                logDrinkBtn.classList.remove('bg-red-600', 'hover:bg-red-700');
+                logDrinkBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+            }
+        }
+        
+        function logHydration(amount, durationSeconds, note) {
+            const logEntry = {
+                amountOz: amount,
+                durationSeconds: durationSeconds,
+                note: note || '',
+                timestamp: new Date().toISOString()
+            };
+            push(sessionLogRef, logEntry);
+        }
+
+        function renderLogEntry(session) {
+            const logEntry = document.createElement('li');
+            logEntry.className = 'bg-white p-4 rounded-lg shadow-sm border flex justify-between items-center';
+            
+            const minutes = Math.floor(session.durationSeconds / 60);
+            const seconds = session.durationSeconds % 60;
+            const durationText = `${minutes}m ${seconds}s`;
+            const logTime = new Date(session.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const noteText = session.note ? `- ${session.note}` : '';
+
+            logEntry.innerHTML = `
+                <div>
+                    <p class="font-semibold text-gray-800">${session.amountOz} oz <span class="text-gray-600 font-normal">${noteText}</span></p>
+                    <p class="text-sm text-gray-500">Took ${durationText}</p>
+                </div>
+                <div class="text-right">
+                     <span class="text-green-500 font-bold">✔ Logged</span>
+                     <p class="text-sm text-gray-400">${logTime}</p>
+                </div>
+            `;
+            hydrationLog.appendChild(logEntry);
+        }
+
+        function updateProgressUI() {
+            if (appState.totalHydrationGoal <= 0) return;
+            const percentage = (appState.currentHydration / appState.totalHydrationGoal) * 100;
+            hydrationProgressBar.style.width = `${Math.min(percentage, 100)}%`;
+            
+            const goalLiters = ozToLiters(appState.totalHydrationGoal).toFixed(2);
+            const currentLiters = ozToLiters(appState.currentHydration).toFixed(2);
+            progressText.textContent = `${Math.round(appState.currentHydration)} oz / ${appState.totalHydrationGoal} oz (${Math.round(percentage)}%)`;
+            progressTextLitersEl.textContent = `${currentLiters} L / ${goalLiters} L`;
+
+            if (percentage >= 100) {
+                 hydrationProgressBar.classList.remove('bg-green-500');
+                 hydrationProgressBar.classList.add('bg-blue-500');
+                 progressText.textContent += " - Goal Reached! 🎉";
+            } else {
+                 hydrationProgressBar.classList.remove('bg-blue-500');
+                 hydrationProgressBar.classList.add('bg-green-500');
+            }
+        }
+
+        function copyLogsToClipboard() {
+            // This function fetches the latest log data directly to ensure it's complete and sorted correctly for copying.
+            onValue(sessionLogRef, (snapshot) => {
+                const logData = snapshot.val();
+                if (!logData) {
+                    showAlert('No logs to copy.');
+                    return;
+                }
+
+                let logText = `Hydration Log - ${new Date().toLocaleString()}\n`;
+                logText += `Goal: ${appState.totalHydrationGoal} oz (${ozToLiters(appState.totalHydrationGoal).toFixed(2)} L)\n`;
+                logText += `Current: ${appState.currentHydration} oz (${ozToLiters(appState.currentHydration).toFixed(2)} L)\n`;
+                logText += '------------------------------------\n';
+
+                const sessions = Object.values(logData).sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp)); // Sort oldest to newest
+                sessions.forEach(session => {
+                    const logTime = new Date(session.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    const note = session.note ? ` (${session.note})` : '';
+                    logText += `${logTime}: ${session.amountOz} oz${note}\n`;
+                });
+
+                // Create a temporary textarea to hold the text and copy it
+                const textArea = document.createElement('textarea');
+                textArea.value = logText;
+                textArea.style.position = 'absolute';
+                textArea.style.left = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showAlert('Logs copied to clipboard!');
+                } catch (err) {
+                    showAlert('Failed to copy logs.');
+                    console.error('Copy to clipboard failed', err);
+                }
+                document.body.removeChild(textArea);
+
+            }, { onlyOnce: true }); // We only need to fetch the data once for this operation.
+        }
+
+    </script>
+</body>
+</html>

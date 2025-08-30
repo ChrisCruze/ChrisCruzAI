@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Tracker App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        .dark ::-webkit-scrollbar-track {
+            background: #2d3748;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background: #4a5568;
+        }
+        .dark ::-webkit-scrollbar-thumb:hover {
+            background: #718096;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+    <div id="app-container">
+        <!-- App content will be rendered here -->
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, onValue, push, update, remove, set } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        // --- Firebase Configuration ---
+        // IMPORTANT: Replace with your Firebase project configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.appspot.com",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183"
+        };
+
+        // --- Application State ---
+        let db;
+        let goals = [];
+        let isLoading = true;
+        let error = null;
+        let selectedGoal = null;
+        let editingGoal = null;
+        let view = 'active'; // 'active' or 'completed'
+        let sortBy = 'createdAt_desc';
+
+        const appContainer = document.getElementById('app-container');
+
+        // --- Helper Functions ---
+        const createIconHTML = (path, className = "w-6 h-6") => `
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="${className}">
+                <path stroke-linecap="round" stroke-linejoin="round" d="${path}" />
+            </svg>
+        `;
+
+        // --- UI Rendering Functions ---
+
+        const render = () => {
+            if (isLoading) {
+                appContainer.innerHTML = `<div class="min-h-screen flex items-center justify-center text-gray-700 dark:text-white">Loading your goals...</div>`;
+                return;
+            }
+
+            if (error) {
+                appContainer.innerHTML = `<div class="min-h-screen flex items-center justify-center text-red-700 bg-red-100">${error}</div>`;
+                return;
+            }
+
+            const headerHTML = `
+                <header class="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg shadow-sm sticky top-0 z-40">
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+                        <div class="flex items-center space-x-3">
+                            ${createIconHTML("M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z", "w-8 h-8 text-blue-500")}
+                            <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Goal Tracker</h1>
+                        </div>
+                        <button id="add-new-goal-btn" class="flex items-center space-x-2 bg-blue-600 text-white px-4 py-2.5 rounded-lg font-semibold hover:bg-blue-700 shadow-md hover:shadow-lg transition-transform transform hover:scale-105">
+                            ${createIconHTML("M12 4.5v15m7.5-7.5h-15")}
+                            <span>New Goal</span>
+                        </button>
+                    </div>
+                </header>
+            `;
+
+            let mainContentHTML;
+
+            if (selectedGoal) {
+                mainContentHTML = renderGoalDetail(selectedGoal);
+            } else {
+                mainContentHTML = renderGoalList();
+            }
+
+            appContainer.innerHTML = `
+                ${headerHTML}
+                <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                    ${mainContentHTML}
+                </main>
+            `;
+
+            // Add back event listeners after render
+            attachEventListeners();
+        };
+
+        const renderGoalList = () => {
+            const filtered = goals.filter(goal => view === 'active' ? !goal.completed : goal.completed);
+        
+            const sortedGoals = filtered.sort((a, b) => {
+                const [key, order] = sortBy.split('_');
+                const valA = a[key] || 0;
+                const valB = b[key] || 0;
+                
+                let comparison = 0;
+                if (valA > valB) comparison = 1;
+                if (valA < valB) comparison = -1;
+
+                return order === 'asc' ? comparison : -comparison;
+            });
+
+            const goalsGridHTML = sortedGoals.length > 0 
+                ? `<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">${sortedGoals.map(renderGoalItem).join('')}</div>`
+                : `
+                    <div class="text-center py-16 px-6 bg-white dark:bg-gray-800 rounded-xl shadow-md">
+                        ${createIconHTML("M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z", "mx-auto w-16 h-16 text-gray-400 dark:text-gray-500")}
+                        <h3 class="mt-4 text-xl font-semibold text-gray-800 dark:text-white">All Clear!</h3>
+                        <p class="mt-2 text-gray-500 dark:text-gray-400">
+                            ${view === 'active' ? "You have no active goals. Ready to add a new one?" : "You haven't completed any goals yet. Keep going!"}
+                        </p>
+                    </div>
+                `;
+
+            return `
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div>
+                        <button data-view="active" class="view-btn px-4 py-2 rounded-l-lg font-semibold transition ${view === 'active' ? 'bg-blue-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200'}">Active Goals</button>
+                        <button data-view="completed" class="view-btn px-4 py-2 rounded-r-lg font-semibold transition ${view === 'completed' ? 'bg-green-600 text-white' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200'}">Completed</button>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <label for="sort" class="text-sm font-medium text-gray-600 dark:text-gray-300">Sort by:</label>
+                        <select id="sort-select" class="bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md p-2 text-sm">
+                            <option value="createdAt_desc" ${sortBy === 'createdAt_desc' ? 'selected' : ''}>Newest First</option>
+                            <option value="createdAt_asc" ${sortBy === 'createdAt_asc' ? 'selected' : ''}>Oldest First</option>
+                            <option value="dueDate_asc" ${sortBy === 'dueDate_asc' ? 'selected' : ''}>Due Date</option>
+                            <option value="title_asc" ${sortBy === 'title_asc' ? 'selected' : ''}>Title (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+                ${goalsGridHTML}
+            `;
+        };
+        
+        const renderGoalItem = (goal) => {
+            const { id, title, dueDate, steps, completed } = goal;
+            const completedSteps = (steps || []).filter(s => s.completed).length;
+            const totalSteps = (steps || []).length;
+            const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : (completed ? 100 : 0);
+
+            return `
+                <div data-id="${id}" class="goal-item bg-white dark:bg-gray-800 p-5 rounded-xl shadow-lg hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 cursor-pointer border-l-4 ${completed ? 'border-green-500' : 'border-blue-500'}">
+                    <div class="flex justify-between items-start">
+                        <div class="flex-1 pr-4">
+                            <h3 class="font-bold text-lg text-gray-800 dark:text-white ${completed ? 'line-through text-gray-500 dark:text-gray-400' : ''}">${title}</h3>
+                            ${dueDate ? `<p class="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                                ${createIconHTML("M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18", "inline-block w-4 h-4 mr-1")}
+                                Due: ${new Date(dueDate).toLocaleDateString()}
+                            </p>` : ''}
+                        </div>
+                        <div class="flex space-x-2">
+                            <button data-id="${id}" data-completed="${completed}" class="toggle-complete-btn p-2 rounded-full transition ${completed ? 'text-yellow-500 hover:bg-yellow-100' : 'text-green-500 hover:bg-green-100'}">
+                                ${completed ? createIconHTML("M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3") : createIconHTML("M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z")}
+                            </button>
+                            <button data-id="${id}" class="delete-goal-btn p-2 text-red-500 hover:bg-red-100 rounded-full transition">
+                                ${createIconHTML("M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0")}
+                            </button>
+                        </div>
+                    </div>
+                    ${totalSteps > 0 ? `
+                        <div class="mt-4">
+                            <div class="flex justify-between text-sm font-medium text-gray-600 dark:text-gray-300">
+                                <span>Progress</span>
+                                <span>${progress}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-1">
+                                <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: ${progress}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">${completedSteps} of ${totalSteps} steps completed</p>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        };
+
+        const renderGoalDetail = (goal) => {
+             const completedSteps = (goal.steps || []).filter(s => s.completed).length;
+            const totalSteps = (goal.steps || []).length;
+            const progress = totalSteps > 0 ? Math.round((completedSteps / totalSteps) * 100) : (goal.completed ? 100 : 0);
+
+            const stepsHTML = totalSteps > 0 ? `
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Actionable Steps (${completedSteps}/${totalSteps})</h3>
+                    <div class="space-y-3">
+                        ${goal.steps.map((step, index) => `
+                            <div data-step-index="${index}" class="step-toggle flex items-center p-3 rounded-lg cursor-pointer transition ${step.completed ? 'bg-green-50 dark:bg-green-900/50' : 'bg-gray-100 dark:bg-gray-700'}">
+                                <div class="w-5 h-5 rounded-full border-2 ${step.completed ? 'bg-green-500 border-green-500' : 'border-gray-400'} flex items-center justify-center mr-4">
+                                   ${step.completed ? createIconHTML("M4.5 12.75l6 6 9-13.5", "w-4 h-4 text-white") : ''}
+                                </div>
+                                <span class="flex-1 ${step.completed ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-800 dark:text-gray-200'}">${step.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            ` : '';
+            
+            return `
+                <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 md:p-8 w-full">
+                    <button id="back-to-goals" class="flex items-center space-x-2 text-blue-600 dark:text-blue-400 font-semibold mb-6">
+                        ${createIconHTML("M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18")}
+                        <span>Back to Goals</span>
+                    </button>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">${goal.title}</h2>
+                    ${goal.dueDate ? `<p class="text-gray-500 dark:text-gray-400 mt-2">Target Date: ${new Date(goal.dueDate).toLocaleDateString()}</p>` : ''}
+                    <p class="text-gray-700 dark:text-gray-300 mt-4 whitespace-pre-wrap">${goal.description || ''}</p>
+                    
+                    <div class="mt-6">
+                        <h3 class="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-3">Progress</h3>
+                        <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4">
+                            <div class="bg-gradient-to-r from-blue-500 to-teal-400 h-4 rounded-full text-center text-white text-xs font-bold" style="width: ${progress}%">${progress}%</div>
+                        </div>
+                    </div>
+                    ${stepsHTML}
+                </div>
+            `;
+        };
+
+        const renderGoalForm = () => {
+            const goal = editingGoal;
+            const formHTML = `
+                <div id="goal-form-modal" class="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
+                    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 md:p-8 w-full max-w-2xl transform transition-all">
+                        <h2 class="text-2xl md:text-3xl font-bold text-gray-800 dark:text-white mb-6">${goal ? 'Edit Goal' : 'Create a New Goal'}</h2>
+                        <form id="goal-form">
+                            <div class="space-y-6">
+                                <div>
+                                    <label for="title" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Goal Title</label>
+                                    <input type="text" id="title" value="${goal?.title || ''}" class="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" placeholder="e.g., Run a Marathon" required>
+                                </div>
+                                <div>
+                                    <label for="description" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Description</label>
+                                    <textarea id="description" class="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition h-24" placeholder="e.g., Complete 26.2 miles by October">${goal?.description || ''}</textarea>
+                                </div>
+                                <div>
+                                    <label for="dueDate" class="block text-sm font-medium text-gray-600 dark:text-gray-300 mb-1">Target Date</label>
+                                    <input type="date" id="dueDate" value="${goal?.dueDate || ''}" class="w-full p-3 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-2">Actionable Steps</h3>
+                                    <div id="steps-container" class="space-y-3 max-h-40 overflow-y-auto pr-2">
+                                        ${(goal?.steps || [{ text: '', completed: false }]).map((step, index) => `
+                                            <div class="flex items-center space-x-2 step-input-group">
+                                                <input type="text" value="${step.text}" class="flex-grow p-2 bg-gray-50 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md step-input" placeholder="Step ${index + 1}">
+                                                <button type="button" class="remove-step-btn p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900 rounded-full transition">
+                                                    ${createIconHTML("M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z")}
+                                                </button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                    <button type="button" id="add-step-btn" class="mt-3 flex items-center space-x-2 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 font-medium transition">
+                                        ${createIconHTML("M12 9v6m3-3H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z")}
+                                        <span>Add Step</span>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="flex justify-end space-x-4 mt-8">
+                                <button type="button" id="cancel-form-btn" class="px-6 py-2.5 bg-gray-200 text-gray-700 dark:bg-gray-600 dark:text-gray-200 rounded-lg font-semibold hover:bg-gray-300 dark:hover:bg-gray-500 transition">Cancel</button>
+                                <button type="submit" class="px-6 py-2.5 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 shadow-md hover:shadow-lg transition">Save Goal</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            `;
+            document.body.insertAdjacentHTML('beforeend', formHTML);
+            attachFormEventListeners();
+        };
+
+        // --- Event Listeners ---
+        function attachEventListeners() {
+            // Header
+            document.getElementById('add-new-goal-btn')?.addEventListener('click', () => {
+                editingGoal = null;
+                renderGoalForm();
+            });
+
+            // Goal List View
+            document.querySelectorAll('.view-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                view = e.currentTarget.dataset.view;
+                render();
+            }));
+
+            document.getElementById('sort-select')?.addEventListener('change', (e) => {
+                sortBy = e.target.value;
+                render();
+            });
+
+            document.querySelectorAll('.goal-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    if (e.target.closest('.toggle-complete-btn') || e.target.closest('.delete-goal-btn')) {
+                        return; // Let child button handlers take over
+                    }
+                    const goalId = item.dataset.id;
+                    selectedGoal = goals.find(g => g.id === goalId);
+                    render();
+                });
+            });
+
+            document.querySelectorAll('.toggle-complete-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const { id, completed } = e.currentTarget.dataset;
+                handleToggleComplete(id, completed !== 'true');
+            }));
+
+            document.querySelectorAll('.delete-goal-btn').forEach(btn => btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const id = e.currentTarget.dataset.id;
+                handleDeleteGoal(id);
+            }));
+
+            // Goal Detail View
+            document.getElementById('back-to-goals')?.addEventListener('click', () => {
+                selectedGoal = null;
+                render();
+            });
+
+            document.querySelectorAll('.step-toggle').forEach(el => el.addEventListener('click', () => {
+                const index = parseInt(el.dataset.stepIndex, 10);
+                const newSteps = [...(selectedGoal.steps || [])];
+                newSteps[index].completed = !newSteps[index].completed;
+                handleUpdateGoalDetail({ ...selectedGoal, steps: newSteps });
+            }));
+        }
+
+        function attachFormEventListeners() {
+            const form = document.getElementById('goal-form');
+            const modal = document.getElementById('goal-form-modal');
+            
+            form.addEventListener('submit', handleSaveGoal);
+            document.getElementById('cancel-form-btn').addEventListener('click', closeForm);
+            document.getElementById('add-step-btn').addEventListener('click', addStepToForm);
+
+            const stepsContainer = document.getElementById('steps-container');
+            stepsContainer.addEventListener('click', (e) => {
+                if (e.target.closest('.remove-step-btn')) {
+                    e.target.closest('.step-input-group').remove();
+                }
+            });
+
+            // Close modal on outside click
+            modal.addEventListener('click', (e) => {
+                if(e.target === modal) closeForm();
+            });
+        }
+        
+        function addStepToForm() {
+            const stepsContainer = document.getElementById('steps-container');
+            if (stepsContainer.children.length >= 10) return;
+            const index = stepsContainer.children.length;
+            const stepHTML = `
+                <div class="flex items-center space-x-2 step-input-group">
+                    <input type="text" class="flex-grow p-2 bg-gray-50 dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md step-input" placeholder="Step ${index + 1}">
+                    <button type="button" class="remove-step-btn p-2 text-red-500 hover:bg-red-100 dark:hover:bg-red-900 rounded-full transition">
+                        ${createIconHTML("M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z")}
+                    </button>
+                </div>
+            `;
+            stepsContainer.insertAdjacentHTML('beforeend', stepHTML);
+        }
+
+        const closeForm = () => {
+            document.getElementById('goal-form-modal')?.remove();
+            editingGoal = null;
+        }
+
+        // --- Data Logic Functions ---
+        const handleSaveGoal = (e) => {
+            e.preventDefault();
+            const form = e.target;
+            const title = form.querySelector('#title').value.trim();
+            if (!title) return;
+
+            const steps = Array.from(form.querySelectorAll('.step-input-group')).map((group, index) => {
+                const text = group.querySelector('.step-input').value.trim();
+                const existingStep = editingGoal?.steps?.[index] || { completed: false };
+                return { text, completed: existingStep.completed };
+            }).filter(step => step.text);
+            
+            const goalData = {
+                title,
+                description: form.querySelector('#description').value.trim(),
+                dueDate: form.querySelector('#dueDate').value,
+                steps,
+                completed: editingGoal ? editingGoal.completed : false,
+                createdAt: editingGoal ? editingGoal.createdAt : new Date().toISOString(),
+            };
+
+            if (editingGoal) {
+                const goalRef = ref(db, `goals/${editingGoal.id}`);
+                update(goalRef, goalData).catch(err => console.error("Error updating goal:", err));
+            } else {
+                const goalsRef = ref(db, 'goals');
+                push(goalsRef, goalData).catch(err => console.error("Error adding goal:", err));
+            }
+            closeForm();
+        };
+        
+        const handleUpdateGoalDetail = (updatedGoal) => {
+            const { id, ...data } = updatedGoal;
+            const goalRef = ref(db, `goals/${id}`);
+            set(goalRef, data)
+               .then(() => {
+                    selectedGoal = updatedGoal;
+                    // Optimistically update local state before Firebase syncs for faster UI
+                    const goalIndex = goals.findIndex(g => g.id === id);
+                    if (goalIndex > -1) {
+                        goals[goalIndex] = updatedGoal;
+                    }
+                    render();
+               })
+               .catch(err => console.error("Error updating goal details:", err));
+        };
+
+        const handleToggleComplete = (id, completed) => {
+            const goalRef = ref(db, `goals/${id}/completed`);
+            set(goalRef, completed).catch(err => console.error("Error toggling completion:", err));
+        };
+
+        const handleDeleteGoal = (id) => {
+            const goalRef = ref(db, `goals/${id}`);
+            remove(goalRef).catch(err => console.error("Error deleting goal:", err));
+            if (selectedGoal && selectedGoal.id === id) {
+                selectedGoal = null;
+            }
+            // render() will be called automatically by the onValue listener
+        };
+
+        // --- Initialization ---
+        const init = () => {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getDatabase(app);
+
+                const goalsRef = ref(db, 'goals');
+                onValue(goalsRef, (snapshot) => {
+                    const data = snapshot.val();
+                    goals = data ? Object.keys(data).map(key => ({ id: key, ...data[key] })) : [];
+                    isLoading = false;
+                    render();
+                }, (err) => {
+                    console.error("Firebase data fetch error:", err);
+                    error = "Failed to load goals.";
+                    isLoading = false;
+                    render();
+                });
+
+            } catch (err) {
+                console.error("Firebase initialization error:", err);
+                error = "Failed to connect to the database.";
+                isLoading = false;
+                render();
+            }
+        };
+
+        init();
+
+    </script>
+</body>
+</html>

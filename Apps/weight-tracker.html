@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weight Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue, query, orderByChild, limitToLast, get } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js";
+
+        // IMPORTANT: Replace with your Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+          authDomain: "chriscruz-d62ea.firebaseapp.com",
+          databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+          projectId: "chriscruz-d62ea",
+          storageBucket: "chriscruz-d62ea.firebasestorage.app",
+          messagingSenderId: "817856028090",
+          appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+          measurementId: "G-LVHF0VP8RM"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // DOM Elements
+        const weightForm = document.getElementById('weightForm');
+        const weightInput = document.getElementById('weight');
+        const typeSelect = document.getElementById('type');
+        const milesRanContainer = document.getElementById('milesRanContainer');
+        const milesRanInput = document.getElementById('milesRan');
+        const resultDiv = document.getElementById('result');
+        const historyDiv = document.getElementById('history');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const historyLoadingSpinner = document.getElementById('historyLoadingSpinner');
+
+        let burnRatePerMile = 0.62; // Default value
+        const targetWeight = 170;
+
+        // --- Firebase Configuration ---
+        const configRef = ref(db, 'config/burnRatePerMile');
+        onValue(configRef, (snapshot) => {
+            if (snapshot.exists()) {
+                burnRatePerMile = parseFloat(snapshot.val());
+                console.log(`Updated burn rate from Firebase: ${burnRatePerMile}`);
+            } else {
+                console.log('No burn rate config found in Firebase, using default.');
+            }
+        });
+
+
+        // --- Event Listeners ---
+        typeSelect.addEventListener('change', () => {
+            if (typeSelect.value === 'after_running') {
+                milesRanContainer.classList.remove('hidden');
+            } else {
+                milesRanContainer.classList.add('hidden');
+            }
+        });
+
+        weightForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const weight = parseFloat(weightInput.value);
+            const type = typeSelect.value;
+            const milesRan = parseFloat(milesRanInput.value);
+
+            if (isNaN(weight) || weight <= 0) {
+                showResult('Please enter a valid weight.', 'error');
+                return;
+            }
+            if (type === 'after_running' && (isNaN(milesRan) || milesRan <= 0)) {
+                showResult('Please enter the miles you ran.', 'error');
+                return;
+            }
+
+            loadingSpinner.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+
+            try {
+                await logWeight(weight, type, milesRan);
+                weightForm.reset();
+                milesRanContainer.classList.add('hidden');
+            } catch (error) {
+                console.error("Error logging weight:", error);
+                showResult('Failed to log weight. Please try again.', 'error');
+            } finally {
+                loadingSpinner.classList.add('hidden');
+            }
+        });
+
+        // --- Core Functions ---
+        async function logWeight(weight, type, milesRan) {
+            const timestamp = new Date().toISOString();
+            const newWeightEntry = {
+                weight,
+                type,
+                timestamp
+            };
+
+            if (type === 'after_running') {
+                newWeightEntry.miles_ran = milesRan;
+            }
+
+            // Save to Firebase
+            const weightsRef = ref(db, 'weights');
+            await push(weightsRef, newWeightEntry);
+
+            // Perform calculations
+            if (type === 'before_running') {
+                calculateMilesToTarget(weight);
+            } else if (type === 'after_running') {
+                await calculateRunStats(weight, milesRan, timestamp);
+            }
+        }
+
+        function calculateMilesToTarget(currentWeight) {
+            if (currentWeight <= targetWeight) {
+                showResult(`🎉 You've reached the target weight of ${targetWeight} lbs!`, 'success');
+                return;
+            }
+            const weightToLose = currentWeight - targetWeight;
+            const milesNeeded = (weightToLose / burnRatePerMile).toFixed(2);
+            showResult(`You need to run approximately <strong>${milesNeeded} miles</strong> to reach your target weight of ${targetWeight} lbs.`, 'info');
+        }
+
+        async function calculateRunStats(afterRunWeight, milesRan, afterRunTimestamp) {
+            // Find the 'before_running' weight from the same day
+            const startOfDay = new Date(afterRunTimestamp);
+            startOfDay.setHours(0, 0, 0, 0);
+
+            const weightsRef = ref(db, 'weights');
+            const q = query(weightsRef, orderByChild('timestamp'));
+
+            try {
+                const snapshot = await get(q);
+                let beforeRunWeightEntry = null;
+
+                if (snapshot.exists()) {
+                    const allWeights = [];
+                    snapshot.forEach(childSnapshot => {
+                        allWeights.push(childSnapshot.val());
+                    });
+                    
+                    // Filter for today's 'before_running' entries and find the latest one
+                    beforeRunWeightEntry = allWeights
+                        .filter(entry => 
+                            entry.type === 'before_running' && 
+                            new Date(entry.timestamp) >= startOfDay &&
+                            new Date(entry.timestamp) < new Date(afterRunTimestamp)
+                        )
+                        .pop(); // Get the last one before the current entry
+                }
+
+                if (beforeRunWeightEntry) {
+                    const beforeRunWeight = beforeRunWeightEntry.weight;
+                    const weightDifference = (beforeRunWeight - afterRunWeight).toFixed(2);
+                    const actualBurnRate = (weightDifference / milesRan).toFixed(2);
+
+                    let message = `You lost <strong>${weightDifference} lbs</strong> during your run. `;
+                    message += `Your actual burn rate for this run was <strong>${actualBurnRate} lbs/mile</strong>. `;
+                    
+                    if(actualBurnRate > burnRatePerMile) {
+                        message += `That's higher than the estimated ${burnRatePerMile} lbs/mile. Great job!`;
+                    } else {
+                        message += `That's a bit lower than the estimated ${burnRatePerMile} lbs/mile.`;
+                    }
+                    showResult(message, 'info');
+
+                } else {
+                    showResult('Logged your "After Running" weight. No "Before Running" weight found for today to compare.', 'warning');
+                }
+            } catch (error) {
+                console.error("Error fetching previous weight:", error);
+                showResult('Could not fetch previous weight data to compare.', 'error');
+            }
+        }
+
+        // --- UI Functions ---
+        function showResult(message, type = 'info') {
+            resultDiv.innerHTML = message;
+            resultDiv.classList.remove('hidden', 'bg-blue-100', 'text-blue-800', 'bg-green-100', 'text-green-800', 'bg-red-100', 'text-red-800', 'bg-yellow-100', 'text-yellow-800');
+            switch (type) {
+                case 'success':
+                    resultDiv.classList.add('bg-green-100', 'text-green-800');
+                    break;
+                case 'error':
+                    resultDiv.classList.add('bg-red-100', 'text-red-800');
+                    break;
+                case 'warning':
+                    resultDiv.classList.add('bg-yellow-100', 'text-yellow-800');
+                    break;
+                default:
+                    resultDiv.classList.add('bg-blue-100', 'text-blue-800');
+            }
+        }
+
+        function displayHistory() {
+            const weightsRef = ref(db, 'weights');
+            const recentWeightsQuery = query(weightsRef, orderByChild('timestamp'), limitToLast(100));
+
+            onValue(recentWeightsQuery, (snapshot) => {
+                historyLoadingSpinner.classList.add('hidden');
+                historyDiv.innerHTML = '';
+                if (!snapshot.exists()) {
+                    historyDiv.innerHTML = '<p class="text-center text-gray-500">No weight entries yet.</p>';
+                    return;
+                }
+
+                const entries = [];
+                snapshot.forEach((childSnapshot) => {
+                    entries.push({ key: childSnapshot.key, ...childSnapshot.val() });
+                });
+
+                // Reverse to show newest first
+                entries.reverse().forEach(entry => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.className = 'bg-white p-4 rounded-lg shadow-sm flex justify-between items-center';
+
+                    const date = new Date(entry.timestamp);
+                    const formattedDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                    const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+                    const typeText = entry.type === 'before_running' ? 'Before Run' : 'After Run';
+                    const typeColor = entry.type === 'before_running' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800';
+
+                    entryDiv.innerHTML = `
+                        <div>
+                            <p class="font-bold text-lg text-gray-800">${entry.weight} lbs</p>
+                            <p class="text-sm text-gray-500">${formattedDate} at ${formattedTime}</p>
+                        </div>
+                        <span class="text-xs font-semibold px-2 py-1 rounded-full ${typeColor}">${typeText}</span>
+                    `;
+                    historyDiv.appendChild(entryDiv);
+                });
+            });
+        }
+
+        // Initial Load
+        displayHistory();
+
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-2xl">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800">Weight Tracker</h1>
+            <p class="text-gray-600 mt-2">Log your weight and track your progress towards 170 lbs.</p>
+        </header>
+
+        <main>
+            <!-- Input Form Card -->
+            <div class="bg-white p-6 rounded-xl shadow-md mb-8">
+                <form id="weightForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Weight Input -->
+                        <div>
+                            <label for="weight" class="block text-sm font-medium text-gray-700">Current Weight (lbs)</label>
+                            <input type="number" id="weight" name="weight" step="0.1" required class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+
+                        <!-- Type Selector -->
+                        <div>
+                            <label for="type" class="block text-sm font-medium text-gray-700">Log Type</label>
+                            <select id="type" name="type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option value="before_running">Before Running</option>
+                                <option value="after_running">After Running</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Miles Ran Input (Conditional) -->
+                    <div id="milesRanContainer" class="mt-4 hidden">
+                        <label for="milesRan" class="block text-sm font-medium text-gray-700">How many miles did you run?</label>
+                        <input type="number" id="milesRan" name="milesRan" step="0.1" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="mt-6">
+                        <button type="submit" class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <svg id="loadingSpinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Log Weight
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Result Display -->
+            <div id="result" class="p-4 mb-8 rounded-md text-sm font-medium text-center hidden"></div>
+
+            <!-- History Section -->
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">Weight History</h2>
+                <div class="text-center">
+                     <svg id="historyLoadingSpinner" class="animate-spin mx-auto h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <div id="history" class="space-y-4">
+                    <!-- History items will be injected here by JavaScript -->
+                </div>
+            </div>
+        </main>
+
+    </div>
+
+</body>
+</html>

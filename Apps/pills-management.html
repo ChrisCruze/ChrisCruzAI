@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pills Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto max-w-2xl p-4 sm:p-6 lg:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-900">Pills Management</h1>
+            <p class="text-gray-600 mt-2">Track your Adderall (20mg) intake.</p>
+        </header>
+
+        <!-- Metrics Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4 text-center">Today's Summary</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-center">
+                <div class="bg-blue-100 p-4 rounded-lg">
+                    <p class="text-sm font-medium text-blue-800">Pills Consumed Today</p>
+                    <p id="pills-today" class="text-3xl font-bold text-blue-900">0</p>
+                </div>
+                <div class="bg-green-100 p-4 rounded-lg">
+                    <p class="text-sm font-medium text-green-800">Total Milligrams Today</p>
+                    <p id="mg-today" class="text-3xl font-bold text-green-900">0 mg</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Logging Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+            <h2 class="text-xl font-semibold mb-4">Log Intake</h2>
+            <div class="flex items-center space-x-4">
+                <input type="number" id="pills-input" min="1" value="1" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                <button id="log-button" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-300 ease-in-out transform hover:scale-105">
+                    Log Pills
+                </button>
+            </div>
+             <div id="message-box" class="mt-4 text-center"></div>
+        </div>
+
+        <!-- Log Entries Section -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-semibold">Log Entries</h2>
+                <button id="copy-button" class="bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-300">
+                    Copy Logs
+                </button>
+            </div>
+            <div id="log-entries" class="space-y-4 max-h-96 overflow-y-auto pr-2">
+                <!-- Log entries will be dynamically inserted here -->
+                <p class="text-gray-500 text-center">No entries yet. Add one above!</p>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase SDK imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-app.js";
+        import { getDatabase, ref, push, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.6.10/firebase-database.js";
+
+        // IMPORTANT: User-provided Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+            measurementId: "G-LVHF0VP8RM"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const logsRef = ref(database, 'pills_log');
+
+        // DOM Elements
+        const pillsInput = document.getElementById('pills-input');
+        const logButton = document.getElementById('log-button');
+        const copyButton = document.getElementById('copy-button');
+        const logEntriesContainer = document.getElementById('log-entries');
+        const pillsTodayElem = document.getElementById('pills-today');
+        const mgTodayElem = document.getElementById('mg-today');
+        const messageBox = document.getElementById('message-box');
+        
+        const PILL_MG = 20;
+        let allLogs = []; // To store all log data for the copy function
+
+        /**
+         * Shows a temporary message to the user.
+         * @param {string} text - The message to display.
+         * @param {boolean} isError - If true, formats the message as an error.
+         */
+        function showMessage(text, isError = false) {
+            messageBox.textContent = text;
+            messageBox.className = `mt-4 text-center p-2 rounded-lg ${isError ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`;
+            setTimeout(() => {
+                messageBox.textContent = '';
+                messageBox.className = 'mt-4 text-center';
+            }, 3000);
+        }
+
+        /**
+         * Logs the pill intake to Firebase.
+         */
+        logButton.addEventListener('click', () => {
+            const pillCount = parseInt(pillsInput.value, 10);
+
+            if (isNaN(pillCount) || pillCount <= 0) {
+                showMessage('Please enter a valid number of pills.', true);
+                return;
+            }
+
+            const newLog = {
+                pills: pillCount,
+                mg: pillCount * PILL_MG,
+                timestamp: serverTimestamp() // Use server-side timestamp for accuracy
+            };
+
+            push(logsRef, newLog)
+                .then(() => {
+                    showMessage(`${pillCount} pill(s) logged successfully!`);
+                    pillsInput.value = '1'; // Reset input
+                })
+                .catch(error => {
+                    console.error("Error writing to database:", error);
+                    showMessage('Failed to log pills. See console for details.', true);
+                });
+        });
+
+        /**
+         * Listens for data changes and updates the UI.
+         */
+        onValue(logsRef, (snapshot) => {
+            const data = snapshot.val();
+            logEntriesContainer.innerHTML = ''; // Clear previous entries
+            
+            if (!data) {
+                logEntriesContainer.innerHTML = '<p class="text-gray-500 text-center">No entries yet. Add one above!</p>';
+                allLogs = [];
+                updateMetrics([]);
+                return;
+            }
+
+            const logs = Object.entries(data).map(([key, value]) => ({ id: key, ...value }));
+            // Sort logs by timestamp, newest first
+            logs.sort((a, b) => b.timestamp - a.timestamp);
+            allLogs = logs; // Store for the copy function
+
+            if (logs.length === 0) {
+                logEntriesContainer.innerHTML = '<p class="text-gray-500 text-center">No entries yet. Add one above!</p>';
+            } else {
+                logs.forEach(log => {
+                    const logElement = createLogElement(log);
+                    logEntriesContainer.appendChild(logElement);
+                });
+            }
+            
+            updateMetrics(logs);
+        });
+
+        /**
+         * Creates an HTML element for a single log entry.
+         * @param {object} log - The log data object.
+         * @returns {HTMLElement} The created div element for the log entry.
+         */
+        function createLogElement(log) {
+            const div = document.createElement('div');
+            div.className = 'bg-gray-50 p-4 rounded-lg flex justify-between items-center border border-gray-200';
+            
+            const date = new Date(log.timestamp);
+            const formattedDate = date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const formattedTime = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            div.innerHTML = `
+                <div>
+                    <p class="font-semibold">${log.pills} pill(s) - ${log.mg}mg</p>
+                    <p class="text-sm text-gray-500">${formattedDate} at ${formattedTime}</p>
+                </div>
+            `;
+            return div;
+        }
+
+        /**
+         * Calculates and updates the daily metrics.
+         * @param {Array<object>} logs - An array of all log objects.
+         */
+        function updateMetrics(logs) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Set to the beginning of the day
+
+            const todaysLogs = logs.filter(log => {
+                const logDate = new Date(log.timestamp);
+                return logDate >= today;
+            });
+
+            const totalPillsToday = todaysLogs.reduce((sum, log) => sum + log.pills, 0);
+            const totalMgToday = totalPillsToday * PILL_MG;
+
+            pillsTodayElem.textContent = totalPillsToday;
+            mgTodayElem.textContent = `${totalMgToday} mg`;
+        }
+
+        /**
+         * Copies all log entries to the clipboard.
+         */
+        copyButton.addEventListener('click', () => {
+            if (allLogs.length === 0) {
+                showMessage('No logs to copy.', true);
+                return;
+            }
+
+            let textToCopy = "Pill Intake Log:\n\n";
+            allLogs.forEach(log => {
+                const date = new Date(log.timestamp);
+                const formattedDateTime = date.toLocaleString('en-US', {
+                    year: 'numeric', month: 'short', day: 'numeric',
+                    hour: '2-digit', minute: '2-digit', hour12: true
+                });
+                textToCopy += `${log.pills} pill(s) (${log.mg}mg) on ${formattedDateTime}\n`;
+            });
+
+            // Create a temporary textarea to perform the copy action
+            const textArea = document.createElement('textarea');
+            textArea.value = textToCopy;
+            textArea.style.position = 'fixed'; // Prevent scrolling to bottom of page in MS Edge.
+            textArea.style.top = '0';
+            textArea.style.left = '0';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showMessage('All logs copied to clipboard!');
+                } else {
+                    showMessage('Failed to copy logs.', true);
+                }
+            } catch (err) {
+                console.error('Fallback: Oops, unable to copy', err);
+                showMessage('Failed to copy logs. See console for details.', true);
+            }
+
+            document.body.removeChild(textArea);
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeOS - Your AI-Powered Life Management System</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .life-domain-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        
+        .life-domain-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .metric-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+        
+        .app-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .floating-nav {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item:hover {
+            transform: scale(1.1);
+        }
+        
+        .ai-insight {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dasharray 0.5s ease;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInFromLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        
+        .animate-slide-in-left {
+            animation: slideInFromLeft 0.8s ease-out forwards;
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 3s ease-in-out infinite;
+        }
+        
+        .animate-delay-100 { animation-delay: 0.1s; }
+        .animate-delay-200 { animation-delay: 0.2s; }
+        .animate-delay-300 { animation-delay: 0.3s; }
+        .animate-delay-400 { animation-delay: 0.4s; }
+        .animate-delay-500 { animation-delay: 0.5s; }
+        .animate-delay-600 { animation-delay: 0.6s; }
+        .animate-delay-700 { animation-delay: 0.7s; }
+    </style>
+</head>
+<body class="text-gray-800">
+    <!-- Header -->
+    <header class="relative z-10">
+        <div class="container mx-auto px-6 py-8">
+            <div class="text-center">
+                <div class="mb-6">
+                    <div class="inline-block p-4 bg-white/10 rounded-full mb-4 animate-pulse-slow">
+                        <i class="fas fa-rocket text-4xl text-white"></i>
+                    </div>
+                </div>
+                <h1 class="text-6xl font-bold text-white mb-4 tracking-tight animate-slide-in-left">
+                    LifeOS
+                </h1>
+                <p class="text-xl text-white/90 font-light max-w-2xl mx-auto mb-6">
+                    Your AI-powered life management operating system. Manage every aspect of your life with elegance and intelligence.
+                </p>
+                <div class="flex items-center justify-center space-x-4 text-white/80">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle text-green-400 mr-2"></i>
+                        <span>19 Life Apps</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-brain text-purple-400 mr-2"></i>
+                        <span>AI Powered</span>
+                    </div>
+                    <div class="flex items-center">
+                        <i class="fas fa-sync text-blue-400 mr-2"></i>
+                        <span>Real-time Sync</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard -->
+    <main class="container mx-auto px-6 pb-24">
+        <!-- Life Overview Metrics -->
+        <section class="mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="metric-card p-6 animate-fade-in-up animate-delay-100">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Today's Tasks</p>
+                            <p class="text-3xl font-bold text-gray-900" id="todayTasks">0</p>
+                        </div>
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-tasks text-blue-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metric-card p-6 animate-fade-in-up animate-delay-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Health Score</p>
+                            <p class="text-3xl font-bold text-gray-900" id="healthScore">0%</p>
+                        </div>
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-heartbeat text-green-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metric-card p-6 animate-fade-in-up animate-delay-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Knowledge Items</p>
+                            <p class="text-3xl font-bold text-gray-900" id="knowledgeItems">0</p>
+                        </div>
+                        <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-brain text-purple-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="metric-card p-6 animate-fade-in-up animate-delay-400">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Goals Progress</p>
+                            <p class="text-3xl font-bold text-gray-900" id="goalsProgress">0%</p>
+                        </div>
+                        <div class="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-bullseye text-orange-600 text-xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Life Insights -->
+        <section class="mb-12">
+            <div class="ai-insight animate-fade-in-up animate-delay-500">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center">
+                        <i class="fas fa-robot text-2xl mr-3"></i>
+                        <h2 class="text-2xl font-bold">AI Life Insights</h2>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                        <span class="text-sm text-white/80">AI Active</span>
+                    </div>
+                </div>
+                <div id="aiInsights" class="text-lg">
+                    <p>Loading your personalized life insights...</p>
+                </div>
+                <div class="flex items-center justify-between mt-4">
+                    <button id="refreshInsights" class="bg-white/20 hover:bg-white/30 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-sync-alt mr-2"></i>Refresh Insights
+                    </button>
+                    <button id="customizeInsights" class="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-sliders-h mr-2"></i>Customize
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Recent Activity Timeline -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">Recent Activity</h2>
+            <div class="glass-card p-6 rounded-2xl">
+                <div id="activityTimeline" class="space-y-4">
+                    <div class="flex items-center text-white/80">
+                        <i class="fas fa-spinner fa-spin mr-3"></i>
+                        <span>Loading recent activity...</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Life Domain Cards -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">Life Management Domains</h2>
+            <div class="app-grid">
+                <!-- Knowledge & Learning -->
+                <div class="life-domain-card glass-card p-6 rounded-2xl" data-domain="knowledge">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-brain text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Knowledge & Learning</h3>
+                    </div>
+                    <p class="text-white/80 mb-4">Manage your second brain, workflows, and digital assets</p>
+                    <div class="space-y-2">
+                        <a href="Apps/second-brain.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-sticky-note mr-2"></i>Second Brain
+                        </a>
+                        <a href="Apps/knowledge-workflow.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-project-diagram mr-2"></i>Knowledge Workflow
+                        </a>
+                        <a href="Apps/bookmarks-manager.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-bookmark mr-2"></i>Bookmarks Manager
+                        </a>
+                        <a href="Apps/artifacts.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-archive mr-2"></i>Artifacts
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Productivity & Work -->
+                <div class="life-domain-card glass-card p-6 rounded-2xl" data-domain="productivity">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-rocket text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Productivity & Work</h3>
+                    </div>
+                    <p class="text-white/80 mb-4">Organize projects, tasks, and routines for maximum efficiency</p>
+                    <div class="space-y-2">
+                        <a href="Apps/project-planner.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-th-large mr-2"></i>Project Planner
+                        </a>
+                        <a href="Apps/sprint-tracker.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-running mr-2"></i>Sprint Tracker
+                        </a>
+                        <a href="Apps/todoist-sorter.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-list-check mr-2"></i>Todoist Sorter
+                        </a>
+                        <a href="Apps/routine-management.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-clock mr-2"></i>Routine Management
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Health & Fitness -->
+                <div class="life-domain-card glass-card p-6 rounded-2xl" data-domain="health">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-heartbeat text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Health & Fitness</h3>
+                    </div>
+                    <p class="text-white/80 mb-4">Track workouts, nutrition, and wellness metrics</p>
+                    <div class="space-y-2">
+                        <a href="Apps/workout-tracker.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-dumbbell mr-2"></i>Workout Tracker
+                        </a>
+                        <a href="Apps/food-diary.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-utensils mr-2"></i>Food Diary
+                        </a>
+                        <a href="Apps/weight-tracker.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-weight-scale mr-2"></i>Weight Tracker
+                        </a>
+                        <a href="Apps/hydration-tracker.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-tint mr-2"></i>Hydration Tracker
+                        </a>
+                        <a href="Apps/pills-management.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-pills mr-2"></i>Pills Management
+                        </a>
+                        <a href="Apps/stretch-tracker.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-child mr-2"></i>Stretch Tracker
+                        </a>
+                        <a href="Apps/marathon-training.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-flag-checkered mr-2"></i>Marathon Training
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Relationships & Social -->
+                <div class="life-domain-card glass-card p-6 rounded-2xl" data-domain="relationships">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-pink-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-users text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Relationships & Social</h3>
+                    </div>
+                    <p class="text-white/80 mb-4">Maintain connections and manage social relationships</p>
+                    <div class="space-y-2">
+                        <a href="Apps/friend-crm.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-user-friends mr-2"></i>Friend CRM
+                        </a>
+                        <a href="Apps/upkeep.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-tools mr-2"></i>Upkeep
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Organization & Systems -->
+                <div class="life-domain-card glass-card p-6 rounded-2xl" data-domain="organization">
+                    <div class="flex items-center mb-4">
+                        <div class="w-12 h-12 bg-orange-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-cogs text-white text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Organization & Systems</h3>
+                    </div>
+                    <p class="text-white/80 mb-4">Track goals, inventory, and life systems</p>
+                    <div class="space-y-2">
+                        <a href="Apps/goal-tracker.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-bullseye mr-2"></i>Goal Tracker
+                        </a>
+                        <a href="Apps/inventory-management.html" class="block text-white/90 hover:text-white transition-colors">
+                            <i class="fas fa-boxes-stacked mr-2"></i>Inventory Management
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="mb-12">
+            <h2 class="text-3xl font-bold text-white mb-8 text-center">Quick Actions</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <button id="addTask" class="glass-card p-6 rounded-2xl text-left hover:bg-white/20 transition-all">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-plus text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Add Task</h3>
+                            <p class="text-white/80">Quickly add a new task</p>
+                        </div>
+                    </div>
+                </button>
+                
+                <button id="logWorkout" class="glass-card p-6 rounded-2xl text-left hover:bg-white/20 transition-all">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-green-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-dumbbell text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Log Workout</h3>
+                            <p class="text-white/80">Record your fitness activity</p>
+                        </div>
+                    </div>
+                </button>
+                
+                <button id="addNote" class="glass-card p-6 rounded-2xl text-left hover:bg-white/20 transition-all">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-purple-500 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-sticky-note text-white text-xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-white">Add Note</h3>
+                            <p class="text-white/80">Capture a new thought</p>
+                        </div>
+                    </div>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Floating Navigation -->
+    <nav class="floating-nav">
+        <div class="glass-card px-6 py-3 rounded-full flex items-center space-x-6">
+            <a href="#" class="nav-item text-white hover:text-blue-200 transition-colors" data-section="dashboard">
+                <i class="fas fa-home text-xl"></i>
+            </a>
+            <a href="#" class="nav-item text-white hover:text-blue-200 transition-colors" data-section="analytics">
+                <i class="fas fa-chart-line text-xl"></i>
+            </a>
+            <a href="#" class="nav-item text-white hover:text-blue-200 transition-colors" data-section="settings">
+                <i class="fas fa-cog text-xl"></i>
+            </a>
+            <a href="#" class="nav-item text-white hover:text-blue-200 transition-colors" data-section="profile">
+                <i class="fas fa-user text-xl"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Modals -->
+    <div id="taskModal" class="fixed inset-0 bg-black/50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-2xl p-6 w-full max-w-md">
+                <h3 class="text-xl font-bold mb-4">Add New Task</h3>
+                <form id="taskForm">
+                    <input type="text" id="taskTitle" placeholder="Task title" class="w-full p-3 border border-gray-300 rounded-lg mb-4" required>
+                    <textarea id="taskDescription" placeholder="Description (optional)" class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+                    <div class="flex space-x-3">
+                        <button type="button" id="cancelTask" class="flex-1 bg-gray-300 text-gray-800 py-2 px-4 rounded-lg">Cancel</button>
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-lg">Add Task</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const auth = firebase.auth();
+
+        // LifeOS Dashboard Class
+        class LifeOSDashboard {
+                         constructor() {
+                 this.initializeEventListeners();
+                 this.loadDashboardData();
+                 this.generateAIInsights();
+                 this.loadActivityTimeline();
+             }
+
+                         initializeEventListeners() {
+                 // Quick action buttons
+                 document.getElementById('addTask').addEventListener('click', () => this.showTaskModal());
+                 document.getElementById('logWorkout').addEventListener('click', () => this.redirectToApp('Apps/workout-tracker.html'));
+                 document.getElementById('addNote').addEventListener('click', () => this.redirectToApp('Apps/second-brain.html'));
+                 
+                 // Modal controls
+                 document.getElementById('cancelTask').addEventListener('click', () => this.hideTaskModal());
+                 document.getElementById('taskForm').addEventListener('submit', (e) => this.handleTaskSubmit(e));
+                 
+                 // AI insights refresh
+                 document.getElementById('refreshInsights').addEventListener('click', () => this.generateAIInsights());
+                 document.getElementById('customizeInsights').addEventListener('click', () => this.showCustomizeModal());
+                 
+                 // Navigation
+                 document.querySelectorAll('.nav-item').forEach(item => {
+                     item.addEventListener('click', (e) => this.handleNavigation(e));
+                 });
+             }
+
+            async loadDashboardData() {
+                try {
+                    // Load today's tasks
+                    const tasksRef = db.ref('tasks');
+                    tasksRef.once('value').then((snapshot) => {
+                        const today = new Date().toISOString().split('T')[0];
+                        let todayCount = 0;
+                        snapshot.forEach((childSnapshot) => {
+                            const task = childSnapshot.val();
+                            if (task.dueDate === today) {
+                                todayCount++;
+                            }
+                        });
+                        document.getElementById('todayTasks').textContent = todayCount;
+                    });
+
+                    // Load health score
+                    this.calculateHealthScore();
+                    
+                    // Load knowledge items
+                    const notesRef = db.ref('second-brain/notes');
+                    notesRef.once('value').then((snapshot) => {
+                        document.getElementById('knowledgeItems').textContent = snapshot.numChildren();
+                    });
+                    
+                    // Load goals progress
+                    this.calculateGoalsProgress();
+                    
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                }
+            }
+
+            async calculateHealthScore() {
+                try {
+                    // Calculate health score based on various metrics
+                    let score = 0;
+                    let totalMetrics = 0;
+                    
+                    // Check workout frequency
+                    const workoutsRef = db.ref('workouts');
+                    const workoutsSnapshot = await workoutsRef.once('value');
+                    const recentWorkouts = [];
+                    workoutsSnapshot.forEach((childSnapshot) => {
+                        const workout = childSnapshot.val();
+                        const workoutDate = new Date(workout.timestamp);
+                        const daysAgo = (Date.now() - workoutDate.getTime()) / (1000 * 60 * 60 * 24);
+                        if (daysAgo <= 7) {
+                            recentWorkouts.push(workout);
+                        }
+                    });
+                    
+                    if (recentWorkouts.length >= 3) score += 25;
+                    totalMetrics++;
+                    
+                    // Check hydration
+                    const hydrationRef = db.ref('hydration');
+                    const hydrationSnapshot = await hydrationRef.once('value');
+                    let todayHydration = 0;
+                    const today = new Date().toISOString().split('T')[0];
+                    hydrationSnapshot.forEach((childSnapshot) => {
+                        const entry = childSnapshot.val();
+                        if (entry.date === today) {
+                            todayHydration += entry.amount || 0;
+                        }
+                    });
+                    
+                    if (todayHydration >= 2000) score += 25; // 2L daily goal
+                    totalMetrics++;
+                    
+                    // Check weight tracking consistency
+                    const weightRef = db.ref('weight');
+                    const weightSnapshot = await weightRef.once('value');
+                    const weightEntries = [];
+                    weightSnapshot.forEach((childSnapshot) => {
+                        weightEntries.push(childSnapshot.val());
+                    });
+                    
+                    if (weightEntries.length >= 5) score += 25; // Consistent tracking
+                    totalMetrics++;
+                    
+                    // Check food logging
+                    const foodRef = db.ref('food-diary');
+                    const foodSnapshot = await foodRef.once('value');
+                    let todayMeals = 0;
+                    foodSnapshot.forEach((childSnapshot) => {
+                        const meal = childSnapshot.val();
+                        if (meal.date === today) {
+                            todayMeals++;
+                        }
+                    });
+                    
+                    if (todayMeals >= 2) score += 25; // At least 2 meals logged
+                    totalMetrics++;
+                    
+                    const finalScore = totalMetrics > 0 ? Math.round(score / totalMetrics) : 0;
+                    document.getElementById('healthScore').textContent = finalScore + '%';
+                    
+                } catch (error) {
+                    console.error('Error calculating health score:', error);
+                }
+            }
+
+            async calculateGoalsProgress() {
+                try {
+                    const goalsRef = db.ref('goals');
+                    const goalsSnapshot = await goalsRef.once('value');
+                    let totalProgress = 0;
+                    let goalCount = 0;
+                    
+                    goalsSnapshot.forEach((childSnapshot) => {
+                        const goal = childSnapshot.val();
+                        if (goal.progress !== undefined) {
+                            totalProgress += goal.progress;
+                            goalCount++;
+                        }
+                    });
+                    
+                    const averageProgress = goalCount > 0 ? Math.round(totalProgress / goalCount) : 0;
+                    document.getElementById('goalsProgress').textContent = averageProgress + '%';
+                    
+                } catch (error) {
+                    console.error('Error calculating goals progress:', error);
+                }
+            }
+
+            async generateAIInsights() {
+                try {
+                    const insightsContainer = document.getElementById('aiInsights');
+                    insightsContainer.innerHTML = '<p>Generating insights...</p>';
+                    
+                    // Collect data from various domains
+                    const dashboardData = await this.collectDashboardData();
+                    
+                    // Generate AI insights using Gemini API
+                    const insights = await this.callGeminiAPI(dashboardData);
+                    
+                    insightsContainer.innerHTML = `
+                        <div class="space-y-3">
+                            ${insights.split('\n').map(line => `<p>${line}</p>`).join('')}
+                        </div>
+                    `;
+                    
+                } catch (error) {
+                    console.error('Error generating AI insights:', error);
+                    document.getElementById('aiInsights').innerHTML = `
+                        <p>Unable to generate insights at the moment. Please try again later.</p>
+                    `;
+                }
+            }
+
+            async collectDashboardData() {
+                try {
+                    const data = {
+                        tasks: [],
+                        workouts: [],
+                        nutrition: [],
+                        goals: [],
+                        notes: []
+                    };
+                    
+                    // Collect recent data from various domains
+                    const tasksRef = db.ref('tasks');
+                    const tasksSnapshot = await tasksRef.once('value');
+                    tasksSnapshot.forEach((childSnapshot) => {
+                        data.tasks.push(childSnapshot.val());
+                    });
+                    
+                    const workoutsRef = db.ref('workouts');
+                    const workoutsSnapshot = await workoutsRef.once('value');
+                    workoutsSnapshot.forEach((childSnapshot) => {
+                        data.workouts.push(childSnapshot.val());
+                    });
+                    
+                    const foodRef = db.ref('food-diary');
+                    const foodSnapshot = await foodRef.once('value');
+                    foodSnapshot.forEach((childSnapshot) => {
+                        data.nutrition.push(childSnapshot.val());
+                    });
+                    
+                    const goalsRef = db.ref('goals');
+                    const goalsSnapshot = await goalsRef.once('value');
+                    goalsSnapshot.forEach((childSnapshot) => {
+                        data.goals.push(childSnapshot.val());
+                    });
+                    
+                    const notesRef = db.ref('second-brain/notes');
+                    const notesSnapshot = await notesRef.once('value');
+                    notesSnapshot.forEach((childSnapshot) => {
+                        data.notes.push(childSnapshot.val());
+                    });
+                    
+                    return data;
+                    
+                } catch (error) {
+                    console.error('Error collecting dashboard data:', error);
+                    return {};
+                }
+            }
+
+            async callGeminiAPI(data) {
+                try {
+                    // Create a prompt based on the collected data
+                    const prompt = this.createInsightPrompt(data);
+                    
+                                         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{
+                                    text: prompt
+                                }]
+                            }]
+                        })
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`API call failed: ${response.status}`);
+                    }
+                    
+                    const result = await response.json();
+                    return result.candidates[0].content.parts[0].text;
+                    
+                } catch (error) {
+                    console.error('Error calling Gemini API:', error);
+                    // Return fallback insights
+                    return this.generateFallbackInsights(data);
+                }
+            }
+
+            createInsightPrompt(data) {
+                return `Based on the following life data, provide 3-4 actionable insights and recommendations for improving life balance and productivity. Keep each insight under 2 sentences and be encouraging:
+
+Tasks: ${data.tasks.length} total
+Workouts: ${data.workouts.length} recent workouts
+Nutrition: ${data.nutrition.length} meals logged
+Goals: ${data.goals.length} active goals
+Notes: ${data.notes.length} knowledge items
+
+Focus on:
+1. Health and wellness optimization
+2. Productivity and time management
+3. Knowledge and learning growth
+4. Goal achievement strategies
+
+Provide specific, actionable advice.`;
+            }
+
+            generateFallbackInsights(data) {
+                const insights = [];
+                
+                if (data.tasks.length > 0) {
+                    insights.push("You have active tasks - consider prioritizing them using the Eisenhower Matrix for maximum impact.");
+                }
+                
+                if (data.workouts.length > 0) {
+                    insights.push("Great job staying active! Consistency in your fitness routine will compound over time.");
+                }
+                
+                if (data.nutrition.length > 0) {
+                    insights.push("Tracking your nutrition shows mindfulness about your health - keep up the great work!");
+                }
+                
+                if (data.goals.length > 0) {
+                    insights.push("Having clear goals is the first step to achievement. Break them down into smaller, manageable steps.");
+                }
+                
+                if (data.notes.length > 0) {
+                    insights.push("Your knowledge base is growing - consider reviewing and connecting related notes for deeper insights.");
+                }
+                
+                return insights.join('\n\n');
+            }
+
+            showTaskModal() {
+                document.getElementById('taskModal').classList.remove('hidden');
+            }
+
+            hideTaskModal() {
+                document.getElementById('taskModal').classList.add('hidden');
+                document.getElementById('taskForm').reset();
+            }
+
+            async handleTaskSubmit(e) {
+                e.preventDefault();
+                
+                const title = document.getElementById('taskTitle').value;
+                const description = document.getElementById('taskDescription').value;
+                
+                try {
+                    const taskRef = db.ref('tasks');
+                    await taskRef.push({
+                        title: title,
+                        description: description,
+                        status: 'todo',
+                        priority: 'medium',
+                        createdAt: new Date().toISOString(),
+                        dueDate: new Date().toISOString().split('T')[0]
+                    });
+                    
+                    this.hideTaskModal();
+                    this.loadDashboardData(); // Refresh dashboard
+                    
+                    // Show success message
+                    this.showToast('Task added successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Error adding task:', error);
+                    this.showToast('Error adding task. Please try again.', 'error');
+                }
+            }
+
+            redirectToApp(appUrl) {
+                window.open(appUrl, '_blank');
+            }
+
+            handleNavigation(e) {
+                e.preventDefault();
+                const section = e.currentTarget.dataset.section;
+                
+                // Handle navigation to different sections
+                switch(section) {
+                    case 'analytics':
+                        this.showToast('Analytics section coming soon!', 'info');
+                        break;
+                    case 'settings':
+                        this.showToast('Settings section coming soon!', 'info');
+                        break;
+                    case 'profile':
+                        this.showToast('Profile section coming soon!', 'info');
+                        break;
+                    default:
+                        // Stay on dashboard
+                        break;
+                }
+            }
+
+                         async loadActivityTimeline() {
+                 try {
+                     const timelineContainer = document.getElementById('activityTimeline');
+                     const activities = [];
+                     
+                     // Collect recent activities from various sources
+                     const recentData = await this.collectRecentActivity();
+                     
+                     // Sort by timestamp
+                     activities.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+                     
+                     // Display activities
+                     if (activities.length === 0) {
+                         timelineContainer.innerHTML = `
+                             <div class="text-center text-white/60 py-8">
+                                 <i class="fas fa-inbox text-4xl mb-4"></i>
+                                 <p>No recent activity to display</p>
+                                 <p class="text-sm">Start using your LifeOS apps to see activity here</p>
+                             </div>
+                         `;
+                     } else {
+                         const timelineHTML = activities.slice(0, 10).map(activity => `
+                             <div class="flex items-center text-white/90 hover:text-white transition-colors cursor-pointer" onclick="window.open('${activity.appUrl}', '_blank')">
+                                 <div class="w-10 h-10 ${activity.iconBg} rounded-full flex items-center justify-center mr-4">
+                                     <i class="fas ${activity.icon} text-white"></i>
+                                 </div>
+                                 <div class="flex-1">
+                                     <p class="font-medium">${activity.title}</p>
+                                     <p class="text-sm text-white/70">${activity.description}</p>
+                                 </div>
+                                 <div class="text-right text-sm text-white/60">
+                                     <p>${this.formatTimeAgo(activity.timestamp)}</p>
+                                     <p class="text-xs">${activity.appName}</p>
+                                 </div>
+                             </div>
+                         `).join('');
+                         
+                         timelineContainer.innerHTML = timelineHTML;
+                     }
+                     
+                 } catch (error) {
+                     console.error('Error loading activity timeline:', error);
+                     document.getElementById('activityTimeline').innerHTML = `
+                         <div class="text-center text-white/60 py-4">
+                             <p>Unable to load recent activity</p>
+                         </div>
+                     `;
+                 }
+             }
+
+             async collectRecentActivity() {
+                 const activities = [];
+                 const now = new Date();
+                 const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                 
+                 try {
+                     // Collect from various data sources
+                     const dataSources = [
+                         { ref: 'tasks', type: 'task', icon: 'fa-tasks', iconBg: 'bg-blue-500', appName: 'Task Manager', appUrl: 'Apps/project-planner.html' },
+                         { ref: 'workouts', type: 'workout', icon: 'fa-dumbbell', iconBg: 'bg-green-500', appName: 'Workout Tracker', appUrl: 'Apps/workout-tracker.html' },
+                         { ref: 'food-diary', type: 'meal', icon: 'fa-utensils', iconBg: 'bg-orange-500', appName: 'Food Diary', appUrl: 'Apps/food-diary.html' },
+                         { ref: 'second-brain/notes', type: 'note', icon: 'fa-sticky-note', iconBg: 'bg-purple-500', appName: 'Second Brain', appUrl: 'Apps/second-brain.html' },
+                         { ref: 'goals', type: 'goal', icon: 'fa-bullseye', iconBg: 'bg-red-500', appName: 'Goal Tracker', appUrl: 'Apps/goal-tracker.html' }
+                     ];
+                     
+                     for (const source of dataSources) {
+                         try {
+                             const ref = db.ref(source.ref);
+                             const snapshot = await ref.once('value');
+                             
+                             snapshot.forEach((childSnapshot) => {
+                                 const item = childSnapshot.val();
+                                 const timestamp = item.createdAt || item.timestamp || item.date;
+                                 
+                                 if (timestamp && new Date(timestamp) > oneWeekAgo) {
+                                     let title, description;
+                                     
+                                     switch (source.type) {
+                                         case 'task':
+                                             title = item.title;
+                                             description = `Task ${item.status}`;
+                                             break;
+                                         case 'workout':
+                                             title = `Workout: ${item.exercises?.length || 0} exercises`;
+                                             description = item.duration || 'Duration not specified';
+                                             break;
+                                         case 'meal':
+                                             title = `Meal: ${item.name}`;
+                                             description = `${item.calories || 0} calories`;
+                                             break;
+                                         case 'note':
+                                             title = item.title || 'Untitled Note';
+                                             description = item.content?.substring(0, 50) + '...';
+                                             break;
+                                         case 'goal':
+                                             title = item.title;
+                                             description = `${item.progress || 0}% complete`;
+                                             break;
+                                     }
+                                     
+                                     activities.push({
+                                         ...source,
+                                         title,
+                                         description,
+                                         timestamp
+                                     });
+                                 }
+                             });
+                         } catch (error) {
+                             console.error(`Error collecting data from ${source.ref}:`, error);
+                         }
+                     }
+                     
+                 } catch (error) {
+                     console.error('Error collecting recent activity:', error);
+                 }
+                 
+                 return activities;
+             }
+
+             formatTimeAgo(timestamp) {
+                 const now = new Date();
+                 const time = new Date(timestamp);
+                 const diffInMinutes = Math.floor((now - time) / (1000 * 60));
+                 
+                 if (diffInMinutes < 1) return 'Just now';
+                 if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
+                 if (diffInMinutes < 1440) return `${Math.floor(diffInMinutes / 60)}h ago`;
+                 return `${Math.floor(diffInMinutes / 1440)}d ago`;
+             }
+
+             showCustomizeModal() {
+                 this.showToast('Customization features coming soon!', 'info');
+             }
+
+             showToast(message, type = 'info') {
+                 // Create and show a toast notification
+                 const toast = document.createElement('div');
+                 toast.className = `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${
+                     type === 'success' ? 'bg-green-500' :
+                     type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+                 }`;
+                 toast.textContent = message;
+                 
+                 document.body.appendChild(toast);
+                 
+                 setTimeout(() => {
+                     toast.remove();
+                 }, 3000);
+             }
+         }
+
+        // Initialize the dashboard when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Show loading state
+            const loadingOverlay = document.createElement('div');
+            loadingOverlay.id = 'loadingOverlay';
+            loadingOverlay.className = 'fixed inset-0 bg-gradient-to-br from-blue-600 to-purple-700 flex items-center justify-center z-50';
+            loadingOverlay.innerHTML = `
+                <div class="text-center text-white">
+                    <div class="w-16 h-16 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4"></div>
+                    <h2 class="text-2xl font-bold mb-2">LifeOS</h2>
+                    <p class="text-white/80">Initializing your life management system...</p>
+                </div>
+            `;
+            document.body.appendChild(loadingOverlay);
+            
+            // Initialize dashboard
+            const dashboard = new LifeOSDashboard();
+            
+            // Hide loading after a short delay
+            setTimeout(() => {
+                loadingOverlay.style.opacity = '0';
+                loadingOverlay.style.transition = 'opacity 0.5s ease-out';
+                setTimeout(() => {
+                    loadingOverlay.remove();
+                }, 500);
+            }, 1500);
+        });
+    </script>
+</body>
+</html>

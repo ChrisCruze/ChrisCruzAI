@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Airtable Bookmarks</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/timeago.js@4.0.2/dist/timeago.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        .modal-backdrop { transition: opacity 0.3s ease; }
+
+        /* Make modal content scrollable on mobile */
+        .modal-body {
+            max-height: 75vh;
+            overflow-y: auto;
+            padding-right: 1rem; /* for scrollbar */
+        }
+
+        /* View toggle button styles */
+        .view-btn { padding: 0.5rem; border-radius: 0.375rem; transition: background-color 0.2s, color 0.2s; font-weight: 500; }
+        .view-btn.active { background-color: white; color: #1f2937; box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); }
+        .view-btn:not(.active) { background-color: transparent; color: #4b5563; }
+        
+        /* Table sort indicator styles */
+        .sortable-header { cursor: pointer; user-select: none; }
+        .sortable-header:hover { background-color: #f9fafb; }
+        .sort-indicator { display: inline-block; margin-left: 0.5rem; color: #9ca3af; transition: opacity 0.2s; opacity: 0; }
+        .sortable-header.sorted .sort-indicator { opacity: 1; color: #3b82f6; }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Main Container -->
+    <div class="container mx-auto p-4 md:p-6">
+
+        <!-- Controls -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+            <div class="relative w-full md:w-auto lg:w-1/3">
+                <input type="text" id="searchInput" placeholder="Search bookmarks..." class="w-full p-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition">
+                <svg class="w-5 h-5 text-gray-400 absolute top-3.5 left-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+                <select id="sortSelect" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition w-full sm:w-auto">
+                    <option value="last_modified_desc">Sort: Modified (Newest)</option>
+                    <option value="last_modified_asc">Sort: Modified (Oldest)</option>
+                    <option value="created_desc">Sort: Created (Newest)</option>
+                    <option value="created_asc">Sort: Created (Oldest)</option>
+                    <option value="name_asc">Sort: Name (A-Z)</option>
+                    <option value="name_desc">Sort: Name (Z-A)</option>
+                    <option value="clicks_desc">Sort: Clicks (Most)</option>
+                    <option value="clicks_asc">Sort: Clicks (Least)</option>
+                </select>
+                <select id="categoryFilter" class="p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition w-full sm:w-auto">
+                    <option value="all">All Categories</option>
+                </select>
+                <div id="viewToggle" class="flex items-center rounded-lg bg-gray-200 p-1 w-full sm:w-auto justify-center">
+                    <button data-view="grid" class="view-btn active w-1/2 sm:w-auto" title="Grid View"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg></button>
+                    <button data-view="table" class="view-btn w-1/2 sm:w-auto" title="Table View"><svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" /></svg></button>
+                </div>
+                <button id="addBookmarkBtn" class="bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition w-full sm:w-auto">Add Bookmark</button>
+            </div>
+        </div>
+        
+        <div id="loader" class="text-center py-10 hidden"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div><p class="mt-4 text-gray-600">Loading Bookmarks...</p></div>
+        <div id="errorMessage" class="text-center py-10 hidden bg-red-100 text-red-700 p-4 rounded-lg mb-6"><p id="errorText"></p></div>
+        <div id="noResults" class="text-center py-10 hidden"><p class="text-gray-500">No bookmarks found.</p></div>
+
+        <div id="bookmarksGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"></div>
+
+        <div id="bookmarksTableContainer" class="hidden overflow-x-auto bg-white rounded-lg shadow-md border border-gray-200">
+            <table class="w-full text-sm text-left text-gray-600">
+                <thead class="text-xs text-gray-700 uppercase bg-gray-100">
+                    <tr>
+                        <th scope="col" class="px-6 py-3 sortable-header" data-sort-field="Name">Name <span class="sort-indicator"></span></th>
+                        <th scope="col" class="px-6 py-3 sortable-header" data-sort-field="Category">Category <span class="sort-indicator"></span></th>
+                        <th scope="col" class="px-6 py-3 sortable-header" data-sort-field="Clicks">Clicks <span class="sort-indicator"></span></th>
+                        <th scope="col" class="px-6 py-3 sortable-header sorted" data-sort-field="Last Modified">Modified <span class="sort-indicator">▼</span></th>
+                        <th scope="col" class="px-6 py-3 sortable-header" data-sort-field="Created">Created <span class="sort-indicator"></span></th>
+                        <th scope="col" class="px-6 py-3"><span class="sr-only">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody id="bookmarksTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="bookmarkModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl flex flex-col">
+            <div class="p-6 border-b">
+                <div class="flex justify-between items-center">
+                    <h2 id="modalTitle" class="text-2xl font-bold">Add New Bookmark</h2>
+                    <button id="closeModalBtn" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+                </div>
+                <div id="modalLinksContainer" class="mt-2 space-x-4 text-sm"></div>
+            </div>
+            <div class="modal-body p-6">
+                <form id="bookmarkForm">
+                    <input type="hidden" id="recordId" name="recordId">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label for="name" class="block text-sm font-medium text-gray-700 mb-1">Name</label><input type="text" id="name" name="name" class="w-full p-2 border border-gray-300 rounded-lg" required></div>
+                        <div><label for="url" class="block text-sm font-medium text-gray-700 mb-1">URL</label><input type="url" id="url" name="url" class="w-full p-2 border border-gray-300 rounded-lg" required></div>
+                        <div><label for="editor_url" class="block text-sm font-medium text-gray-700 mb-1">Editor URL</label><input type="url" id="editor_url" name="editor_url" class="w-full p-2 border border-gray-300 rounded-lg"></div>
+                        <div><label for="category" class="block text-sm font-medium text-gray-700 mb-1">Category</label><input type="text" id="category" name="category" class="w-full p-2 border border-gray-300 rounded-lg"></div>
+                        <div>
+                            <label for="favicon" class="block text-sm font-medium text-gray-700 mb-1">Favicon URL / Data URI</label>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="favicon" name="favicon" class="w-full p-2 border border-gray-300 rounded-lg">
+                                <button type="button" id="generateFaviconBtn" class="bg-gray-200 text-gray-700 font-semibold py-2 px-3 rounded-lg hover:bg-gray-300 transition text-sm" title="Generate AI Icon">Gen</button>
+                            </div>
+                        </div>
+                        <div><label for="color" class="block text-sm font-medium text-gray-700 mb-1">Color (hex)</label><input type="text" id="color" name="color" placeholder="#4299e1" class="w-full p-2 border border-gray-300 rounded-lg"></div>
+                    </div>
+                    <div class="mt-4"><label for="code" class="block text-sm font-medium text-gray-700 mb-1">Code (HTML)</label><textarea id="code" name="code" rows="4" class="w-full p-2 border border-gray-300 rounded-lg font-mono text-sm"></textarea></div>
+                    <div class="mt-4"><label for="documentation" class="block text-sm font-medium text-gray-700 mb-1">Documentation</label><textarea id="documentation" name="documentation" rows="4" class="w-full p-2 border border-gray-300 rounded-lg"></textarea></div>
+                    <div class="mt-4"><label for="notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label><textarea id="notes" name="notes" rows="3" class="w-full p-2 border border-gray-300 rounded-lg"></textarea></div>
+                </form>
+            </div>
+            <div class="p-6 bg-gray-50 border-t rounded-b-lg flex justify-between items-center">
+                <button type="button" id="modalDeleteBtn" class="hidden bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition">Delete</button>
+                <div class="flex justify-end gap-4 flex-grow">
+                    <button type="button" id="cancelBtn" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition">Cancel</button>
+                    <button type="submit" form="bookmarkForm" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition">Save Bookmark</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="deleteConfirmModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center p-4 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-sm p-6"><h3 class="text-lg font-bold text-gray-900">Confirm Deletion</h3><p class="text-sm text-gray-600 mt-2">Are you sure? This action cannot be undone.</p><div class="mt-6 flex justify-end gap-4"><button id="cancelDeleteBtn" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition">Cancel</button><button id="confirmDeleteBtn" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700 transition">Delete</button></div></div></div>
+    <div id="renderModal" class="fixed inset-0 bg-black bg-opacity-70 modal-backdrop flex items-center justify-center p-4 hidden"><div class="bg-white rounded-lg shadow-xl w-full max-w-6xl h-[90vh] flex flex-col p-6 relative"><div class="flex justify-between items-center mb-4 border-b pb-3"><h2 id="renderModalTitle" class="text-2xl font-bold text-gray-800 truncate pr-10">Rendered HTML</h2><button id="closeRenderModalBtn" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600"><svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div><iframe id="renderFrame" class="w-full flex-grow border border-gray-300 rounded-lg" sandbox></iframe></div></div>
+    
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-50 modal-backdrop flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl h-[70vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center"><h2 class="text-xl font-bold">Settings</h2><button id="closeSettingsModalBtn" class="text-gray-400 hover:text-gray-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button></div>
+            <div class="flex-grow p-6 overflow-y-auto prose max-w-none">
+                <h3>Readme</h3><p>This is a simple bookmark manager that connects to an Airtable base to store and retrieve data.</p>
+                <h3>Changelog</h3><h4>v082725</h4><ul><li>Added AI Favicon Generation</li><li>Added Settings modal with Readme and Changelog</li><li>Added Color, Favicon, and Documentation fields</li><li>Made cards more compact and mobile-friendly</li></ul><h4>v072625</h4><ul><li>Initial release</li></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer and Settings Button -->
+    <footer class="text-center p-4 text-sm text-gray-400 relative">
+        <p>version 082725</p>
+        <p class="mt-1"><a href="https://airtable.com/appbcMtddj6Rfwo5D/tbledMqb8WJV9145L/viwGcWGn2QGpgT0RO?blocks=hide" target="_blank" class="hover:text-blue-500 transition">View Airtable Base</a></p>
+        <button id="settingsBtn" class="absolute bottom-4 right-4 text-gray-400 hover:text-gray-600 p-2 rounded-full hover:bg-gray-200 transition" title="Settings">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </button>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Configuration ---
+            const API_KEY = "patdMoOPya9xAXGLG.3a26ab9163b441fa24a5e1edc3d775c4608e447dd7c0ffa50d6de697d121c022";
+            const BASE_ID = "appbcMtddj6Rfwo5D";
+            const TABLE_NAME = "tbledMqb8WJV9145L";
+            const API_URL = `https://api.airtable.com/v0/${BASE_ID}/${TABLE_NAME}`;
+            const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent`;
+            
+            // --- State ---
+            let allBookmarks = [];
+            let recordToDeleteId = null;
+            let currentView = 'grid';
+            let currentSort = { field: 'Last Modified', direction: 'desc' };
+
+            // --- DOM Elements ---
+            const loader = document.getElementById('loader');
+            const errorMessage = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            const noResults = document.getElementById('noResults');
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const sortSelect = document.getElementById('sortSelect');
+            const bookmarksGrid = document.getElementById('bookmarksGrid');
+            const bookmarksTableContainer = document.getElementById('bookmarksTableContainer');
+            const bookmarksTableBody = document.getElementById('bookmarksTableBody');
+            const viewToggle = document.getElementById('viewToggle');
+            
+            // Modals
+            const modal = document.getElementById('bookmarkModal');
+            const addBookmarkBtn = document.getElementById('addBookmarkBtn');
+            const closeModalBtn = document.getElementById('closeModalBtn');
+            const cancelBtn = document.getElementById('cancelBtn');
+            const bookmarkForm = document.getElementById('bookmarkForm');
+            const modalTitle = document.getElementById('modalTitle');
+            const recordIdInput = document.getElementById('recordId');
+            const modalDeleteBtn = document.getElementById('modalDeleteBtn');
+            const modalLinksContainer = document.getElementById('modalLinksContainer');
+            const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+            const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+            const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+            const renderModal = document.getElementById('renderModal');
+            const closeRenderModalBtn = document.getElementById('closeRenderModalBtn');
+            const renderFrame = document.getElementById('renderFrame');
+            const settingsBtn = document.getElementById('settingsBtn');
+            const settingsModal = document.getElementById('settingsModal');
+            const closeSettingsModalBtn = document.getElementById('closeSettingsModalBtn');
+            const generateFaviconBtn = document.getElementById('generateFaviconBtn');
+
+            // --- API Functions ---
+            const fetchWithRetry = async (url, options, retries = 3, delay = 1000) => {
+                for (let i = 0; i < retries; i++) {
+                    try {
+                        const response = await fetch(url, options);
+                        if (!response.ok) {
+                            const errorData = await response.json().catch(() => ({}));
+                            throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    } catch (error) {
+                        if (i === retries - 1) throw error;
+                        await new Promise(res => setTimeout(res, delay * Math.pow(2, i)));
+                    }
+                }
+            };
+
+            const fetchBookmarks = async () => {
+                showLoader(true); showError(false);
+                try {
+                    const data = await fetchWithRetry(`${API_URL}?view=Grid%20view`, { headers: { 'Authorization': `Bearer ${API_KEY}` } });
+                    allBookmarks = data.records;
+                    renderContent();
+                    populateCategoryFilter();
+                } catch (error) {
+                    console.error('Error fetching bookmarks:', error);
+                    showError(true, `Failed to load bookmarks. ${error.message}`);
+                } finally {
+                    showLoader(false);
+                }
+            };
+
+            const createOrUpdateBookmark = async (recordId, fields) => {
+                const url = recordId ? `${API_URL}/${recordId}` : API_URL;
+                const method = recordId ? 'PATCH' : 'POST';
+                try {
+                    await fetchWithRetry(url, { method, headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ fields }) });
+                    await fetchBookmarks();
+                    closeModal();
+                } catch (error) {
+                    console.error(`Error ${recordId ? 'updating' : 'creating'} bookmark:`, error);
+                    showError(true, `Error: Could not save the bookmark. ${error.message}`);
+                    closeModal();
+                }
+            };
+
+            const deleteBookmark = async (recordId) => {
+                if (!recordId) return;
+                try {
+                    await fetchWithRetry(`${API_URL}/${recordId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${API_KEY}` } });
+                    await fetchBookmarks();
+                } catch (error) {
+                    console.error('Error deleting bookmark:', error);
+                    showError(true, `Error: Could not delete the bookmark. ${error.message}`);
+                } finally {
+                    closeDeleteModal();
+                }
+            };
+
+            const handleBookmarkClick = async (recordId, currentClicks) => {
+                const newClicks = (currentClicks || 0) + 1;
+                const lastClickedDate = new Date().toISOString();
+                const bookmark = allBookmarks.find(b => b.id === recordId);
+                if (bookmark) {
+                    bookmark.fields.Clicks = newClicks;
+                    bookmark.fields['Last Clicked'] = lastClickedDate;
+                    renderContent(); // Optimistic update
+                }
+                try {
+                    await fetch(`${API_URL}/${recordId}`, { method: 'PATCH', headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ fields: { "Clicks": newClicks, "Last Clicked": lastClickedDate } }) });
+                } catch (error) {
+                    console.error('Error updating click data:', error); // Silently fail, UI is already updated
+                }
+            };
+
+            // --- UI & Rendering ---
+            const showLoader = (visible) => { loader.style.display = visible ? 'block' : 'none'; };
+            const showError = (visible, message = '') => { errorMessage.style.display = visible ? 'block' : 'none'; errorText.textContent = message; };
+
+            const renderContent = () => {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedCategory = categoryFilter.value;
+                const filtered = allBookmarks.filter(r => (r.fields.Name?.toLowerCase().includes(searchTerm) ?? false) && (selectedCategory === 'all' || r.fields.Category === selectedCategory));
+                sortBookmarks(filtered);
+                noResults.style.display = filtered.length === 0 ? 'block' : 'none';
+                if (currentView === 'grid') {
+                    renderGridView(filtered);
+                } else {
+                    renderTableView(filtered);
+                }
+                updateTableSortIndicators();
+            };
+
+            const renderGridView = (bookmarks) => {
+                bookmarksGrid.innerHTML = '';
+                bookmarks.forEach(record => bookmarksGrid.appendChild(createBookmarkCard(record)));
+            };
+
+            const renderTableView = (bookmarks) => {
+                bookmarksTableBody.innerHTML = '';
+                bookmarks.forEach(record => bookmarksTableBody.appendChild(createBookmarkTableRow(record)));
+            };
+
+            const createBookmarkCard = (record) => {
+                const { id, fields } = record;
+                const card = document.createElement('div');
+                card.className = 'bg-white p-3 rounded-lg shadow-md border-l-4 flex flex-col justify-between transition-transform transform hover:-translate-y-1';
+                card.style.borderColor = fields.Color || 'transparent';
+
+                const modifiedTimeAgo = fields['Last Clicked'] ? timeago.format(new Date(fields['Last Clicked'])) : 'Never';
+                const faviconUrl = fields.Favicon || `https://www.google.com/s2/favicons?domain=${fields.URL}&sz=32`;
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                             <img src="${faviconUrl}" alt="Favicon" class="w-6 h-6 rounded-md object-contain mr-2" onerror="this.style.display='none'">
+                            <button class="edit-btn p-1 text-gray-400 hover:text-blue-600 rounded-full" data-id="${id}" title="Edit"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg></button>
+                        </div>
+                        <h3 class="text-base font-bold text-gray-800 leading-tight mb-2 min-h-[40px]">
+                            <a href="${fields.URL}" target="_blank" class="hover:text-blue-600" data-record-id="${id}" data-clicks="${fields.Clicks || 0}" title="${fields.Name}">${fields.Name}</a>
+                        </h3>
+                        <span class="text-xs font-semibold inline-block py-0.5 px-2 rounded-full bg-gray-100 text-gray-700">${fields.Category || 'Uncategorized'}</span>
+                    </div>
+                    <div class="mt-3 pt-2 border-t border-gray-100 text-xs text-gray-500 flex justify-between items-center">
+                        <span class="flex items-center gap-1" title="Clicks"><svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>${fields.Clicks || 0}</span>
+                        ${fields.Code ? `<button class="render-btn text-xs font-semibold bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full hover:bg-gray-300">Render</button>` : ''}
+                        <span class="font-medium" title="Modified">${modifiedTimeAgo}</span>
+                    </div>`;
+
+                card.querySelector('.edit-btn').addEventListener('click', () => handleEdit(id));
+                card.querySelector('a').addEventListener('click', (e) => handleBookmarkClick(e.currentTarget.dataset.recordId, parseInt(e.currentTarget.dataset.clicks, 10)));
+                const renderBtn = card.querySelector('.render-btn');
+                if (renderBtn) renderBtn.addEventListener('click', () => openRenderModal(fields.Code, fields.Name));
+                return card;
+            };
+            
+            const createBookmarkTableRow = (record) => {
+                const { id, fields, createdTime } = record;
+                const row = document.createElement('tr');
+                row.className = 'bg-white border-b hover:bg-gray-50';
+
+                const modifiedDate = fields['Last Clicked'] ? new Date(fields['Last Clicked']) : null;
+                const createdDate = new Date(createdTime);
+                const modifiedTimeAgo = modifiedDate ? timeago.format(modifiedDate) : 'Never';
+                const createdTimeAgo = timeago.format(createdDate);
+
+                row.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"><a href="${fields.URL}" target="_blank" class="hover:text-blue-600" data-record-id="${id}" data-clicks="${fields.Clicks || 0}">${fields.Name}</a></td>
+                    <td class="px-6 py-4">${fields.Category || ''}</td>
+                    <td class="px-6 py-4">${fields.Clicks || 0}</td>
+                    <td class="px-6 py-4" title="${modifiedDate ? modifiedDate.toLocaleString() : ''}">${modifiedTimeAgo}</td>
+                    <td class="px-6 py-4" title="${createdDate.toLocaleString()}">${createdTimeAgo}</td>
+                    <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                        <button class="edit-btn font-medium text-blue-600 hover:underline p-1" data-id="${id}">Edit</button>
+                    </td>
+                `;
+                row.querySelector('.edit-btn').addEventListener('click', () => handleEdit(id));
+                row.querySelector('a').addEventListener('click', (e) => handleBookmarkClick(e.currentTarget.dataset.recordId, parseInt(e.currentTarget.dataset.clicks, 10)));
+                return row;
+            };
+
+            const sortBookmarks = (bookmarks) => {
+                const { field, direction } = currentSort;
+                bookmarks.sort((a, b) => {
+                    let valA, valB;
+                    if (field === 'Created') valA = a.createdTime, valB = b.createdTime;
+                    else if (field === 'Last Modified') valA = a.fields['Last Clicked'], valB = b.fields['Last Clicked'];
+                    else valA = a.fields[field], valB = b.fields[field];
+                    
+                    if (valA === undefined || valA === null) valA = direction === 'asc' ? 'zzzzzzzz' : '';
+                    if (valB === undefined || valB === null) valB = direction === 'asc' ? 'zzzzzzzz' : '';
+                    if (field === 'Clicks' && valA === '') valA = -1;
+                    if (field === 'Clicks' && valB === '') valB = -1;
+
+                    let comparison = 0;
+                    if (valA > valB) comparison = 1;
+                    else if (valA < valB) comparison = -1;
+                    
+                    return direction === 'asc' ? comparison : -comparison;
+                });
+            };
+
+            const populateCategoryFilter = () => {
+                const categories = [...new Set(allBookmarks.map(r => r.fields.Category).filter(Boolean))];
+                categoryFilter.innerHTML = '<option value="all">All Categories</option>';
+                categories.sort().forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat;
+                    option.textContent = cat;
+                    categoryFilter.appendChild(option);
+                });
+            };
+
+            // --- Modal Handling ---
+            const openModal = (record = null) => {
+                bookmarkForm.reset();
+                modalTitle.textContent = record ? 'Edit Bookmark' : 'Add New Bookmark';
+                recordIdInput.value = record ? record.id : '';
+                modalLinksContainer.innerHTML = '';
+                modalDeleteBtn.classList.toggle('hidden', !record);
+                if (record) {
+                    const fields = record.fields;
+                    document.getElementById('name').value = fields.Name || '';
+                    document.getElementById('url').value = fields.URL || '';
+                    document.getElementById('editor_url').value = fields['Editor URL'] || '';
+                    document.getElementById('category').value = fields.Category || '';
+                    document.getElementById('code').value = fields.Code || '';
+                    document.getElementById('notes').value = fields.Notes || '';
+                    document.getElementById('favicon').value = fields.Favicon || '';
+                    document.getElementById('documentation').value = fields.Documentation || '';
+                    document.getElementById('color').value = fields.Color || '';
+                    if (fields['Editor URL']) modalLinksContainer.innerHTML += `<a href="${fields['Editor URL']}" target="_blank" class="font-medium text-green-600 hover:underline">Edit Content</a>`;
+                    if (fields['Record URL']) modalLinksContainer.innerHTML += `<a href="${fields['Record URL']}" target="_blank" class="font-medium text-purple-600 hover:underline">View Airtable Record</a>`;
+                }
+                modal.classList.remove('hidden');
+            };
+            const closeModal = () => modal.classList.add('hidden');
+            const openDeleteModal = (recordId) => { recordToDeleteId = recordId; deleteConfirmModal.classList.remove('hidden'); };
+            const closeDeleteModal = () => { recordToDeleteId = null; deleteConfirmModal.classList.add('hidden'); };
+            const openRenderModal = (htmlCode, title) => { document.getElementById('renderModalTitle').textContent = title; renderFrame.srcdoc = htmlCode; renderModal.classList.remove('hidden'); };
+            const closeRenderModal = () => { renderModal.classList.add('hidden'); renderFrame.srcdoc = ''; };
+            const openSettingsModal = () => settingsModal.classList.remove('hidden');
+            const closeSettingsModal = () => settingsModal.classList.add('hidden');
+
+            // --- Event Handlers ---
+            const handleEdit = (recordId) => openModal(allBookmarks.find(r => r.id === recordId));
+            
+            const handleFormSubmit = (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                const recordId = formData.get('recordId');
+                const fields = { 
+                    "Name": formData.get('name'), "URL": formData.get('url'), "Category": formData.get('category'), 
+                    "Notes": formData.get('notes'), "Editor URL": formData.get('editor_url'), "Code": formData.get('code'), 
+                    "Favicon": formData.get('favicon'), "Documentation": formData.get('documentation'), "Color": formData.get('color')
+                };
+                createOrUpdateBookmark(recordId, fields);
+            };
+
+            const handleViewToggle = (e) => {
+                const button = e.target.closest('.view-btn');
+                if (!button || button.classList.contains('active')) return;
+                currentView = button.dataset.view;
+                document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                bookmarksGrid.classList.toggle('hidden', currentView !== 'grid');
+                bookmarksTableContainer.classList.toggle('hidden', currentView !== 'table');
+                renderContent();
+            };
+
+            const handleSortChange = (e) => {
+                const [fieldKey, direction] = e.target.value.split('_');
+                const fieldMap = { name: 'Name', clicks: 'Clicks', last_modified: 'Last Modified', created: 'Created' };
+                currentSort = { field: fieldMap[fieldKey], direction };
+                renderContent();
+            };
+
+            const handleTableHeaderClick = (e) => {
+                const header = e.target.closest('.sortable-header');
+                if (!header) return;
+                const field = header.dataset.sortField;
+                if (currentSort.field === field) {
+                    currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+                } else {
+                    currentSort.field = field;
+                    currentSort.direction = 'desc';
+                }
+                renderContent();
+            };
+
+            const updateTableSortIndicators = () => {
+                document.querySelectorAll('.sortable-header').forEach(header => {
+                    const field = header.dataset.sortField;
+                    const indicator = header.querySelector('.sort-indicator');
+                    if (!indicator) return;
+                    if (currentSort.field === field) {
+                        header.classList.add('sorted');
+                        indicator.textContent = currentSort.direction === 'asc' ? '▲' : '▼';
+                    } else {
+                        header.classList.remove('sorted');
+                        indicator.textContent = '';
+                    }
+                });
+            };
+            
+            const handleGenerateFavicon = async () => {
+                const name = document.getElementById('name').value;
+                const category = document.getElementById('category').value;
+                if (!name) { alert('Please enter a name for the bookmark first.'); return; }
+                
+                const originalBtnText = generateFaviconBtn.textContent;
+                generateFaviconBtn.textContent = '...';
+                generateFaviconBtn.disabled = true;
+
+                const systemPrompt = "You are an SVG icon designer. Generate a simple, modern, single-color SVG icon. The SVG should be a single path, have a viewBox of '0 0 24 24', have no width or height attributes, and use fill='currentColor'. The output should be ONLY the <svg>...</svg> code, with no other text or markdown.";
+                const userQuery = `Create an icon for a bookmark named "${name}" in the category "${category}".`;
+
+                try {
+                    const payload = { contents: [{ parts: [{ text: userQuery }] }], systemInstruction: { parts: [{ text: systemPrompt }] } };
+                    const response = await fetch(GEMINI_API_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    if (!response.ok) throw new Error('AI service failed to respond.');
+                    const result = await response.json();
+                    let svgText = result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+                    svgText = svgText.replace(/```svg|```/g, '').trim();
+                    if (svgText.startsWith('<svg')) {
+                        const dataUri = `data:image/svg+xml,${encodeURIComponent(svgText)}`;
+                        document.getElementById('favicon').value = dataUri;
+                    } else { throw new Error('Invalid SVG format received from AI.'); }
+                } catch (error) {
+                    console.error('Error generating favicon:', error);
+                    alert(`Failed to generate icon: ${error.message}`);
+                } finally {
+                    generateFaviconBtn.textContent = originalBtnText;
+                    generateFaviconBtn.disabled = false;
+                }
+            };
+            
+            // --- Event Listeners ---
+            addBookmarkBtn.addEventListener('click', () => openModal());
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            modalDeleteBtn.addEventListener('click', () => { closeModal(); openDeleteModal(recordIdInput.value); });
+            bookmarkForm.addEventListener('submit', handleFormSubmit);
+            cancelDeleteBtn.addEventListener('click', closeDeleteModal);
+            confirmDeleteBtn.addEventListener('click', () => deleteBookmark(recordToDeleteId));
+            closeRenderModalBtn.addEventListener('click', closeRenderModal);
+            searchInput.addEventListener('input', renderContent);
+            categoryFilter.addEventListener('change', renderContent);
+            sortSelect.addEventListener('change', handleSortChange);
+            viewToggle.addEventListener('click', handleViewToggle);
+            document.querySelector('#bookmarksTableContainer thead').addEventListener('click', handleTableHeaderClick);
+            settingsBtn.addEventListener('click', openSettingsModal);
+            closeSettingsModalBtn.addEventListener('click', closeSettingsModal);
+            generateFaviconBtn.addEventListener('click', handleGenerateFavicon);
+            window.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeModal(); closeDeleteModal(); closeRenderModal(); closeSettingsModal(); } });
+
+            fetchBookmarks();
+        });
+    </script>
+</body>
+</html>

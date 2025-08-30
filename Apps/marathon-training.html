@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NYC Marathon Training Checklist</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .progress-bar-container {
+            background-color: #e0e7ff;
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            background-color: #06D6A0; /* A vibrant sea green */
+            transition: width 0.5s ease-in-out;
+        }
+        .week-accordion details {
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .week-accordion summary {
+            padding: 1rem;
+            cursor: pointer;
+            outline: none;
+            transition: background-color 0.2s;
+        }
+        .week-accordion summary:hover {
+            background-color: #f9fafb;
+        }
+        .week-accordion summary::-webkit-details-marker {
+            display: none;
+        }
+        .week-accordion summary::after {
+            content: '▼';
+            float: right;
+            transform: rotate(0deg);
+            transition: transform 0.2s;
+        }
+        .week-accordion details[open] summary::after {
+            transform: rotate(180deg);
+        }
+        .current-week {
+            border: 2px solid #118AB2; /* A deep cerulean blue */
+            border-radius: 0.5rem;
+            box-shadow: 0 0 15px rgba(17, 138, 178, 0.3);
+        }
+        .task-item input[type="checkbox"] {
+            width: 1.25rem;
+            height: 1.25rem;
+            accent-color: #118AB2;
+            flex-shrink: 0;
+        }
+        .task-item .editable-text {
+            outline: none;
+            transition: color 0.2s;
+        }
+        .task-item .editable-text:focus {
+            box-shadow: 0 0 0 2px #118ab260;
+            border-radius: 4px;
+            background-color: #fefce8;
+        }
+        .task-item input:checked + .editable-text {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+        .edit-icon {
+            opacity: 0;
+            transition: opacity 0.2s;
+            color: #9ca3af;
+            font-style: normal;
+        }
+        .task-item:hover .edit-icon {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-[#073B4C]">
+
+    <header class="bg-[#073B4C] text-white text-center py-8 px-4">
+        <h1 class="text-3xl md:text-5xl font-black uppercase tracking-wider">Marathon Checklist</h1>
+        <div class="mt-2 text-lg text-gray-300">
+            <p>Sunday, November 2, 2025 • 8:00 AM • New York, NY</p>
+        </div>
+        <div id="countdown" class="mt-4 text-2xl font-bold tracking-wider"></div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+            <h2 class="text-2xl font-bold mb-4">Overall Progress</h2>
+            <div class="progress-bar-container w-full h-8">
+                <div id="progress-bar" class="progress-bar h-full flex items-center justify-center text-white font-bold">0%</div>
+            </div>
+        </div>
+
+        <div id="checklist-container" class="bg-white rounded-xl shadow-lg week-accordion">
+            <!-- Checklist will be generated here -->
+            <p class="text-center p-8 text-gray-500">Generating your training plan...</p>
+        </div>
+    </main>
+
+    <footer class="text-center py-6 mt-8 text-gray-500">
+        <p>Trust the process. You've got this.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        const firebaseConfig = {
+          apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+          authDomain: "chriscruz-d62ea.firebaseapp.com",
+          databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+          projectId: "chriscruz-d62ea",
+          storageBucket: "chriscruz-d62ea.firebasestorage.app",
+          messagingSenderId: "817856028090",
+          appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+          measurementId: "G-LVHF0VP8RM"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const marathonDate = new Date('2025-11-02T08:00:00');
+
+        const fullTrainingPlan = [
+            { week: 1, title: "Foundation & Gear", tasks: [
+                { id: 'w1d1', day: 'Mon', text: 'Rest' }, { id: 'w1d2', day: 'Tue', text: '3 mi Easy' }, { id: 'w1d3', day: 'Wed', text: '4 mi Easy w/ Strides' }, { id: 'w1d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w1d5', day: 'Fri', text: 'Rest' }, { id: 'w1d6', day: 'Sat', text: '3 mi Easy' }, { id: 'w1d7', day: 'Sun', text: '6 mi Long Run' },
+                { id: 'w1t1', day: 'Goal', text: 'Get professionally fitted for running shoes at a specialty store.' }, { id: 'w1t2', day: 'Goal', text: 'Buy moisture-wicking socks and technical running apparel.' }
+            ]},
+            { week: 2, title: "Building Consistency", tasks: [
+                { id: 'w2d1', day: 'Mon', text: 'Rest' }, { id: 'w2d2', day: 'Tue', text: '3 mi Easy' }, { id: 'w2d3', day: 'Wed', text: '4 mi Hilly Run' }, { id: 'w2d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w2d5', day: 'Fri', text: 'Rest' }, { id: 'w2d6', day: 'Sat', text: '4 mi Easy' }, { id: 'w2d7', day: 'Sun', text: '7 mi Long Run' },
+                { id: 'w2t1', day: 'Goal', text: 'Research NYC running groups (NYRR, Dashing Whippets, etc.).' }
+            ]},
+            { week: 3, title: "Increasing Endurance", tasks: [
+                { id: 'w3d1', day: 'Mon', text: 'Rest' }, { id: 'w3d2', day: 'Tue', text: '3 mi Easy' }, { id: 'w3d3', day: 'Wed', text: '5 mi Easy w/ Strides' }, { id: 'w3d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w3d5', day: 'Fri', text: 'Rest' }, { id: 'w3d6', day: 'Sat', text: '4 mi Easy' }, { id: 'w3d7', day: 'Sun', text: '8 mi Long Run' },
+                { id: 'w3t1', day: 'Goal', text: 'Buy anti-chafe balm (e.g., BodyGlide) and test it.' }
+            ]},
+            { week: 4, title: "Stepback & Recovery", tasks: [
+                { id: 'w4d1', day: 'Mon', text: 'Rest' }, { id: 'w4d2', day: 'Tue', text: '2 mi Easy' }, { id: 'w4d3', day: 'Wed', text: '4 mi Easy' }, { id: 'w4d4', day: 'Thu', text: 'Rest' }, { id: 'w4d5', day: 'Fri', text: 'Rest' }, { id: 'w4d6', day: 'Sat', text: '3 mi Easy' }, { id: 'w4d7', day: 'Sun', text: '5 mi Long Run (Stepback)' },
+                { id: 'w4t1', day: 'Goal', text: 'Start testing nutrition (gels/chews) on your long run.' }
+            ]},
+            { week: 5, title: "Hitting Double Digits", tasks: [
+                { id: 'w5d1', day: 'Mon', text: 'Rest' }, { id: 'w5d2', day: 'Tue', text: '4 mi Easy' }, { id: 'w5d3', day: 'Wed', text: '5 mi Hilly Run' }, { id: 'w5d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w5d5', day: 'Fri', text: 'Rest' }, { id: 'w5d6', day: 'Sat', text: '5 mi Easy' }, { id: 'w5d7', day: 'Sun', text: '10 mi Long Run' },
+                { id: 'w5t1', day: 'Goal', text: 'Refine your long run fueling strategy. What works for you?' }
+            ]},
+            { week: 6, title: "Building Strength", tasks: [
+                { id: 'w6d1', day: 'Mon', text: 'Rest' }, { id: 'w6d2', day: 'Tue', text: '4 mi Easy' }, { id: 'w6d3', day: 'Wed', text: '6 mi Easy w/ Strides' }, { id: 'w6d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w6d5', day: 'Fri', text: 'Rest' }, { id: 'w6d6', day: 'Sat', text: '5 mi Easy' }, { id: 'w6d7', day: 'Sun', text: '11 mi Long Run' }
+            ]},
+            { week: 7, title: "Conquering Hills", tasks: [
+                { id: 'w7d1', day: 'Mon', text: 'Rest' }, { id: 'w7d2', day: 'Tue', text: '4 mi Easy' }, { id: 'w7d3', day: 'Wed', text: '6 mi Hilly Run' }, { id: 'w7d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w7d5', day: 'Fri', text: 'Rest' }, { id: 'w7d6', day: 'Sat', text: '5 mi Easy' }, { id: 'w7d7', day: 'Sun', text: '12 mi Long Run' }
+            ]},
+            { week: 8, title: "Mid-Plan Recovery", tasks: [
+                { id: 'w8d1', day: 'Mon', text: 'Rest' }, { id: 'w8d2', day: 'Tue', text: '3 mi Easy' }, { id: 'w8d3', day: 'Wed', text: '5 mi Easy' }, { id: 'w8d4', day: 'Thu', text: 'Rest' }, { id: 'w8d5', day: 'Fri', text: 'Rest' }, { id: 'w8d6', day: 'Sat', text: '4 mi Easy' }, { id: 'w8d7', day: 'Sun', text: '8 mi Long Run (Stepback)' },
+                { id: 'w8t1', day: 'Goal', text: 'Assess your shoes. Consider buying a second pair to rotate.' }
+            ]},
+            { week: 9, title: "Pushing the Distance", tasks: [
+                { id: 'w9d1', day: 'Mon', text: 'Rest' }, { id: 'w9d2', day: 'Tue', text: '5 mi Easy' }, { id: 'w9d3', day: 'Wed', text: '6 mi Easy w/ Strides' }, { id: 'w9d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w9d5', day: 'Fri', text: 'Rest' }, { id: 'w9d6', day: 'Sat', text: '5 mi Easy' }, { id: 'w9d7', day: 'Sun', text: '14 mi Long Run' }
+            ]},
+            { week: 10, title: "Hill Power", tasks: [
+                { id: 'w10d1', day: 'Mon', text: 'Rest' }, { id: 'w10d2', day: 'Tue', text: '5 mi Easy' }, { id: 'w10d3', day: 'Wed', text: '7 mi Hilly Run' }, { id: 'w10d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w10d5', day: 'Fri', text: 'Rest' }, { id: 'w10d6', day: 'Sat', text: '5 mi Easy' }, { id: 'w10d7', day: 'Sun', text: '15 mi Long Run' }
+            ]},
+            { week: 11, title: "Getting Serious", tasks: [
+                { id: 'w11d1', day: 'Mon', text: 'Rest' }, { id: 'w11d2', day: 'Tue', text: '5 mi Easy' }, { id: 'w11d3', day: 'Wed', text: '7 mi Easy w/ Strides' }, { id: 'w11d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w11d5', day: 'Fri', text: 'Rest' }, { id: 'w11d6', day: 'Sat', text: '5 mi Easy' }, { id: 'w11d7', day: 'Sun', text: '16 mi Long Run' }
+            ]},
+            { week: 12, title: "Final Stepback", tasks: [
+                { id: 'w12d1', day: 'Mon', text: 'Rest' }, { id: 'w12d2', day: 'Tue', text: '4 mi Easy' }, { id: 'w12d3', day: 'Wed', text: '6 mi Easy' }, { id: 'w12d4', day: 'Thu', text: 'Rest' }, { id: 'w12d5', day: 'Fri', text: 'Rest' }, { id: 'w12d6', day: 'Sat', text: '4 mi Easy' }, { id: 'w12d7', day: 'Sun', text: '10 mi Long Run (Stepback)' }
+            ]},
+            { week: 13, title: "Peak Week!", tasks: [
+                { id: 'w13d1', day: 'Mon', text: 'Rest' }, { id: 'w13d2', day: 'Tue', text: '5 mi Easy' }, { id: 'w13d3', day: 'Wed', text: '7 mi w/ 4 mi Marathon Pace' }, { id: 'w13d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w13d5', day: 'Fri', text: 'Rest' }, { id: 'w13d6', day: 'Sat', text: '5 mi Easy' }, { id: 'w13d7', day: 'Sun', text: '18 mi Long Run (Peak)' },
+                { id: 'w13t1', day: 'Goal', text: 'Full dress rehearsal: Wear your race day outfit on your long run.' }, { id: 'w13t2', day: 'Goal', text: 'Finalize and test your exact race day nutrition plan.' }
+            ]},
+            { week: 14, title: "The Taper Begins", tasks: [
+                { id: 'w14d1', day: 'Mon', text: 'Rest' }, { id: 'w14d2', day: 'Tue', text: '4 mi Easy' }, { id: 'w14d3', day: 'Wed', text: '6 mi Easy w/ Strides' }, { id: 'w14d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w14d5', day: 'Fri', text: 'Rest' }, { id: 'w14d6', day: 'Sat', text: '4 mi Easy' }, { id: 'w14d7', day: 'Sun', text: '12 mi Long Run (Taper)' },
+                { id: 'w14t1', day: 'Goal', text: 'Plan your race week logistics (expo visit, travel).' }
+            ]},
+            { week: 15, title: "Rest & Sharpen", tasks: [
+                { id: 'w15d1', day: 'Mon', text: 'Rest' }, { id: 'w15d2', day: 'Tue', text: '3 mi Easy' }, { id: 'w15d3', day: 'Wed', text: '5 mi Easy w/ 2 mi Marathon Pace' }, { id: 'w15d4', day: 'Thu', text: 'Rest or Cross-Train' }, { id: 'w15d5', day: 'Fri', text: 'Rest' }, { id: 'w15d6', day: 'Sat', text: '3 mi Easy' }, { id: 'w15d7', day: 'Sun', text: '8 mi Long Run (Taper)' },
+                { id: 'w15t1', day: 'Goal', text: 'Start carb-loading 2-3 days before the race.' }
+            ]},
+            { week: 16, title: "Race Week!", tasks: [
+                { id: 'w16d1', day: 'Mon', text: 'Rest' }, { id: 'w16d2', day: 'Tue', text: '2 mi Easy' }, { id: 'w16d3', day: 'Wed', text: 'Rest' }, { id: 'w16d4', day: 'Thu', text: 'Go to the Marathon Expo to pick up your bib.' }, { id: 'w16d5', day: 'Fri', text: 'Rest. Lay out your entire race day kit.' }, { id: 'w16d6', day: 'Sat', text: '2 mi Very Easy Shakeout Run' }, { id: 'w16d7', day: 'Sun', text: 'MARATHON DAY! Trust your training.' }
+            ]}
+        ];
+
+        let userId = localStorage.getItem('marathonChecklistUserId');
+        if (!userId) {
+            userId = crypto.randomUUID();
+            localStorage.setItem('marathonChecklistUserId', userId);
+        }
+        const checklistRef = ref(database, `checklists/${userId}`);
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const planStartDate = new Date(marathonDate);
+            planStartDate.setDate(planStartDate.getDate() - (16 * 7)); 
+            planStartDate.setHours(0,0,0,0);
+            
+            listenForData(planStartDate);
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        });
+
+        function updateCountdown() {
+            const now = new Date();
+            const distance = marathonDate - now;
+
+            const countdownEl = document.getElementById('countdown');
+            if (distance < 0) {
+                countdownEl.innerHTML = "Congratulations, Marathoner!";
+                return;
+            }
+
+            const totalDays = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const totalWeeks = Math.floor(totalDays / 7);
+            const remainingDaysInWeek = totalDays % 7;
+            
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+            countdownEl.innerHTML = `
+                <div class="flex justify-center items-baseline gap-x-3 sm:gap-x-4 md:gap-x-6">
+                     <div><span class="text-3xl md:text-4xl font-black">${totalWeeks}</span><span class="text-md md:text-lg ml-1 font-semibold">Weeks</span></div>
+                     <div><span class="text-3xl md:text-4xl font-black">${remainingDaysInWeek}</span><span class="text-md md:text-lg ml-1 font-semibold">Days</span></div>
+                     <div class="hidden md:block"><span class="text-3xl md:text-4xl font-black">${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}</span></div>
+                </div>
+            `;
+        }
+
+        function renderChecklist(planStartDate, customTexts = {}) {
+            const container = document.getElementById('checklist-container');
+            container.innerHTML = '';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            let currentWeekNumber = -1;
+            if (today >= planStartDate) {
+                const diffTime = today - planStartDate;
+                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+                currentWeekNumber = Math.floor(diffDays / 7) + 1;
+            }
+            
+            const dayMap = { 'Mon': 0, 'Tue': 1, 'Wed': 2, 'Thu': 3, 'Fri': 4, 'Sat': 5, 'Sun': 6 };
+
+            fullTrainingPlan.forEach(weekData => {
+                const isCurrentWeek = weekData.week === currentWeekNumber;
+                const details = document.createElement('details');
+                details.id = `week-${weekData.week}`;
+                if (isCurrentWeek) {
+                    details.open = true;
+                    details.classList.add('current-week');
+                }
+                
+                const weekStartDate = new Date(planStartDate);
+                weekStartDate.setDate(weekStartDate.getDate() + (weekData.week - 1) * 7);
+
+                const summary = document.createElement('summary');
+                summary.className = 'font-bold text-xl';
+                summary.innerHTML = `Week ${weekData.week}: <span class="font-normal text-lg">${weekData.title}</span> <span class="font-normal text-gray-500 text-base ml-2">(${weekStartDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})</span>`;
+                
+                const taskList = document.createElement('div');
+                taskList.className = 'p-4 space-y-3';
+                
+                weekData.tasks.forEach(task => {
+                    const taskEl = document.createElement('div');
+                    taskEl.className = 'flex items-start gap-3 task-item';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.id = task.id;
+                    checkbox.className = "mt-1";
+                    checkbox.addEventListener('change', handleCheckChange);
+
+                    const textSpan = document.createElement('span');
+                    textSpan.contentEditable = true;
+                    textSpan.dataset.taskId = task.id;
+                    textSpan.className = 'editable-text w-full';
+                    
+                    let taskDateText = '';
+                    if (task.day !== 'Goal') {
+                        const taskDate = new Date(weekStartDate);
+                        taskDate.setDate(taskDate.getDate() + dayMap[task.day]);
+                        taskDateText = ` <span class="text-gray-400 font-normal">(${taskDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})</span>`;
+                    }
+                    
+                    const defaultText = `${task.day}: ${task.text}`;
+                    const customText = customTexts[task.id];
+                    
+                    textSpan.innerHTML = (customText || defaultText) + taskDateText;
+                    if (task.day === 'Goal') {
+                        textSpan.classList.add('font-semibold', 'text-[#EF476F]');
+                    }
+                    
+                    textSpan.addEventListener('blur', handleTextChange);
+                    
+                    const editIcon = document.createElement('i');
+                    editIcon.className = 'edit-icon';
+                    editIcon.textContent = '✏️';
+
+                    taskEl.appendChild(checkbox);
+                    taskEl.appendChild(textSpan);
+                    taskEl.appendChild(editIcon);
+                    taskList.appendChild(taskEl);
+                });
+
+                details.appendChild(summary);
+                details.appendChild(taskList);
+                container.appendChild(details);
+            });
+
+            if (currentWeekNumber !== -1 && currentWeekNumber <= fullTrainingPlan.length) {
+                document.getElementById(`week-${currentWeekNumber}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        }
+        
+        function handleTextChange(e) {
+            const textSpan = e.target;
+            const taskId = textSpan.dataset.taskId;
+            const newText = textSpan.innerText.split(' (')[0]; // Save only the main text part
+            const textRef = ref(database, `checklists/${userId}/customTexts/${taskId}`);
+            set(textRef, newText);
+        }
+
+        function handleCheckChange(e) {
+            const taskId = e.target.id;
+            const isChecked = e.target.checked;
+            const taskRef = ref(database, `checklists/${userId}/checks/${taskId}`);
+            set(taskRef, isChecked);
+        }
+
+        function listenForData(planStartDate) {
+            onValue(checklistRef, (snapshot) => {
+                const data = snapshot.val() || {};
+                const customTexts = data.customTexts || {};
+                const checks = data.checks || {};
+                
+                // Initial render if checklist is not on the page yet
+                if (!document.getElementById('checklist-container').hasChildNodes() || document.querySelector('#checklist-container p')) {
+                    renderChecklist(planStartDate, customTexts);
+                }
+
+                let checkedCount = 0;
+                const totalTasks = fullTrainingPlan.reduce((acc, week) => acc + week.tasks.length, 0);
+
+                const allCheckboxes = document.querySelectorAll('input[type="checkbox"]');
+                allCheckboxes.forEach(checkbox => {
+                    const taskId = checkbox.id;
+                    const isCheckedInDb = checks[taskId] || false;
+                    if (checkbox.checked !== isCheckedInDb) {
+                        checkbox.checked = isCheckedInDb;
+                    }
+                    if(isCheckedInDb) {
+                        checkedCount++;
+                    }
+                });
+                
+                updateProgressBar(checkedCount, totalTasks);
+            }, { onlyOnce: false });
+        }
+
+        function updateProgressBar(checkedCount, totalTasks) {
+            const progressBar = document.getElementById('progress-bar');
+            if (totalTasks > 0) {
+                const percentage = Math.round((checkedCount / totalTasks) * 100);
+                progressBar.style.width = `${percentage}%`;
+                progressBar.textContent = `${percentage}%`;
+            }
+        }
+
+    </script>
+</body>
+</html>

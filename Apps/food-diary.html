@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Food Diary</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @keyframes fade-in-out {
+            0%, 100% { opacity: 0; transform: translateY(10px); }
+            10%, 90% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-out {
+            animation: fade-in-out 3s ease-in-out forwards;
+        }
+        /* Simple prose styles for modals */
+        .prose h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 1rem; }
+        .prose p, .prose ul, .prose li { margin-bottom: 1rem; }
+        .prose ul { list-style-position: inside; }
+        .prose li { margin-left: 1rem; }
+        .prose code { font-family: monospace; background-color: #f3f4f6; padding: 0.125rem 0.25rem; border-radius: 0.25rem; }
+        .prose pre { background-color: #f3f4f6; padding: 0.75rem; border-radius: 0.5rem; overflow-x: auto; }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans text-gray-800">
+
+    <div id="app" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-4xl">
+        
+        <header class="relative text-center mb-8">
+            <h1 class="text-4xl sm:text-5xl font-bold text-green-600">AI Food Diary</h1>
+            <p class="text-gray-600 mt-2">Log meals with natural language or add them manually.</p>
+            <button id="settings-button" class="absolute top-0 right-0 p-2 text-gray-500 hover:text-gray-800 hover:bg-gray-200 rounded-full transition-colors" aria-label="Settings" title="Settings">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-1.006 1.11-1.223l.12-.04c.542-.216 1.154-.106 1.61.258l.495.372a1.875 1.875 0 002.32.09l.4-.302c.542-.408 1.286-.32 1.77.214l.328.368c.44.492.495 1.22.122 1.786l-.372.496a1.875 1.875 0 00.09 2.32l.302.4c.408.542.32 1.286-.214 1.77l-.368.328c-.492.44-1.22.495-1.786.122l-.496-.372a1.875 1.875 0 00-2.32.09l-.4.302c-.542-.408-1.286.32-1.77-.214l-.328-.368c-.44-.492-.495-1.22-.122-1.786l.372-.496a1.875 1.875 0 00-.09-2.32l-.302-.4c-.408-.542-.32-1.286.214-1.77l.368-.328c.492-.44 1.22-.495 1.786-.122l.496.372a1.875 1.875 0 002.32-.09l.4-.302z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </button>
+        </header>
+
+        <div id="summary-section" class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+            <h2 class="text-lg font-medium text-gray-500 text-center mb-4">Today's Nutritional Summary</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                 <div class="text-center"><p id="total-calories" class="text-2xl font-bold text-green-500">0</p><p class="text-xs text-gray-500">Calories (kcal)</p></div>
+                 <div class="text-center"><p id="total-protein" class="text-2xl font-bold text-blue-500">0.0</p><p class="text-xs text-gray-500">Protein (g)</p></div>
+                 <div class="text-center"><p id="total-carbs" class="text-2xl font-bold text-orange-500">0.0</p><p class="text-xs text-gray-500">Carbs (g)</p></div>
+                 <div class="text-center"><p id="total-fats" class="text-2xl font-bold text-purple-500">0.0</p><p class="text-xs text-gray-500">Fats (g)</p></div>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+            <h3 class="font-bold text-xl mb-4 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6 text-purple-500"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 15l-.813.904L9.813 15.904zM8.25 7.5L9 6.69l.75.81L8.25 7.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M9 3.75c-1.59 0-2.94.84-3.75 2.1L3.75 6C3 6.9 3 7.5 3 7.5s0 .6.75.9L5.25 9C6.06 10.16 7.41 11 9 11s2.94-.84 3.75-2.1L14.25 9c.75-.3.75-.9.75-.9s0-.6-.75-.9L12.75 6C11.94 4.84 10.59 3.75 9 3.75zM9 12.75c-1.59 0-2.94-.84-3.75-2.1L3.75 9.75C3 10.65 3 11.25 3 11.25s0 .6.75.9L5.25 13.5c.81 1.26 2.16 2.1 3.75 2.1s2.94-.84 3.75-2.1l1.5-2.25c.75-.3.75-.9.75-.9s0-.6-.75-.9l-1.5-2.25c-.81-1.26-2.16-2.1-3.75-2.1z" /></svg>
+                Log with AI
+            </h3>
+            <form id="ai-form">
+                <textarea id="ai-input" placeholder="e.g., For breakfast I had two scrambled eggs, a slice of toast with butter, and a black coffee" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-shadow" rows="3"></textarea>
+                <div class="flex flex-col sm:flex-row items-center gap-4 mt-4">
+                    <select id="ai-meal-type" class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500">
+                        <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option>
+                    </select>
+                    <button id="ai-submit-button" type="submit" class="w-full sm:w-auto bg-purple-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200 flex items-center justify-center gap-2">
+                        Log Meal
+                    </button>
+                </div>
+            </form>
+        </div>
+
+         <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="font-bold text-xl">Log Manually</h3>
+                <button id="catalog-button" class="bg-blue-500 text-white text-sm font-bold py-2 px-4 rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" /></svg>
+                    Log from Catalog
+                </button>
+            </div>
+            <form id="manual-form" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
+                <div class="md:col-span-2 lg:col-span-1">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Food Name</label>
+                    <input type="text" name="name" placeholder="Apple" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Calories</label>
+                    <input type="number" name="calories" placeholder="95" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" required />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Protein (g)</label>
+                    <input type="number" name="protein" placeholder="0.5" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Carbs (g)</label>
+                    <input type="number" name="carbs" placeholder="25" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Fats (g)</label>
+                    <input type="number" name="fats" placeholder="0.3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500" />
+                </div>
+                <div class="md:col-span-2 lg:col-span-4">
+                     <label class="block text-sm font-medium text-gray-700 mb-1">Meal Type</label>
+                     <select name="meal" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500">
+                         <option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Snacks</option>
+                     </select>
+                 </div>
+                <div class="lg:col-span-1">
+                    <button type="submit" class="w-full bg-green-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors">
+                        Add Food
+                    </button>
+                </div>
+            </form>
+             <p id="error-message" class="text-red-500 text-sm mt-4"></p>
+        </div>
+
+        <div>
+            <div class="flex justify-center items-center mb-6 relative">
+                <h3 class="font-bold text-2xl">Today's Log</h3>
+                <button id="copy-log-button" class="absolute right-0 bg-gray-200 text-gray-600 text-xs font-bold py-1 px-3 rounded-lg hover:bg-gray-300 transition-colors flex items-center gap-1">
+                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 17.25v3.375c0 .621-.504 1.125-1.125 1.125h-9.75a1.125 1.125 0 01-1.125-1.125V7.875c0-.621.504-1.125 1.125-1.125H6.75a9.06 9.06 0 011.5.124m7.5 10.376h3.375c.621 0 1.125-.504 1.125-1.125V11.25c0-4.46-3.243-8.161-7.5-8.876a9.06 9.06 0 00-1.5-.124H9.375c-.621 0-1.125.504-1.125 1.125v3.5m7.5 10.375H9.375a1.125 1.125 0 01-1.125-1.125v-9.25m12 6.625v-1.875a3.375 3.375 0 00-3.375-3.375h-1.5a1.125 1.125 0 01-1.125-1.125v-1.5a3.375 3.375 0 00-3.375-3.375H9.75" /></svg>
+                    Copy Log
+                </button>
+            </div>
+            <div id="food-log-container">
+                <p class="text-center text-gray-500">Loading your food log...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-xl">Settings & Information</h3><button class="modal-close p-2 rounded-full hover:bg-gray-200"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
+            <div class="border-b border-gray-200"><nav id="settings-tabs" class="flex space-x-4 px-4"><button data-tab="read-me" class="px-4 py-2 text-sm font-medium transition-colors border-b-2 border-purple-500 text-purple-600">Read Me</button><button data-tab="change-log" class="px-4 py-2 text-sm font-medium transition-colors text-gray-500 hover:text-gray-700">Change Log</button><button data-tab="data-schema" class="px-4 py-2 text-sm font-medium transition-colors text-gray-500 hover:text-gray-700">Data Schema</button></nav></div>
+            <div id="settings-content" class="p-6 overflow-y-auto prose max-w-none"></div>
+        </div>
+    </div>
+
+    <div id="edit-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <!-- Edit modal content will be injected here by JS -->
+    </div>
+    
+    <div id="catalog-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <div class="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[80vh] flex flex-col">
+            <div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-xl">Food Catalog</h3><button class="modal-close p-2 rounded-full hover:bg-gray-200"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
+            <div id="catalog-list" class="p-4 overflow-y-auto"></div>
+        </div>
+    </div>
+    
+    <div id="relog-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+        <!-- Re-log modal content will be injected here by JS -->
+    </div>
+    
+    <div id="catalog-log-modal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 hidden">
+         <!-- Catalog Log modal content will be injected here by JS -->
+    </div>
+
+    <div id="notification-container"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getDatabase, ref, onValue, push, remove, serverTimestamp, set, query, orderByChild, update } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-database.js";
+
+        // --- App State ---
+        let state = {
+            foodLog: [],
+            foodCatalog: [],
+            isLoading: true,
+            db: null,
+            editingItem: null,
+            relogItem: null,
+            catalogLogItem: null,
+        };
+
+        // --- Firebase Config ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+        };
+
+        // --- DOM Elements ---
+        const DOMElements = {
+            foodLogContainer: document.getElementById('food-log-container'),
+            errorMessage: document.getElementById('error-message'),
+            aiForm: document.getElementById('ai-form'),
+            manualForm: document.getElementById('manual-form'),
+            aiSubmitBtn: document.getElementById('ai-submit-button'),
+            copyLogBtn: document.getElementById('copy-log-button'),
+            // Modals
+            settingsModal: document.getElementById('settings-modal'),
+            editModal: document.getElementById('edit-modal'),
+            catalogModal: document.getElementById('catalog-modal'),
+            relogModal: document.getElementById('relog-modal'),
+            catalogLogModal: document.getElementById('catalog-log-modal'),
+            settingsButton: document.getElementById('settings-button'),
+            catalogButton: document.getElementById('catalog-button'),
+            notificationContainer: document.getElementById('notification-container'),
+        };
+
+        // --- Utility Functions ---
+        function showNotification(message) {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-5 right-5 bg-gray-800 text-white py-2 px-5 rounded-lg shadow-lg z-50 animate-fade-in-out';
+            notification.textContent = message;
+            DOMElements.notificationContainer.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function setError(message) {
+            DOMElements.errorMessage.textContent = message || '';
+        }
+        
+        function toggleModal(modal, show) {
+            modal.classList.toggle('hidden', !show);
+        }
+
+        // --- Render Functions ---
+        function renderSummary() {
+            const totals = state.foodLog.reduce((acc, item) => {
+                acc.calories += Number(item.calories) || 0;
+                acc.protein += Number(item.protein) || 0;
+                acc.carbs += Number(item.carbs) || 0;
+                acc.fats += Number(item.fats) || 0;
+                return acc;
+            }, { calories: 0, protein: 0, carbs: 0, fats: 0 });
+
+            document.getElementById('total-calories').textContent = totals.calories.toFixed(0);
+            document.getElementById('total-protein').textContent = totals.protein.toFixed(1);
+            document.getElementById('total-carbs').textContent = totals.carbs.toFixed(1);
+            document.getElementById('total-fats').textContent = totals.fats.toFixed(1);
+        }
+
+        function renderFoodLog() {
+            DOMElements.foodLogContainer.innerHTML = '';
+            if (state.foodLog.length === 0) {
+                DOMElements.foodLogContainer.innerHTML = `<div class="text-center py-10 px-6 bg-white rounded-2xl shadow-md"><p class="mt-4 text-gray-600 font-semibold">No meals logged yet for today.</p><p class="text-sm text-gray-500">Use one of the forms above to add your first meal!</p></div>`;
+                return;
+            }
+
+            const groupedByMeal = state.foodLog.reduce((acc, item) => {
+                (acc[item.mealType] = acc[item.mealType] || []).push(item);
+                return acc;
+            }, {});
+
+            const container = document.createElement('div');
+            container.className = 'space-y-8';
+
+            Object.entries(groupedByMeal).forEach(([mealType, items]) => {
+                const mealSection = document.createElement('div');
+                mealSection.innerHTML = `<h4 class="font-bold text-lg mb-3 text-gray-700">${mealType}</h4>`;
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-1 md:grid-cols-2 gap-4';
+                
+                items.forEach(item => {
+                    const loggedTime = new Date(item.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                    const itemEl = document.createElement('div');
+                    itemEl.className = 'bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200';
+                    itemEl.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <p class="font-semibold text-gray-800">${item.foodName}</p>
+                                <p class="text-lg font-bold text-green-600">${item.calories} <span class="text-sm font-normal text-gray-500">kcal</span></p>
+                            </div>
+                            <div class="flex items-center">
+                                <button data-action="edit" data-id="${item.id}" class="p-2 rounded-full text-gray-400 hover:bg-yellow-100 hover:text-yellow-600" title="Edit"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" /></svg></button>
+                                <button data-action="relog" data-id="${item.id}" class="p-2 rounded-full text-gray-400 hover:bg-blue-100 hover:text-blue-500" title="Log Again"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></button>
+                                <button data-action="delete" data-id="${item.id}" class="p-2 rounded-full text-gray-400 hover:bg-red-100 hover:text-red-500" title="Delete"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" /></svg></button>
+                            </div>
+                        </div>
+                        <div class="mt-2 pt-2 border-t border-gray-100 flex justify-between items-center">
+                            <div class="grid grid-cols-3 gap-2 text-center flex-grow">
+                                <p class="text-xs text-gray-600"><strong>${item.protein || 0}g</strong> <span class="text-gray-500">Protein</span></p>
+                                <p class="text-xs text-gray-600"><strong>${item.carbs || 0}g</strong> <span class="text-gray-500">Carbs</span></p>
+                                <p class="text-xs text-gray-600"><strong>${item.fats || 0}g</strong> <span class="text-gray-500">Fats</span></p>
+                            </div>
+                            <span class="text-xs text-gray-400 ml-4">${loggedTime}</span>
+                        </div>
+                    `;
+                    grid.appendChild(itemEl);
+                });
+                mealSection.appendChild(grid);
+                container.appendChild(mealSection);
+            });
+            DOMElements.foodLogContainer.appendChild(container);
+        }
+        
+        // --- Database Functions ---
+        async function addFoodToCatalog(foodData) {
+            const foodKey = foodData.foodName.trim().toLowerCase();
+            const existing = state.foodCatalog.find(item => item.foodName.toLowerCase() === foodKey);
+            if (!existing) {
+                const catalogRef = ref(state.db, `food_diary/food_catalog/${foodKey.replace(/[^a-zA-Z0-9]/g, '')}`);
+                await set(catalogRef, {
+                    foodName: foodData.foodName.trim(),
+                    calories: Number(foodData.calories),
+                    protein: Number(foodData.protein),
+                    carbs: Number(foodData.carbs),
+                    fats: Number(foodData.fats)
+                });
+            }
+        }
+
+        async function addFoodToDb(foodData) {
+            const foodLogRef = ref(state.db, 'food_diary/public_log_v2');
+            const { id, ...dataToPush } = foodData;
+            await push(foodLogRef, { ...dataToPush, createdAt: serverTimestamp() });
+            await addFoodToCatalog(foodData);
+        }
+
+        // --- Event Handlers ---
+        async function handleAddFood(e) {
+            e.preventDefault();
+            const formData = new FormData(DOMElements.manualForm);
+            const newFood = {
+                name: formData.get('name').trim(),
+                calories: formData.get('calories'),
+                protein: formData.get('protein') || 0,
+                carbs: formData.get('carbs') || 0,
+                fats: formData.get('fats') || 0,
+                meal: formData.get('meal'),
+            };
+
+            if (!newFood.name || !newFood.calories) {
+                setError("Food name and calories are required.");
+                return;
+            }
+
+            try {
+                await addFoodToDb({
+                    foodName: newFood.name,
+                    calories: Number(newFood.calories),
+                    protein: Number(newFood.protein),
+                    carbs: Number(newFood.carbs),
+                    fats: Number(newFood.fats),
+                    mealType: newFood.meal,
+                });
+                DOMElements.manualForm.reset();
+                setError(null);
+                showNotification(`${newFood.name} added!`);
+            } catch (err) {
+                console.error("Error adding food:", err);
+                setError("Failed to log food.");
+            }
+        }
+
+        async function handleAiLog(e) {
+            e.preventDefault();
+            const aiInput = document.getElementById('ai-input').value.trim();
+            if (!aiInput) {
+                setError("Please describe your meal for the AI.");
+                return;
+            }
+            DOMElements.aiSubmitBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 animate-spin"><path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.696a4.5 4.5 0 01-1.823-1.021A4.5 4.5 0 019.023 9.348" /></svg> Analyzing...`;
+            DOMElements.aiSubmitBtn.disabled = true;
+            setError(null);
+
+            const prompt = `Analyze the following meal description and provide a nutritional breakdown for each distinct food item. Estimate calories, protein (in grams), carbohydrates (in grams), and fats (in grams). Meal description: "${aiInput}"`;
+            const payload = {
+                contents: [{ role: "user", parts: [{ text: prompt }] }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "OBJECT",
+                        properties: {
+                            foods: {
+                                type: "ARRAY",
+                                items: {
+                                    type: "OBJECT",
+                                    properties: {
+                                        foodName: { type: "STRING" }, calories: { type: "NUMBER" }, protein: { type: "NUMBER" }, carbs: { type: "NUMBER" }, fats: { type: "NUMBER" }
+                                    },
+                                    required: ["foodName", "calories", "protein", "carbs", "fats"]
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            const apiKey = "";
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`API error: ${response.status}`);
+                const result = await response.json();
+                const parsedData = JSON.parse(result.candidates[0].content.parts[0].text);
+
+                if (parsedData.foods && parsedData.foods.length > 0) {
+                    const aiMealType = document.getElementById('ai-meal-type').value;
+                    for (const food of parsedData.foods) {
+                        await addFoodToDb({ ...food, mealType: aiMealType });
+                    }
+                    document.getElementById('ai-input').value = '';
+                    showNotification("AI meal logged successfully!");
+                } else {
+                    setError("AI could not identify food items. Please try a different description.");
+                }
+            } catch (err) {
+                console.error("AI log error:", err);
+                setError("An error occurred with the AI logger. Please try again or use manual entry.");
+            } finally {
+                DOMElements.aiSubmitBtn.innerHTML = 'Log Meal';
+                DOMElements.aiSubmitBtn.disabled = false;
+            }
+        }
+
+        function handleLogActions(e) {
+            const button = e.target.closest('button[data-action]');
+            if (!button) return;
+
+            const action = button.dataset.action;
+            const id = button.dataset.id;
+            const item = state.foodLog.find(i => i.id === id);
+
+            if (action === 'delete') {
+                if (confirm(`Are you sure you want to delete ${item.foodName}?`)) {
+                    const itemRef = ref(state.db, `food_diary/public_log_v2/${id}`);
+                    remove(itemRef).then(() => showNotification("Item deleted.")).catch(err => setError("Failed to delete."));
+                }
+            } else if (action === 'relog') {
+                state.relogItem = item;
+                renderRelogModal();
+                toggleModal(DOMElements.relogModal, true);
+            } else if (action === 'edit') {
+                state.editingItem = item;
+                renderEditModal();
+                toggleModal(DOMElements.editModal, true);
+            }
+        }
+        
+        // --- Modal Rendering and Handling ---
+        
+        function renderEditModal() {
+            const item = state.editingItem;
+            if(!item) return;
+            DOMElements.editModal.innerHTML = `
+                <form id="edit-form-content" class="bg-white rounded-2xl shadow-xl max-w-lg w-full">
+                    <div class="p-4 border-b flex justify-between items-center"><h3 class="font-bold text-xl">Edit Food Log</h3><button type="button" class="modal-close p-2 rounded-full hover:bg-gray-200"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button></div>
+                    <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Food Name</label><input type="text" name="foodName" value="${item.foodName}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500" required /></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Meal Type</label><select name="mealType" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500"><option ${item.mealType === 'Breakfast' ? 'selected' : ''}>Breakfast</option><option ${item.mealType === 'Lunch' ? 'selected' : ''}>Lunch</option><option ${item.mealType === 'Dinner' ? 'selected' : ''}>Dinner</option><option ${item.mealType === 'Snacks' ? 'selected' : ''}>Snacks</option></select></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Calories</label><input type="number" name="calories" value="${item.calories}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500" required /></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Protein (g)</label><input type="number" name="protein" value="${item.protein}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500" /></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Carbs (g)</label><input type="number" name="carbs" value="${item.carbs}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500" /></div>
+                        <div><label class="block text-sm font-medium text-gray-700 mb-1">Fats (g)</label><input type="number" name="fats" value="${item.fats}" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500" /></div>
+                    </div>
+                    <div class="p-4 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+                        <button type="button" class="modal-close bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600">Save Changes</button>
+                    </div>
+                </form>
+            `;
+            DOMElements.editModal.querySelector('#edit-form-content').addEventListener('submit', handleUpdateFood);
+        }
+        
+        async function handleUpdateFood(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const updatedItem = {
+                id: state.editingItem.id,
+                foodName: formData.get('foodName'),
+                calories: Number(formData.get('calories')),
+                protein: Number(formData.get('protein')),
+                carbs: Number(formData.get('carbs')),
+                fats: Number(formData.get('fats')),
+                mealType: formData.get('mealType'),
+            };
+
+            const itemRef = ref(state.db, `food_diary/public_log_v2/${updatedItem.id}`);
+            const { id, ...dataToUpdate } = updatedItem;
+            
+            try {
+                await update(itemRef, dataToUpdate);
+                await addFoodToCatalog(dataToUpdate);
+                showNotification("Log updated!");
+                toggleModal(DOMElements.editModal, false);
+                state.editingItem = null;
+            } catch (err) {
+                setError("Failed to update item.");
+            }
+        }
+        
+        function renderRelogModal() {
+            const item = state.relogItem;
+            if (!item) return;
+            DOMElements.relogModal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+                    <h3 class="font-bold text-lg mb-2">Log "${item.foodName}" again?</h3>
+                    <p class="text-gray-600 mb-4">Select which meal to log this item under.</p>
+                    <div id="relog-options" class="grid grid-cols-2 gap-3">
+                        ${['Breakfast', 'Lunch', 'Dinner', 'Snacks'].map(meal => `<button data-meal="${meal}" class="w-full bg-blue-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-600">${meal}</button>`).join('')}
+                    </div>
+                    <button class="modal-close w-full mt-4 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">Cancel</button>
+                </div>
+            `;
+        }
+
+        function renderCatalogLogModal() {
+            const item = state.catalogLogItem;
+            if (!item) return;
+            DOMElements.catalogLogModal.innerHTML = `
+                <div class="bg-white rounded-2xl shadow-xl max-w-sm w-full p-6">
+                    <h3 class="font-bold text-lg mb-2">Log "${item.foodName}" to which meal?</h3>
+                    <p class="text-gray-600 mb-4">Select a meal to log this item.</p>
+                    <div id="catalog-log-options" class="grid grid-cols-2 gap-3">
+                        ${['Breakfast', 'Lunch', 'Dinner', 'Snacks'].map(meal => `<button data-meal="${meal}" class="w-full bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600">${meal}</button>`).join('')}
+                    </div>
+                    <button class="modal-close w-full mt-4 bg-gray-200 text-gray-700 font-bold py-2 px-4 rounded-lg hover:bg-gray-300">Cancel</button>
+                </div>
+            `;
+        }
+
+        function renderCatalog() {
+            const list = document.getElementById('catalog-list');
+            list.innerHTML = '';
+            if (state.foodCatalog.length === 0) {
+                list.innerHTML = '<p>Your catalog is empty. Add some food to see it here!</p>';
+                return;
+            }
+            const ul = document.createElement('ul');
+            ul.className = 'space-y-2';
+            state.foodCatalog.forEach(food => {
+                const li = document.createElement('li');
+                li.className = 'p-3 bg-gray-50 rounded-lg hover:bg-green-100 cursor-pointer transition-colors';
+                li.innerHTML = `<p class="font-semibold">${food.foodName}</p><p class="text-sm text-gray-600">${food.calories} kcal, P:${food.protein}g, C:${food.carbs}g, F:${food.fats}g</p>`;
+                li.addEventListener('click', () => {
+                    state.catalogLogItem = food;
+                    toggleModal(DOMElements.catalogModal, false);
+                    renderCatalogLogModal();
+                    toggleModal(DOMElements.catalogLogModal, true);
+                });
+                ul.appendChild(li);
+            });
+            list.appendChild(ul);
+        }
+
+        // --- App Initialization ---
+        function init() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                state.db = getDatabase(app);
+            } catch (e) {
+                console.error("Firebase init error:", e);
+                setError("Failed to connect to database.");
+                return;
+            }
+
+            // Setup listeners
+            const foodLogRef = ref(state.db, 'food_diary/public_log_v2');
+            const catalogRef = query(ref(state.db, 'food_diary/food_catalog'), orderByChild('foodName'));
+
+            onValue(foodLogRef, (snapshot) => {
+                const data = snapshot.val();
+                const today = new Date();
+                const startOfDay = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+                
+                state.foodLog = data ? Object.entries(data)
+                    .map(([key, value]) => ({ id: key, ...value }))
+                    .filter(item => item.createdAt >= startOfDay)
+                    .sort((a, b) => a.createdAt - b.createdAt) : [];
+                
+                renderSummary();
+                renderFoodLog();
+            });
+
+            onValue(catalogRef, (snapshot) => {
+                const data = snapshot.val();
+                state.foodCatalog = data ? Object.values(data) : [];
+                renderCatalog();
+            });
+
+            // Attach event listeners
+            DOMElements.manualForm.addEventListener('submit', handleAddFood);
+            DOMElements.aiForm.addEventListener('submit', handleAiLog);
+            DOMElements.foodLogContainer.addEventListener('click', handleLogActions);
+            DOMElements.copyLogBtn.addEventListener('click', () => {
+                const grouped = state.foodLog.reduce((acc, item) => {
+                    (acc[item.mealType] = acc[item.mealType] || []).push(item); return acc;
+                }, {});
+                const totals = state.foodLog.reduce((t, i) => ({...t, calories: t.calories + Number(i.calories)}), {calories:0});
+
+                let logString = `Today's Food Log\nTotal Calories: ${totals.calories.toFixed(0)} kcal\n\n`;
+                Object.keys(grouped).forEach(meal => {
+                    logString += `--- ${meal} ---\n`;
+                    grouped[meal].forEach(i => {
+                        const time = new Date(i.createdAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+                        logString += `- [${time}] ${i.foodName}: ${i.calories} kcal (P:${i.protein}g, C:${i.carbs}g, F:${i.fats}g)\n`;
+                    });
+                    logString += "\n";
+                });
+                navigator.clipboard.writeText(logString).then(() => showNotification('Log copied!'), () => showNotification('Copy failed.'));
+            });
+
+            // Modal Listeners
+            DOMElements.settingsButton.addEventListener('click', () => toggleModal(DOMElements.settingsModal, true));
+            DOMElements.catalogButton.addEventListener('click', () => toggleModal(DOMElements.catalogModal, true));
+            
+            document.body.addEventListener('click', (e) => {
+                 if (e.target.closest('.modal-close')) {
+                    [DOMElements.settingsModal, DOMElements.editModal, DOMElements.catalogModal, DOMElements.relogModal, DOMElements.catalogLogModal].forEach(m => toggleModal(m, false));
+                }
+            });
+
+            DOMElements.relogModal.addEventListener('click', (e) => {
+                const meal = e.target.dataset.meal;
+                if(meal) {
+                     addFoodToDb({ ...state.relogItem, mealType: meal }).then(() => {
+                        showNotification(`${state.relogItem.foodName} re-logged!`);
+                        toggleModal(DOMElements.relogModal, false);
+                        state.relogItem = null;
+                    });
+                }
+            });
+
+            DOMElements.catalogLogModal.addEventListener('click', (e) => {
+                const meal = e.target.dataset.meal;
+                if(meal) {
+                    addFoodToDb({ ...state.catalogLogItem, mealType: meal }).then(() => {
+                        showNotification(`${state.catalogLogItem.foodName} logged!`);
+                        toggleModal(DOMElements.catalogLogModal, false);
+                        state.catalogLogItem = null;
+                    });
+                }
+            });
+
+            // Settings Tab Logic
+            const settingsTabsContainer = document.getElementById('settings-tabs');
+            const settingsContent = document.getElementById('settings-content');
+            const tabsContent = {
+                 'read-me': `<h2>Welcome to the AI Food Diary!</h2><p>This application helps you track your daily nutritional intake with ease. Here are the main features:</p><ul><li><strong>AI-Powered Logging:</strong> Simply describe your meal in plain English, and our AI will analyze it and estimate the nutritional information for you.</li><li><strong>Manual Entry:</strong> For precise control, you can manually enter food items with their specific calorie and macronutrient counts.</li><li><strong>Edit Entries:</strong> Made a mistake? You can now edit any food log entry to correct its details.</li><li><strong>Daily Summary:</strong> Get a clear, real-time overview of your total calories, protein, carbs, and fats for the day.</li><li><strong>Food Catalog:</strong> Every food you log is automatically saved to a personal catalog. You can quickly log items again directly from the catalog.</li></ul>`,
+                 'change-log': `<h2>Application Updates</h2><ul class="space-y-4"><li><p class="font-semibold">2025-08-10</p><p>Converted application from React to a single-file HTML web app.</p></li><li><p class="font-semibold">2025-08-10</p><p>Added the ability to edit existing food log entries.</p></li></ul>`,
+                 'data-schema': `<h2>Firebase Data Schema</h2><p>Path: <code>/food_diary/public_log_v2/</code></p><pre><code>{\n  "-PushID123": {\n    "foodName": "Scrambled Eggs",\n    "calories": 140,\n    "protein": 12,\n    "createdAt": 1723339200000\n  }\n}</code></pre><p>Path: <code>/food_diary/food_catalog/</code></p><pre><code>{\n  "scrambledeggs": {\n    "foodName": "Scrambled Eggs",\n    "calories": 140\n  }\n}</code></pre>`
+            };
+            settingsContent.innerHTML = tabsContent['read-me'];
+            settingsTabsContainer.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const tabName = e.target.dataset.tab;
+                    settingsContent.innerHTML = tabsContent[tabName];
+                    settingsTabsContainer.querySelectorAll('button').forEach(btn => {
+                        btn.className = 'px-4 py-2 text-sm font-medium transition-colors text-gray-500 hover:text-gray-700';
+                        btn.classList.toggle('border-b-2', false);
+                        btn.classList.toggle('border-purple-500', false);
+                        btn.classList.toggle('text-purple-600', false);
+                    });
+                    e.target.classList.add('border-b-2', 'border-purple-500', 'text-purple-600');
+                }
+            });
+
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

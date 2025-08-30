@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artifact Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Simple scrollbar styling for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+        
+        /* Styles to counteract Tailwind's preflight for markdown rendering */
+        .prose {
+            max-width: 80ch;
+        }
+        .prose h1, .prose h2, .prose h3, .prose h4 {
+            margin-bottom: 0.8em;
+            margin-top: 1.2em;
+            font-weight: 600;
+        }
+        .prose h1 { font-size: 2.25rem; }
+        .prose h2 { font-size: 1.875rem; }
+        .prose h3 { font-size: 1.5rem; }
+        .prose h4 { font-size: 1.25rem; }
+        .prose p {
+            margin-bottom: 1.25em;
+        }
+        .prose ul, .prose ol {
+            margin-left: 1.5rem;
+            margin-bottom: 1.25em;
+        }
+        .prose ul { list-style-type: disc; }
+        .prose ol { list-style-type: decimal; }
+        .prose li { margin-bottom: 0.5em; }
+        .prose a {
+            color: #3b82f6; /* blue-500 */
+            text-decoration: underline;
+        }
+        .prose blockquote {
+            border-left-width: 4px;
+            padding-left: 1rem;
+            font-style: italic;
+        }
+        .prose code {
+            background-color: #f3f4f6; /* gray-100 */
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+            font-size: 0.875em;
+        }
+        .prose pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+
+        /* Dark mode prose styles */
+        .dark .dark\:prose-invert { color: #d1d5db; }
+        .dark .dark\:prose-invert h1,
+        .dark .dark\:prose-invert h2,
+        .dark .dark\:prose-invert h3,
+        .dark .dark\:prose-invert h4,
+        .dark .dark\:prose-invert strong { color: #f9fafb; }
+        .dark .dark\:prose-invert a { color: #60a5fa; } /* blue-400 */
+        .dark .dark\:prose-invert blockquote {
+            color: #9ca3af;
+            border-left-color: #4b5563;
+        }
+        .dark .dark\:prose-invert code {
+            background-color: #374151; /* gray-700 */
+        }
+        /* Custom prose styles for nested content */
+        .prose .prose {
+             color: #d1d5db;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div id="root"></div>
+
+    <!-- React and ReactDOM from CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- MarkedJS for Markdown Parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script type="module">
+// Since React and ReactDOM are loaded from CDN, they are available on the window object.
+const { useState, useEffect, useMemo, useCallback } = React;
+
+// --- SVG Icons ---
+const Icon = ({ children, ...props }) => (
+    React.createElement('svg', {
+        xmlns: "http://www.w3.org/2000/svg",
+        width: "24",
+        height: "24",
+        viewBox: "0 0 24 24",
+        fill: "none",
+        stroke: "currentColor",
+        strokeWidth: "2",
+        strokeLinecap: "round",
+        strokeLinejoin: "round",
+        ...props
+    }, children)
+);
+const MoreHorizontal = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('circle', { cx: "12", cy: "12", r: "1" }), React.createElement('circle', { cx: "19", cy: "12", r: "1" }), React.createElement('circle', { cx: "5", cy: "12", r: "1" })));
+const Settings = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('circle', { cx: "12", cy: "12", r: "3" }), React.createElement('path', { d: "M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" })));
+const FileText = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" }), React.createElement('polyline', { points: "14 2 14 8 20 8" }), React.createElement('line', { x1: "16", y1: "13", x2: "8", y2: "13" }), React.createElement('line', { x1: "16", y1: "17", x2: "8", y2: "17" }), React.createElement('polyline', { points: "10 9 9 9 8 9" })));
+const List = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('line', { x1: "8", y1: "6", x2: "21", y2: "6" }), React.createElement('line', { x1: "8", y1: "12", x2: "21", y2: "12" }), React.createElement('line', { x1: "8", y1: "18", x2: "21", y2: "18" }), React.createElement('line', { x1: "3", y1: "6", x2: "3.01", y2: "6" }), React.createElement('line', { x1: "3", y1: "12", x2: "3.01", y2: "12" }), React.createElement('line', { x1: "3", y1: "18", x2: "3.01", y2: "18" })));
+const Edit = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" }), React.createElement('path', { d: "M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" })));
+const Save = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" }), React.createElement('polyline', { points: "17 21 17 13 7 13 7 21" }), React.createElement('polyline', { points: "7 3 7 8 15 8" })));
+const X = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('line', { x1: "18", y1: "6", x2: "6", y2: "18" }), React.createElement('line', { x1: "6", y1: "6", x2: "18", y2: "18" })));
+const Copy = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('rect', { x: "9", y: "9", width: "13", height: "13", rx: "2", ry: "2" }), React.createElement('path', { d: "M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" })));
+const CopyPlus = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('rect', { x: '8', y: '8', width: '13', height: '13', rx: '2', ry: '2' }), React.createElement('path', { d: 'M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2' }), React.createElement('line', { x1: '14.5', y1: '11.5', x2: '14.5', y2: '17.5' }), React.createElement('line', { x1: '11.5', y1: '14.5', x2: '17.5', y2: '14.5' })));
+const Download = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" }), React.createElement('polyline', { points: "7 10 12 15 17 10" }), React.createElement('line', { x1: "12", y1: "15", x2: "12", y2: "3" })));
+const BrainCircuit = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M12 5a3 3 0 1 0-5.993.142" }), React.createElement('path', { d: "M12 5a3 3 0 1 1 5.993.142" }), React.createElement('path', { d: "M17.5 8.5c.25.83.39 1.7.45 2.6" }), React.createElement('path', { d: "M12 14a2.5 2.5 0 1 0-5 0" }), React.createElement('path', { d: "M12 14a2.5 2.5 0 1 1 5 0" }), React.createElement('path', { d: "M14.5 16.5c.25.83.39 1.7.45 2.6" }), React.createElement('path', { d: "M6.05 11.1A2.5 2.5 0 0 0 8.5 9.5" }), React.createElement('path', { d: "M3.5 14a2.5 2.5 0 1 1 5 0" }), React.createElement('path', { d: "M3.5 14a2.5 2.5 0 1 0-5 0" }), React.createElement('path', { d: "M12 5a3 3 0 1 1-5.993-.142" }), React.createElement('path', { d: "M12 5a3 3 0 1 0 5.993-.142" }), React.createElement('path', { d: "M18.5 9.5a2.5 2.5 0 0 1-2.45-2.6" }), React.createElement('path', { d: "M20.5 14a2.5 2.5 0 1 0-5 0" }), React.createElement('path', { d: "M20.5 14a2.5 2.5 0 1 1 5 0" }), React.createElement('path', { d: "M12 14a2.5 2.5 0 1 1-5 0" }), React.createElement('path', { d: "M12 14a2.5 2.5 0 1 0 5 0" }), React.createElement('path', { d: "M9.5 16.5a2.5 2.5 0 0 0 2.45 2.6" }), React.createElement('path', { d: "M6.5 8.5c-.25-.83-.39-1.7-.45-2.6" }), React.createElement('path', { d: "M15.95 11.1A2.5 2.5 0 0 1 13.5 9.5" })));
+const ChevronDown = (props) => React.createElement(Icon, props, React.createElement('polyline', { points: "6 9 12 15 18 9" }));
+const ChevronLeft = (props) => React.createElement(Icon, props, React.createElement('polyline', { points: "15 18 9 12 15 6" }));
+const ChevronRight = (props) => React.createElement(Icon, props, React.createElement('polyline', { points: "9 18 15 12 9 6" }));
+const ChevronsLeft = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('polyline', { points: "11 17 6 12 11 7" }), React.createElement('polyline', { points: "18 17 13 12 18 7" })));
+const ChevronsRight = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('polyline', { points: "13 17 18 12 13 7" }), React.createElement('polyline', { points: "6 17 11 12 6 7" })));
+const Loader2 = (props) => React.createElement(Icon, props, React.createElement('path', { d: "M21 12a9 9 0 1 1-6.219-8.56" }));
+const BookOpen = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" }), React.createElement('path', { d: "M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" })));
+const Clock = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('circle', { cx: "12", cy: "12", r: "10" }), React.createElement('polyline', { points: "12 6 12 12 16 14" })));
+const RefreshCw = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('polyline', { points: "23 4 23 10 17 10" }), React.createElement('polyline', { points: "1 20 1 14 7 14" }), React.createElement('path', { d: "M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" })));
+const AlertTriangle = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" }), React.createElement('line', { x1: "12", y1: "9", x2: "12", y2: "13" }), React.createElement('line', { x1: "12", y1: "17", x2: "12.01", y2: "17" })));
+const PlusCircle = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('circle', { cx: "12", cy: "12", r: "10" }), React.createElement('line', { x1: "12", y1: "8", x2: "12", y2: "16" }), React.createElement('line', { x1: "8", y1: "12", x2: "16", y2: "12" })));
+const ExternalLink = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }), React.createElement('polyline', { points: "15 3 21 3 21 9" }), React.createElement('line', { x1: "10", y1: "14", x2: "21", y2: "3" })));
+const Eraser = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M20.42 4.58a2.12 2.12 0 0 0-3-3L7.4 13.62a2.12 2.12 0 1 0 3 3L20.42 4.58z" }), React.createElement('path', { d: "m18 10-4.4-4.4" }), React.createElement('path', { d: "M2 22h16" })));
+const Eye = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" }), React.createElement('circle', { cx: "12", cy: "12", r: "3" })));
+const Paperclip = (props) => React.createElement(Icon, props, React.createElement('path', { d: "M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48" }));
+const StickyNote = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M15.5 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.5L15.5 3Z" }), React.createElement('path', { d: "M15 3v6h6" })));
+const GalleryVertical = (props) => React.createElement(Icon, props, React.createElement(React.Fragment, null, React.createElement('path', { d: "M7 2h10" }), React.createElement('path', { d: "M5 6h14" }), React.createElement('path', { d: "M5 22h14" }), React.createElement('path', { d: "M5 12h14" }), React.createElement('path', { d: "M11 2v20" })));
+
+
+// --- Airtable Configuration ---
+const AIRTABLE_CONFIG = {
+    API_KEY: "patdMoOPya9xAXGLG.3a26ab9163b441fa24a5e1edc3d775c4608e447dd7c0ffa50d6de697d121c022",
+    BASE_ID: "appcrXObwvkKaaSKN",
+    ARTIFACTS_TABLE_ID: "tblT3OSink0NMR1Ry",
+    SOURCES_TABLE_ID: "tbl1ERzVechpmwecT",
+    ATOMIC_NOTES_TABLE_ID: "tblNosLegh1JvcyTS",
+};
+const ARTIFACTS_API_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.BASE_ID}/${AIRTABLE_CONFIG.ARTIFACTS_TABLE_ID}`;
+const SOURCES_API_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.BASE_ID}/${AIRTABLE_CONFIG.SOURCES_TABLE_ID}`;
+const ATOMIC_NOTES_API_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.BASE_ID}/${AIRTABLE_CONFIG.ATOMIC_NOTES_TABLE_ID}`;
+
+// --- Helper Functions ---
+/**
+ * Copies text to the clipboard using a fallback method for broader compatibility.
+ * @param {string} text The text to copy.
+ * @param {(message: string) => void} showToast Function to display a toast notification.
+ */
+const copyToClipboard = (text, showToast) => {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    // Make the textarea out of sight
+    textArea.style.position = "fixed";
+    textArea.style.top = "-9999px";
+    textArea.style.left = "-9999px";
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showToast('Copied to clipboard!');
+        } else {
+            showToast('Failed to copy.');
+        }
+    } catch (err) {
+        console.error('Copy failed:', err);
+        showToast('Failed to copy.');
+    }
+    document.body.removeChild(textArea);
+};
+
+// --- UI Components ---
+const Toast = ({ message, visible }) => {
+    return React.createElement('div', {
+        className: `fixed bottom-5 right-5 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-300 z-50 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`
+    }, message);
+};
+
+// --- Main App Component ---
+const App = () => {
+    const [artifacts, setArtifacts] = useState([]);
+    const [selectedArtifact, setSelectedArtifact] = useState(null);
+    const [activeView, setActiveView] = useState('list');
+    const [editedName, setEditedName] = useState('');
+    const [editedContent, setEditedContent] = useState('');
+    const [isLoading, setIsLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [isAiLoading, setIsAiLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [lastSelectedId, setLastSelectedId] = useState(null);
+    const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [toast, setToast] = useState({ message: '', visible: false });
+
+    const showToast = (message) => {
+        setToast({ message, visible: true });
+        setTimeout(() => setToast({ message: '', visible: false }), 3000);
+    };
+
+    const fetchArtifacts = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await fetch(ARTIFACTS_API_URL, { headers: { Authorization: `Bearer ${AIRTABLE_CONFIG.API_KEY}` } });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const data = await response.json();
+            setArtifacts(data.records.sort((a, b) => new Date(b.fields.Modified) - new Date(a.fields.Modified)));
+        } catch (e) {
+            console.error("Failed to fetch artifacts:", e);
+            setError(e.message);
+        } finally {
+            setIsLoading(false);
+        }
+    }, []);
+
+    useEffect(() => { fetchArtifacts(); }, [fetchArtifacts]);
+
+    const createArtifact = async (name, content) => {
+        setIsSaving(true);
+        setError(null);
+        try {
+            const response = await fetch(ARTIFACTS_API_URL, {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${AIRTABLE_CONFIG.API_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fields: { Name: name, Content: content } })
+            });
+            if (!response.ok) throw new Error(`Failed to create artifact. Status: ${response.status}`);
+            const newRecord = await response.json();
+            setArtifacts(prev => [newRecord, ...prev.filter(a => a.id)]); // Remove temp artifact if it exists
+            setSelectedArtifact(newRecord);
+            setActiveView('view');
+        } catch (e) {
+            console.error("Failed to create artifact:", e);
+            setError(e.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const updateArtifact = async (recordId, name, content) => {
+        setIsSaving(true);
+        setError(null);
+        try {
+            const response = await fetch(`${ARTIFACTS_API_URL}/${recordId}`, {
+                method: 'PATCH',
+                headers: { Authorization: `Bearer ${AIRTABLE_CONFIG.API_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fields: { Name: name, Content: content } }),
+            });
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            const updatedRecord = await response.json();
+            setSelectedArtifact(updatedRecord);
+            setArtifacts(prev => prev.map(a => a.id === recordId ? updatedRecord : a));
+            setActiveView('view');
+        } catch (e) {
+            console.error("Failed to update artifact:", e);
+            setError(e.message);
+        } finally {
+            setIsSaving(false);
+        }
+    };
+    
+    const generateWithAi = async (prompt) => {
+        setIsAiLoading(true);
+        setError(null);
+        try {
+            const apiKey = ""; // Canvas will provide this
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${apiKey}`;
+            const payload = { contents: [{ role: "user", parts: [{ text: prompt }] }] };
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`Gemini API error! status: ${response.status}`);
+            const result = await response.json();
+            if (result.candidates && result.candidates.length > 0) {
+                const text = result.candidates[0].content.parts[0].text;
+                // Append the generated text instead of replacing
+                setEditedContent(prevContent => prevContent.trim() + '\n\n' + text);
+            } else {
+                throw new Error("No content generated by AI.");
+            }
+        } catch (e) {
+            console.error("AI generation failed:", e);
+            setError("AI generation failed. Please try again.");
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
+
+    const handleAiAction = (action) => {
+        let prompt;
+        const currentContent = editedContent;
+        if (!currentContent.trim()) {
+            setError("Cannot perform AI action on empty content.");
+            return;
+        }
+
+        switch(action) {
+            case 'improve':
+                prompt = `Please improve the following text by enhancing its clarity, flow, and impact. Keep the original tone and meaning, but make it more polished and professional:\n\n---\n\n${currentContent}`;
+                break;
+            case 'summarize':
+                prompt = `Please provide a concise summary of the following text, capturing the key points and main ideas:\n\n---\n\n${currentContent}`;
+                break;
+            case 'fix':
+                prompt = `Please correct any spelling and grammar mistakes in the following text:\n\n---\n\n${currentContent}`;
+                break;
+            case 'critique':
+                prompt = `Provide a constructive, critical critique of the following text. Focus on arguments, structure, clarity, and potential areas for improvement. Present the critique clearly, perhaps using headings or bullet points:\n\n---\n\n${currentContent}`;
+                break;
+            case 'insight':
+                prompt = `Based on the following text, generate an interesting and non-obvious insight or a new perspective. Expand on a subtle point or connect ideas in a novel way:\n\n---\n\n${currentContent}`;
+                break;
+            case 'quote':
+                prompt = `Summarize the key message of the following text and format it as a Markdown blockquote (i.e., start each line with '> '):\n\n---\n\n${currentContent}`;
+                break;
+            default: return;
+        }
+        generateWithAi(prompt);
+    };
+
+    const handleCreateNew = () => {
+        const tempId = `temp-${Date.now()}`;
+        const newArtifact = {
+            id: tempId, // Temporary ID for list key
+            fields: {
+                Name: "Untitled Artifact",
+                Content: "# Untitled Artifact\n\nStart writing your content here."
+            }
+        };
+        setLastSelectedId(selectedArtifact?.id);
+        setArtifacts(prev => [newArtifact, ...prev]);
+        setSelectedArtifact(newArtifact);
+        setEditedName(newArtifact.fields.Name);
+        setEditedContent(newArtifact.fields.Content);
+        setActiveView('edit');
+    };
+
+    const handleSelectArtifact = (artifact) => {
+        setSelectedArtifact(artifact);
+        setActiveView('view');
+    };
+
+    const handleEdit = () => {
+        setEditedName(selectedArtifact.fields.Name);
+        setEditedContent(selectedArtifact.fields.Content || '');
+        setActiveView('edit');
+    };
+
+    const handleSave = () => {
+        if (selectedArtifact?.id && !String(selectedArtifact.id).startsWith('temp-')) {
+            updateArtifact(selectedArtifact.id, editedName, editedContent);
+        } else {
+            createArtifact(editedName, editedContent);
+        }
+    };
+
+    const handleCancelEdit = () => {
+        // If it was a new temp artifact, remove it from the list
+        if (String(selectedArtifact?.id).startsWith('temp-')) {
+            setArtifacts(prev => prev.filter(a => a.id !== selectedArtifact.id));
+            const lastArtifact = artifacts.find(a => a.id === lastSelectedId);
+            setSelectedArtifact(lastArtifact || null);
+        }
+        setActiveView('view');
+    };
+
+    const filteredArtifacts = useMemo(() => {
+        if (!searchTerm) return artifacts;
+        return artifacts.filter(a => a.fields.Name?.toLowerCase().includes(searchTerm.toLowerCase()));
+    }, [artifacts, searchTerm]);
+
+    const asideClasses = [
+        "h-full", "border-r", "border-gray-200", "dark:border-gray-700", "flex-shrink-0",
+        "flex", "flex-col", "transition-all", "duration-300",
+        isSidebarOpen ? "w-full md:w-1/3 lg:w-1/4" : "w-0 p-0 border-none",
+        selectedArtifact && activeView !== 'list' && isSidebarOpen ? "hidden md:flex" : "flex"
+    ].join(" ");
+
+    return React.createElement('div', { className: "h-screen w-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 font-sans flex" },
+        isSettingsModalOpen && React.createElement(SettingsModal, { onClose: () => setIsSettingsModalOpen(false) }),
+        React.createElement(Toast, { message: toast.message, visible: toast.visible }),
+        React.createElement('aside', { className: asideClasses },
+            React.createElement('div', { className: isSidebarOpen ? 'flex flex-col h-full' : 'hidden' },
+                React.createElement('div', { className: "p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center" },
+                    React.createElement('h1', { className: "text-xl font-bold text-gray-800 dark:text-gray-200 flex items-center" }, React.createElement(BookOpen, { className: "mr-2" }), "Artifacts"),
+                    React.createElement('div', { className: "flex items-center" },
+                        React.createElement('button', { onClick: handleCreateNew, className: "p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700", title: "New Artifact" }, React.createElement(PlusCircle, { className: "w-5 h-5" })),
+                        React.createElement('button', { onClick: () => setIsSettingsModalOpen(true), className: "p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700", title: "Settings" }, React.createElement(Settings, { className: "w-5 h-5" })),
+                        React.createElement('button', { onClick: fetchArtifacts, className: "p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700", disabled: isLoading, title: "Refresh" }, React.createElement(RefreshCw, { className: `w-5 h-5 ${isLoading ? 'animate-spin' : ''}` })),
+                        React.createElement('button', { onClick: () => setIsSidebarOpen(false), className: "p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700", title: "Collapse Sidebar" }, React.createElement(ChevronsLeft, { className: "w-5 h-5" }))
+                    )
+                ),
+                React.createElement('div', { className: "flex-grow overflow-y-auto" },
+                    isLoading ? React.createElement(LoadingSpinner) : React.createElement(ArtifactList, { artifacts: filteredArtifacts, onSelect: handleSelectArtifact, selectedId: selectedArtifact?.id })
+                ),
+                React.createElement('div', { className: "p-4 border-t border-gray-200 dark:border-gray-700" },
+                    React.createElement('input', { type: "text", placeholder: "Search artifacts...", value: searchTerm, onChange: e => setSearchTerm(e.target.value), className: "w-full px-3 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" })
+                )
+            )
+        ),
+        React.createElement('main', { className: `flex-grow h-full overflow-y-auto transition-all duration-300 ${!selectedArtifact || activeView === 'list' ? 'hidden md:flex' : 'flex'}` },
+            React.createElement('div', { className: "w-full h-full flex flex-col" },
+                error && React.createElement('div', { className: "bg-red-100 border-l-4 border-red-500 text-red-700 p-4 m-4 rounded-md shadow-md flex justify-between items-center", role: "alert" },
+                    React.createElement('div', null,
+                       React.createElement('p', { className: "font-bold" }, "Error"),
+                       React.createElement('p', null, error)
+                    ),
+                    React.createElement('button', { onClick: () => setError(null), className: "p-1 rounded-full hover:bg-red-200" }, React.createElement(X, { className: "w-5 h-5" }))
+                ),
+                selectedArtifact && React.createElement('div', { className: "p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between" },
+                    React.createElement('div', { className: "flex items-center" },
+                       !isSidebarOpen && React.createElement('button', { onClick: () => setIsSidebarOpen(true), className: "p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 mr-2", title: "Open Sidebar" }, React.createElement(ChevronsRight, { className: "w-5 h-5" })),
+                       React.createElement('button', { onClick: () => { setSelectedArtifact(null); setActiveView('list'); }, className: "md:hidden p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 mr-2" }, React.createElement(List, { className: "w-5 h-5" }))
+                    ),
+                    React.createElement('h2', { className: "text-lg font-semibold truncate flex-grow text-center" }, selectedArtifact.fields.Name)
+                ),
+                React.createElement('div', { className: "flex-grow overflow-y-auto" },
+                    !selectedArtifact ? (isLoading ? React.createElement(LoadingSpinner) : React.createElement(WelcomeScreen)) :
+                    activeView === 'view' ? React.createElement(ArtifactView, { artifact: selectedArtifact, onEdit: handleEdit, setSelectedArtifact: setSelectedArtifact, setError: setError, showToast: showToast }) :
+                    React.createElement(ArtifactEdit, { name: editedName, setName: setEditedName, content: editedContent, setContent: setEditedContent, onSave: handleSave, onCancel: handleCancelEdit, isSaving, isAiLoading, onAiAction: handleAiAction })
+                )
+            )
+        )
+    );
+};
+
+const SettingsModal = ({ onClose }) => {
+    const [activeTab, setActiveTab] = useState('readme');
+
+    // Prevent background scroll when modal is open
+    useEffect(() => {
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, []);
+
+    const ReadmeContent = () => (
+        React.createElement('div', { className: "prose dark:prose-invert max-w-none" },
+            React.createElement('h3', { className: "text-xl font-bold" }, "Welcome to the Artifact Manager"),
+            React.createElement('p', null, "This application is a comprehensive tool for creating, managing, and refining your written content, powered by AI assistance and backed by a robust versioning system."),
+            React.createElement('h4', { className: "text-lg font-semibold mt-4" }, "Key Features:"),
+            React.createElement('ul', null,
+                React.createElement('li', null, React.createElement('strong', null, "Markdown Editor:"), " Create and edit your artifacts using a clean, intuitive Markdown editor."),
+                React.createElement('li', null, React.createElement('strong', null, "AI-Powered Actions:"), " Leverage the power of Gemini to improve writing, fix grammar, summarize text, generate insights, and more."),
+                React.createElement('li', null, React.createElement('strong', null, "Airtable Backend:"), " All your artifacts are securely stored and versioned in an Airtable base, providing reliability and data integrity."),
+                React.createElement('li', null, React.createElement('strong', null, "Source & Atomic Note Linking:"), " Attach and view source materials and atomic notes for each artifact, complete with image attachments."),
+                React.createElement('li', null, React.createElement('strong', null, "Attachment Gallery:"), " View all attachments from an artifact and its linked items in a convenient gallery modal."),
+                React.createElement('li', null, React.createElement('strong', null, "Version History:"), " View past snapshots of your artifacts to track changes over time."),
+                React.createElement('li', null, React.createElement('strong', null, "Responsive Design:"), " Access and manage your artifacts seamlessly across desktop and mobile devices.")
+            )
+        )
+    );
+
+    const ChangelogContent = () => (
+         React.createElement('div', { className: "prose dark:prose-invert max-w-none" },
+            React.createElement('h3', { className: "text-xl font-bold" }, "Changelog"),
+            React.createElement('div', { className: "mt-4" },
+                React.createElement('h4', { className: "font-semibold" }, "Version 2.3.1 (August 27, 2025)"),
+                 React.createElement('ul', { className: "list-disc pl-5 mt-1" },
+                    React.createElement('li', null, "Added 'Source', 'Markdown', and 'Airtable' links to the attachment detail view for quick navigation."),
+                ),
+                 React.createElement('h4', { className: "font-semibold mt-4" }, "Version 2.3.0 (August 27, 2025)"),
+                 React.createElement('ul', { className: "list-disc pl-5 mt-1" },
+                    React.createElement('li', null, "Revamped Attachment Gallery: Modal now opens to a grid view of all attachments."),
+                    React.createElement('li', null, "Enhanced Detail View: Images now fit the screen, navigation arrows are repositioned, and the source of the attachment is displayed."),
+                    React.createElement('li', null, "Added expandable content viewer within the attachment detail view to show related text."),
+                ),
+                 React.createElement('h4', { className: "font-semibold mt-4" }, "Version 2.2.0 (August 27, 2025)"),
+                 React.createElement('ul', { className: "list-disc pl-5 mt-1" },
+                    React.createElement('li', null, "Added a unified Attachment Gallery to view all images from an artifact, its sources, and atomic notes."),
+                    React.createElement('li', null, "Added a 'View Attachments' button to the artifact actions dropdown."),
+                    React.createElement('li', null, "The 'Artifacts' table now supports its own 'Attachments' field."),
+                )
+            )
+        )
+    );
+    
+    const DataSchemaContent = () => (
+        React.createElement('div', { className: "prose dark:prose-invert max-w-none" },
+            React.createElement('h3', { className: "text-xl font-bold" }, "Airtable Data Schema"),
+            React.createElement('p', null, "The application uses an Airtable base with three main tables: 'Artifacts', 'Sources', and 'Atomic Notes'."),
+            React.createElement('h4', { className: "text-lg font-semibold mt-6" }, "Artifacts Table"),
+            React.createElement('ul', { className: "mt-2 space-y-2" },
+                React.createElement('li', null, React.createElement('code', null, "Name"), " (Single line text)"),
+                React.createElement('li', null, React.createElement('code', null, "Content"), " (Long text, Markdown)"),
+                 React.createElement('li', null, React.createElement('code', null, "Attachments"), " (Multiple attachments)"),
+                React.createElement('li', null, React.createElement('code', null, "Sources"), " (Link to 'Sources' table)"),
+                React.createElement('li', null, React.createElement('code', null, "Atomic Notes"), " (Link to 'Atomic Notes' table)"),
+                React.createElement('li', null, React.createElement('code', null, "Snapshots Content"), " (Long text for versioning)")
+            ),
+            React.createElement('h4', { className: "text-lg font-semibold mt-6" }, "Sources Table"),
+            React.createElement('ul', { className: "mt-2 space-y-2" },
+                React.createElement('li', null, React.createElement('code', null, "Name"), " (Single line text)"),
+                React.createElement('li', null, React.createElement('code', null, "URL"), " (URL)"),
+                React.createElement('li', null, React.createElement('code', null, "Content"), " (Long text)"),
+                React.createElement('li', null, React.createElement('code', null, "Attachments"), " (Multiple attachments)"),
+                React.createElement('li', null, React.createElement('code', null, "Artifacts"), " (Link to 'Artifacts' table)")
+            ),
+             React.createElement('h4', { className: "text-lg font-semibold mt-6" }, "Atomic Notes Table"),
+            React.createElement('ul', { className: "mt-2 space-y-2" },
+                React.createElement('li', null, React.createElement('code', null, "Name"), " (Single line text)"),
+                React.createElement('li', null, React.createElement('code', null, "URL"), " (URL)"),
+                React.createElement('li', null, React.createElement('code', null, "Content"), " (Long text, Markdown)"),
+                React.createElement('li', null, React.createElement('code', null, "Attachments"), " (Multiple attachments)"),
+                React.createElement('li', null, React.createElement('code', null, "Tags"), " (Single line text)"),
+                React.createElement('li', null, React.createElement('code', null, "Luhmann ID"), " (Single line text)"),
+                React.createElement('li', null, React.createElement('code', null, "Artifacts"), " (Link to 'Artifacts' table)")
+            )
+        )
+    );
+
+    return React.createElement('div', { className: "fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4", onClick: onClose },
+        React.createElement('div', { className: "bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col", onClick: e => e.stopPropagation() },
+            React.createElement('div', { className: "p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center" },
+                React.createElement('h2', { className: "text-xl font-bold text-gray-800 dark:text-gray-200" }, "Settings & Information"),
+                React.createElement('button', { onClick: onClose, className: "p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" }, React.createElement(X, { className: "w-6 h-6" }))
+            ),
+            React.createElement('div', { className: "p-4 border-b border-gray-200 dark:border-gray-700" },
+                React.createElement('div', { className: "flex space-x-2 sm:space-x-4" },
+                    React.createElement('button', { onClick: () => setActiveTab('readme'), className: `px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'readme' ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}` }, "README"),
+                    React.createElement('button', { onClick: () => setActiveTab('changelog'), className: `px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'changelog' ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}` }, "Changelog"),
+                    React.createElement('button', { onClick: () => setActiveTab('schema'), className: `px-3 py-2 rounded-md text-sm font-medium ${activeTab === 'schema' ? 'bg-blue-600 text-white' : 'hover:bg-gray-200 dark:hover:bg-gray-700'}` }, "Data Schema")
+                )
+            ),
+            React.createElement('div', { className: "p-6 flex-grow overflow-y-auto" },
+                activeTab === 'readme' && React.createElement(ReadmeContent),
+                activeTab === 'changelog' && React.createElement(ChangelogContent),
+                activeTab === 'schema' && React.createElement(DataSchemaContent)
+            )
+        )
+    );
+};
+
+const ArtifactList = ({ artifacts, onSelect, selectedId }) => {
+    if (!artifacts.length) return React.createElement('div', { className: "p-4 text-center text-gray-500" }, "No artifacts found.");
+    return React.createElement('ul', null,
+        artifacts.map(artifact => React.createElement('li', { key: artifact.id },
+            React.createElement('button', { onClick: () => onSelect(artifact), className: `w-full text-left p-4 border-b border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors duration-150 ${selectedId === artifact.id ? 'bg-blue-50 dark:bg-blue-900/50' : ''}` },
+                React.createElement('h3', { className: "font-semibold text-gray-800 dark:text-gray-200" }, artifact.fields.Name || 'Untitled Artifact'),
+                artifact.fields.Modified && React.createElement('p', { className: "text-sm text-gray-500 dark:text-gray-400" }, `Modified: ${new Date(artifact.fields.Modified).toLocaleString()}`)
+            )
+        ))
+    );
+};
+
+const CombinedActionsDropdown = ({ onEdit, onCopy, onCopyAll, onDownload, onAddSource, onAddAtomicNote, onShowAttachments, hasAttachments, airtableUrl, versionsUrl, viewUrl }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    
+    const links = [
+        { href: viewUrl, label: 'View Page', icon: Eye },
+        { href: versionsUrl, label: 'Versions', icon: Clock },
+        { href: airtableUrl, label: 'Airtable Record', icon: ExternalLink },
+    ].filter(link => link.href);
+
+    const actions = [
+        { id: 'edit', label: 'Edit', icon: Edit, onClick: onEdit },
+        hasAttachments && { id: 'viewAttachments', label: 'View Attachments', icon: GalleryVertical, onClick: onShowAttachments },
+        { id: 'addSource', label: 'Add Source', icon: Paperclip, onClick: onAddSource },
+        { id: 'addAtomicNote', label: 'Add Atomic Note', icon: StickyNote, onClick: onAddAtomicNote },
+        { id: 'copy', label: 'Copy Content', icon: Copy, onClick: onCopy },
+        { id: 'copyAll', label: 'Copy All', icon: CopyPlus, onClick: onCopyAll },
+        { id: 'download', label: 'Download', icon: Download, onClick: onDownload },
+    ].filter(Boolean);
+
+    return React.createElement('div', { className: "relative" },
+        React.createElement('button', {
+            onClick: () => setIsOpen(!isOpen),
+            className: "p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700"
+        },
+            React.createElement(MoreHorizontal, { className: "w-5 h-5" })
+        ),
+        isOpen && React.createElement('div', { className: "absolute top-full right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-30" },
+            React.createElement('div', { className: "py-1" },
+                actions.map(action => React.createElement('button', {
+                    key: action.id,
+                    onClick: () => { action.onClick(); setIsOpen(false); },
+                    className: "w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                },
+                    React.createElement(action.icon, { className: "w-4 h-4 mr-3" }),
+                    action.label
+                ))
+            ),
+            links.length > 0 && React.createElement('div', { className: "border-t border-gray-200 dark:border-gray-700 my-1" }),
+            React.createElement('div', { className: "py-1" },
+                links.map(link => React.createElement('a', {
+                    key: link.label,
+                    href: link.href,
+                    target: "_blank",
+                    rel: "noopener noreferrer",
+                    className: "w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center"
+                }, React.createElement(link.icon, { className: "w-4 h-4 mr-3" }), link.label))
+            )
+        )
+    );
+};
+
+const ArtifactView = ({ artifact, onEdit, setSelectedArtifact, setError, showToast }) => {
+    const { Name, Content, Created, Modified, Attachments: artifactAttachments, Sources: sourceIds, 'Atomic Notes': atomicNoteIds, 'Snapshots Content': snapshotsContent, 'Airtable URL': airtableUrl, 'Versions URL': versionsUrl, 'View URL': viewUrl } = artifact.fields;
+
+    const [sources, setSources] = useState([]);
+    const [atomicNotes, setAtomicNotes] = useState([]);
+    const [isLoadingSources, setIsLoadingSources] = useState(false);
+    const [isLoadingAtomicNotes, setIsLoadingAtomicNotes] = useState(false);
+    const [isAddSourceModalOpen, setAddSourceModalOpen] = useState(false);
+    const [isAddAtomicNoteModalOpen, setAddAtomicNoteModalOpen] = useState(false);
+    const [isAttachmentGalleryOpen, setAttachmentGalleryOpen] = useState(false);
+
+    const fetchDataForIds = useCallback(async (ids, apiUrl, setIsLoading, setData, errorMsg) => {
+        if (!ids || ids.length === 0) {
+            setData([]);
+            return;
+        }
+        setIsLoading(true);
+        setError(null);
+        try {
+            const fetchPromises = ids.map(id =>
+                fetch(`${apiUrl}/${id}`, { headers: { Authorization: `Bearer ${AIRTABLE_CONFIG.API_KEY}` } })
+            );
+            const responses = await Promise.all(fetchPromises);
+            const data = await Promise.all(responses.map(res => {
+                if (!res.ok) throw new Error(`Failed to fetch. Status: ${res.status}`);
+                return res.json();
+            }));
+            setData(data);
+        } catch (e) {
+            console.error(errorMsg, e);
+            setError(`Could not load one or more items. ${e.message}`);
+            setData([]);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [setError]);
+
+    useEffect(() => {
+        fetchDataForIds(sourceIds, SOURCES_API_URL, setIsLoadingSources, setSources, "Failed to fetch sources:");
+    }, [sourceIds, fetchDataForIds]);
+
+    useEffect(() => {
+        fetchDataForIds(atomicNoteIds, ATOMIC_NOTES_API_URL, setIsLoadingAtomicNotes, setAtomicNotes, "Failed to fetch atomic notes:");
+    }, [atomicNoteIds, fetchDataForIds]);
+    
+    const allAttachments = useMemo(() => {
+        const collected = [];
+        if (artifactAttachments) {
+            collected.push(...artifactAttachments.map(a => ({
+                ...a, 
+                sourceName: Name, 
+                sourceContent: Content,
+                primaryUrl: viewUrl,
+                markdownUrl: viewUrl,
+                airtableUrl: airtableUrl
+            })));
+        }
+        sources.forEach(s => {
+            if (s.fields.Attachments) {
+                collected.push(...s.fields.Attachments.map(a => ({
+                    ...a, 
+                    sourceName: s.fields.Name || 'Source', 
+                    sourceContent: s.fields.Content,
+                    primaryUrl: s.fields.URL,
+                    markdownUrl: s.fields['View URL'],
+                    airtableUrl: s.fields['Airtable URL']
+                })));
+            }
+        });
+        atomicNotes.forEach(n => {
+            if (n.fields.Attachments) {
+                collected.push(...n.fields.Attachments.map(a => ({
+                    ...a, 
+                    sourceName: n.fields.Name || 'Atomic Note', 
+                    sourceContent: n.fields.Content,
+                    primaryUrl: n.fields.URL,
+                    markdownUrl: n.fields['View URL'],
+                    airtableUrl: n.fields['Airtable URL']
+                })));
+            }
+        });
+        return collected;
+    }, [artifactAttachments, sources, atomicNotes, Name, Content, viewUrl, airtableUrl]);
+
+    const handleSaveSource = async (sourceData) => {
+        try {
+            const response = await fetch(SOURCES_API_URL, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${AIRTABLE_CONFIG.API_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fields: { ...sourceData, Artifacts: [artifact.id] } })
+            });
+            if (!response.ok) throw new Error(`Failed to create source. Status: ${response.status}`);
+            const newSourceRecord = await response.json();
+            
+            setSources(prev => [...prev, newSourceRecord]);
+            setSelectedArtifact(prevArtifact => ({
+                ...prevArtifact,
+                fields: {
+                    ...prevArtifact.fields,
+                    Sources: [...(prevArtifact.fields.Sources || []), newSourceRecord.id]
+                }
+            }));
+            setAddSourceModalOpen(false);
+        } catch (e) {
+            console.error("Failed to save source:", e);
+            setError("Failed to save the new source. Please try again.");
+        }
+    };
+    
+    const handleSaveAtomicNote = async (noteData) => {
+        try {
+            const response = await fetch(ATOMIC_NOTES_API_URL, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${AIRTABLE_CONFIG.API_KEY}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fields: { ...noteData, Artifacts: [artifact.id] } })
+            });
+            if (!response.ok) throw new Error(`Failed to create atomic note. Status: ${response.status}`);
+            const newNoteRecord = await response.json();
+            
+            setAtomicNotes(prev => [...prev, newNoteRecord]);
+            setSelectedArtifact(prevArtifact => ({
+                ...prevArtifact,
+                fields: {
+                    ...prevArtifact.fields,
+                    'Atomic Notes': [...(prevArtifact.fields['Atomic Notes'] || []), newNoteRecord.id]
+                }
+            }));
+            setAddAtomicNoteModalOpen(false);
+        } catch (e) {
+            console.error("Failed to save atomic note:", e);
+            setError("Failed to save the new atomic note. Please try again.");
+        }
+    };
+
+    const wordCount = useMemo(() => Content?.split(/\s+/).filter(Boolean).length || 0, [Content]);
+    const charCount = useMemo(() => Content?.length || 0, [Content]);
+    
+    const fullMarkdownContent = `# ${Name}\n\n${Content || ''}`;
+    const parsedHtml = useMemo(() => window.marked.parse(fullMarkdownContent), [fullMarkdownContent]);
+
+    const handleCopy = () => {
+        copyToClipboard(Content || '', showToast);
+    };
+
+    const handleCopyAll = () => {
+        let fullText = `# ${Name}\n\n`;
+        fullText += `## Content\n\n${Content || 'No content available.'}\n\n`;
+        fullText += '## Sources\n\n';
+        if (sources && sources.length > 0) {
+            sources.forEach(source => {
+                fullText += `### ${source.fields.Name || 'Untitled Source'}\n`;
+                if (source.fields.URL) fullText += `- URL: ${source.fields.URL}\n`;
+                if (source.fields.Content) fullText += `- Content:\n\`\`\`\n${source.fields.Content}\n\`\`\`\n`;
+                if (source.fields.Notes) fullText += `- Notes:\n\`\`\`\n${source.fields.Notes}\n\`\`\`\n`;
+                fullText += '\n---\n\n';
+            });
+        } else {
+            fullText += 'No sources linked.\n\n';
+        }
+        fullText += '## Atomic Notes\n\n';
+        if (atomicNotes && atomicNotes.length > 0) {
+            atomicNotes.forEach(note => {
+                fullText += `### ${note.fields.Name || 'Untitled Note'}\n`;
+                if (note.fields.URL) fullText += `- URL: ${note.fields.URL}\n`;
+                if (note.fields.Content) fullText += `\`\`\`\n${note.fields.Content}\n\`\`\`\n`;
+                fullText += '\n---\n\n';
+            });
+        } else {
+            fullText += 'No atomic notes linked.\n\n';
+        }
+        fullText += '## Version History\n\n';
+        const parsedSnapshots = (() => {
+            if (!snapshotsContent) return [];
+            const contentString = Array.isArray(snapshotsContent) ? snapshotsContent.join('\n---------\n') : snapshotsContent;
+            if (typeof contentString !== 'string') return [];
+            return contentString.split(/(?<=Z)---------/).map((s, i) => {
+                const [header, ...contentParts] = s.split('\n');
+                const content = contentParts.join('\n').trim();
+                const dateMatch = header.match(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)/);
+                const date = dateMatch ? new Date(dateMatch[0]).toLocaleString() : `Snapshot ${i + 1}`;
+                return { id: i, date, content };
+            }).filter(s => s.content);
+        })();
+        if (parsedSnapshots.length > 0) {
+            parsedSnapshots.forEach(snapshot => {
+                fullText += `### Snapshot from ${snapshot.date}\n\n`;
+                fullText += `\`\`\`\n${snapshot.content}\n\`\`\`\n\n`;
+            });
+        } else {
+            fullText += 'No version history available.\n';
+        }
+        copyToClipboard(fullText, showToast);
+    };
+
+    const handleDownload = () => {
+        const blob = new Blob([Content], { type: 'text/markdown;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${Name.replace(/ /g, '_') || 'artifact'}.md`;
+        link.click();
+        URL.revokeObjectURL(url);
+    };
+
+    return React.createElement(React.Fragment, null,
+        isAddSourceModalOpen && React.createElement(AddSourceModal, {
+            onClose: () => setAddSourceModalOpen(false),
+            onSave: handleSaveSource,
+        }),
+        isAddAtomicNoteModalOpen && React.createElement(AddAtomicNoteModal, {
+            onClose: () => setAddAtomicNoteModalOpen(false),
+            onSave: handleSaveAtomicNote,
+        }),
+        isAttachmentGalleryOpen && React.createElement(AttachmentGalleryModal, {
+            attachments: allAttachments,
+            onClose: () => setAttachmentGalleryOpen(false)
+        }),
+        React.createElement('div', { className: "h-full flex flex-col" },
+            React.createElement('div', { className: "p-4 flex items-center justify-end space-x-2 bg-gray-100 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10" },
+                React.createElement(CombinedActionsDropdown, {
+                    onEdit: onEdit,
+                    onCopy: handleCopy,
+                    onCopyAll: handleCopyAll,
+                    onDownload: handleDownload,
+                    onAddSource: () => setAddSourceModalOpen(true),
+                    onAddAtomicNote: () => setAddAtomicNoteModalOpen(true),
+                    onShowAttachments: () => setAttachmentGalleryOpen(true),
+                    hasAttachments: allAttachments.length > 0,
+                    airtableUrl: airtableUrl,
+                    versionsUrl: versionsUrl,
+                    viewUrl: viewUrl
+                })
+            ),
+            React.createElement('div', { className: "flex-grow p-6 md:p-8 lg:p-12 max-w-4xl mx-auto w-full" },
+                React.createElement('div', { className:"prose dark:prose-invert w-full", dangerouslySetInnerHTML: { __html: parsedHtml } }),
+                React.createElement(AttachmentViewer, { attachments: artifactAttachments, title: "Artifact Attachments" }),
+                React.createElement('div', { className: "text-sm text-gray-500 dark:text-gray-400 mt-8 pt-6 border-t" },
+                    Created && React.createElement('p', null, React.createElement('strong', null, "Created: "), new Date(Created).toLocaleString()),
+                    Modified && React.createElement('p', null, React.createElement('strong', null, "Last Modified: "), new Date(Modified).toLocaleString()),
+                    React.createElement('p', null, React.createElement('strong', null, "Stats: "), `${wordCount} words / ${charCount} characters`)
+                ),
+                React.createElement(SourcesViewer, { sources, isLoading: isLoadingSources }),
+                React.createElement(AtomicNotesViewer, { notes: atomicNotes, isLoading: isLoadingAtomicNotes }),
+                React.createElement(SnapshotViewer, { snapshotsContent })
+            )
+        )
+    );
+};
+
+const AiActionGroup = ({ onAiAction, isLoading }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const actions = [
+        { id: 'improve', label: 'Improve Writing' },
+        { id: 'fix', label: 'Fix Spelling & Grammar' },
+        { id: 'summarize', label: 'Summarize' },
+        { id: 'quote', label: 'Summarize as Quote' },
+        { id: 'critique', label: 'Critical Critique' },
+        { id: 'insight', label: 'Generate Insight' },
+    ];
+    return React.createElement('div', { className: "relative" },
+        React.createElement('button', { onClick: () => setIsOpen(!isOpen), disabled: isLoading, className: "flex items-center px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 disabled:bg-gray-400" },
+            React.createElement(BrainCircuit, { className: "w-5 h-5 mr-2" }),
+            React.createElement('span', null, "AI Actions"),
+            React.createElement(ChevronDown, { className: `w-4 h-4 ml-2 transition-transform ${isOpen ? 'rotate-180' : ''}` })
+        ),
+        isOpen && React.createElement('div', { className: "absolute top-full right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 z-30" },
+            actions.map(action => React.createElement('button', { key: action.id, onClick: () => { onAiAction(action.id); setIsOpen(false); }, className: "w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700" }, action.label))
+        )
+    );
+};
+
+const ArtifactEdit = ({ name, setName, content, setContent, onSave, onCancel, isSaving, isAiLoading, onAiAction }) => {
+    return React.createElement('div', { className: "h-full flex flex-col bg-white dark:bg-gray-900" },
+        React.createElement('div', { className: "p-2 flex-grow-0 flex-shrink-0 flex items-center justify-between space-x-2 bg-gray-100 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-10" },
+            React.createElement('div', { className: "flex items-center space-x-2" },
+                React.createElement(ActionButton, { onClick: onSave, icon: isSaving ? Loader2 : Save, text: isSaving ? 'Saving...' : 'Save', disabled: isSaving || isAiLoading, className: isSaving ? 'animate-spin' : '' }),
+                React.createElement(ActionButton, { onClick: onCancel, icon: X, text: "Cancel", variant: "secondary", disabled: isSaving || isAiLoading }),
+                React.createElement(ActionButton, { onClick: () => setContent(''), icon: Eraser, text: "Clear", variant: "secondary", disabled: isSaving || isAiLoading })
+            ),
+            React.createElement(AiActionGroup, { onAiAction: onAiAction, isLoading: isAiLoading || isSaving, currentContent: content })
+        ),
+        isAiLoading && React.createElement('div', { className: "absolute inset-0 bg-black/20 z-20 flex items-center justify-center" }, React.createElement(Loader2, { className: "w-10 h-10 animate-spin text-white" })),
+        React.createElement('div', { className: "p-6 md:p-8 lg:p-12 flex-grow flex flex-col" },
+            React.createElement('input', {
+                type: "text",
+                value: name,
+                onChange: (e) => setName(e.target.value),
+                className: "w-full text-3xl font-bold bg-transparent focus:outline-none mb-4 p-2 -ml-2 rounded-md focus:bg-gray-100 dark:focus:bg-gray-800",
+                placeholder: "Artifact Name"
+            }),
+            React.createElement('textarea', {
+                value: content,
+                onChange: (e) => setContent(e.target.value),
+                className: "w-full h-full text-base font-mono bg-transparent resize-none focus:outline-none dark:text-gray-200 flex-grow",
+                placeholder: "Start writing your artifact...",
+                disabled: isSaving || isAiLoading
+            })
+        )
+    );
+};
+
+const AddSourceModal = ({ onClose, onSave }) => {
+    const [name, setName] = useState('');
+    const [url, setUrl] = useState('');
+    const [content, setContent] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        if (!name && !url && !content) {
+            alert("Please provide a Name, URL, or Content for the source.");
+            return;
+        }
+        setIsSaving(true);
+        await onSave({ Name: name, URL: url, Content: content });
+        setIsSaving(false);
+    };
+
+    return React.createElement('div', { className: "fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4", onClick: onClose },
+        React.createElement('form', { onSubmit: handleSave, className: "bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]", onClick: e => e.stopPropagation() },
+            React.createElement('div', { className: "p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0" },
+                React.createElement('h2', { className: "text-xl font-bold text-gray-800 dark:text-gray-200" }, "Add New Source"),
+                React.createElement('button', { type: "button", onClick: onClose, className: "p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" }, React.createElement(X, { className: "w-6 h-6" }))
+            ),
+            React.createElement('div', { className: "p-6 space-y-4 overflow-y-auto" },
+                React.createElement('div', null,
+                    React.createElement('label', { htmlFor: "source-name", className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" }, "Name"),
+                    React.createElement('input', { type: "text", id: "source-name", value: name, onChange: e => setName(e.target.value), className: "w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" })
+                ),
+                React.createElement('div', null,
+                    React.createElement('label', { htmlFor: "source-url", className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" }, "URL"),
+                    React.createElement('input', { type: "url", id: "source-url", value: url, onChange: e => setUrl(e.target.value), className: "w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" })
+                ),
+                 React.createElement('div', null,
+                    React.createElement('label', { htmlFor: "source-content", className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" }, "Content"),
+                    React.createElement('textarea', { id: "source-content", value: content, onChange: e => setContent(e.target.value), rows: 8, className: "w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" })
+                )
+            ),
+            React.createElement('div', { className: "p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2 flex-shrink-0" },
+                React.createElement(ActionButton, { type: "button", onClick: onClose, text: "Cancel", variant: "secondary", disabled: isSaving }),
+                React.createElement(ActionButton, { type: "submit", icon: isSaving ? Loader2 : Save, text: isSaving ? "Saving..." : "Save Source", disabled: isSaving, className: isSaving ? 'animate-spin' : '' })
+            )
+        )
+    );
+};
+
+const AddAtomicNoteModal = ({ onClose, onSave }) => {
+    const [name, setName] = useState('');
+    const [content, setContent] = useState('');
+    const [url, setUrl] = useState('');
+    const [isSaving, setIsSaving] = useState(false);
+
+    const handleSave = async (e) => {
+        e.preventDefault();
+        if (!name && !content && !url) {
+            alert("Please provide a Name, Content, or URL for the note.");
+            return;
+        }
+        setIsSaving(true);
+        await onSave({ Name: name, Content: content, URL: url });
+        setIsSaving(false);
+    };
+
+    return React.createElement('div', { className: "fixed inset-0 bg-black bg-opacity-60 z-50 flex items-center justify-center p-4", onClick: onClose },
+        React.createElement('form', { onSubmit: handleSave, className: "bg-white dark:bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg flex flex-col max-h-[90vh]", onClick: e => e.stopPropagation() },
+            React.createElement('div', { className: "p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center flex-shrink-0" },
+                React.createElement('h2', { className: "text-xl font-bold text-gray-800 dark:text-gray-200" }, "Add New Atomic Note"),
+                React.createElement('button', { type: "button", onClick: onClose, className: "p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700" }, React.createElement(X, { className: "w-6 h-6" }))
+            ),
+            React.createElement('div', { className: "p-6 space-y-4 overflow-y-auto" },
+                React.createElement('div', null,
+                    React.createElement('label', { htmlFor: "note-name", className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" }, "Name"),
+                    React.createElement('input', { type: "text", id: "note-name", value: name, onChange: e => setName(e.target.value), className: "w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" })
+                ),
+                React.createElement('div', null,
+                    React.createElement('label', { htmlFor: "note-url", className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" }, "URL"),
+                    React.createElement('input', { type: "url", id: "note-url", value: url, onChange: e => setUrl(e.target.value), className: "w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" })
+                ),
+                React.createElement('div', null,
+                    React.createElement('label', { htmlFor: "note-content", className: "block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1" }, "Content"),
+                    React.createElement('textarea', { id: "note-content", value: content, onChange: e => setContent(e.target.value), rows: 8, className: "w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" })
+                )
+            ),
+            React.createElement('div', { className: "p-4 border-t border-gray-200 dark:border-gray-700 flex justify-end space-x-2 flex-shrink-0" },
+                React.createElement(ActionButton, { type: "button", onClick: onClose, text: "Cancel", variant: "secondary", disabled: isSaving }),
+                React.createElement(ActionButton, { type: "submit", icon: isSaving ? Loader2 : Save, text: isSaving ? "Saving..." : "Save Note", disabled: isSaving, className: isSaving ? 'animate-spin' : '' })
+            )
+        )
+    );
+};
+
+const AttachmentViewer = ({ attachments, title }) => {
+    if (!attachments || attachments.length === 0) return null;
+    return React.createElement('div', { className: "mt-4 pt-4 border-t border-gray-200 dark:border-gray-700" },
+        React.createElement('h4', { className: "font-semibold mb-2" }, title || "Attachments"),
+        React.createElement('div', { className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" },
+            attachments.map(att => React.createElement('a', { key: att.id, href: att.url, target: "_blank", rel: "noopener noreferrer", className: "block group" },
+                React.createElement('img', { 
+                    src: att.thumbnails?.large?.url || att.url, 
+                    alt: att.filename, 
+                    className: "w-full h-32 object-cover rounded-lg shadow-md group-hover:shadow-xl transition-shadow"
+                })
+            ))
+        )
+    );
+};
+
+const AttachmentGalleryModal = ({ attachments, onClose }) => {
+    const [view, setView] = useState('gallery'); // 'gallery' or 'detail'
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const [isContentVisible, setIsContentVisible] = useState(false);
+
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (view === 'detail') {
+                if (e.key === 'ArrowLeft') goToPrevious();
+                if (e.key === 'ArrowRight') goToNext();
+            }
+            if (e.key === 'Escape') onClose();
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [view, currentIndex, attachments.length]);
+
+    if (!attachments || attachments.length === 0) return null;
+
+    const openDetailView = (index) => {
+        setCurrentIndex(index);
+        setIsContentVisible(false);
+        setView('detail');
+    };
+    
+    const goToPrevious = () => {
+        const isFirst = currentIndex === 0;
+        const newIndex = isFirst ? attachments.length - 1 : currentIndex - 1;
+        setCurrentIndex(newIndex);
+        setIsContentVisible(false);
+    };
+
+    const goToNext = () => {
+        const isLast = currentIndex === attachments.length - 1;
+        const newIndex = isLast ? 0 : currentIndex + 1;
+        setCurrentIndex(newIndex);
+        setIsContentVisible(false);
+    };
+
+    const currentAttachment = attachments[currentIndex];
+    const parsedContentHtml = useMemo(() => {
+        return currentAttachment?.sourceContent ? window.marked.parse(currentAttachment.sourceContent) : '';
+    }, [currentAttachment]);
+
+    return React.createElement('div', { className: "fixed inset-0 bg-black/90 z-50 flex flex-col p-4", onClick: onClose },
+        view === 'gallery' ? (
+            React.createElement(React.Fragment, null,
+                React.createElement('div', { className: "flex-shrink-0 flex justify-between items-center text-white p-2" },
+                    React.createElement('h2', { className: "text-lg font-semibold" }, `All Attachments (${attachments.length})`),
+                    React.createElement('button', { onClick: onClose, className: "p-2 rounded-full hover:bg-white/20" }, React.createElement(X, { className: "w-6 h-6" }))
+                ),
+                React.createElement('div', { className: "flex-grow overflow-y-auto p-4", onClick: e => e.stopPropagation() },
+                    React.createElement('div', { className: "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4" },
+                        attachments.map((att, index) => (
+                            React.createElement('button', {
+                                key: att.id,
+                                onClick: () => openDetailView(index),
+                                className: "block group aspect-square relative"
+                            },
+                                React.createElement('img', {
+                                    src: att.thumbnails?.large?.url || att.url,
+                                    alt: att.filename,
+                                    className: "w-full h-full object-cover rounded-lg shadow-md group-hover:shadow-xl transition-shadow"
+                                }),
+                                React.createElement('div', { className: "absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs p-1 rounded-b-lg truncate" }, att.sourceName)
+                            )
+                        ))
+                    )
+                )
+            )
+        ) : ( // Detail View
+            React.createElement(React.Fragment, null,
+                React.createElement('div', { className: "flex-shrink-0 flex justify-between items-center text-white p-2" },
+                    React.createElement('div', { className: "flex items-center space-x-4" },
+                        React.createElement('button', { onClick: () => setView('gallery'), className: "p-2 rounded-md hover:bg-white/20 flex items-center text-sm" }, React.createElement(List, { className: "w-5 h-5 mr-2" }), "Back to Gallery"),
+                        React.createElement('h2', { className: "text-lg font-semibold truncate" }, `From: ${currentAttachment.sourceName}`)
+                    ),
+                    React.createElement('button', { onClick: onClose, className: "p-2 rounded-full hover:bg-white/20" }, React.createElement(X, { className: "w-6 h-6" }))
+                ),
+                React.createElement('div', { className: "flex-grow flex items-center justify-between relative min-h-0", onClick: e => e.stopPropagation() },
+                    React.createElement('button', { onClick: goToPrevious, className: "flex-shrink-0 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white" }, React.createElement(ChevronLeft, { className: "w-8 h-8" })),
+                    React.createElement('div', { className: "flex-grow flex flex-col items-center justify-center min-h-0 p-4" },
+                        React.createElement('div', { className: "flex-grow w-full h-full flex items-center justify-center" },
+                             React.createElement('img', {
+                                src: currentAttachment.url,
+                                alt: currentAttachment.filename,
+                                className: "max-w-full max-h-full object-contain rounded-lg"
+                            })
+                        ),
+                        React.createElement('div', { className: "flex-shrink-0 mt-4 w-full max-w-4xl" },
+                            React.createElement('div', { className: "bg-white/10 rounded-lg p-2 flex items-center justify-between" },
+                                currentAttachment.sourceContent ? 
+                                    React.createElement('button', { 
+                                        onClick: () => setIsContentVisible(!isContentVisible), 
+                                        className: "text-white flex items-center text-sm font-medium hover:text-gray-300" 
+                                    },
+                                        React.createElement('span', null, "Show Content"),
+                                        React.createElement(isContentVisible ? ChevronDown : ChevronRight, { className: "w-5 h-5 ml-1" })
+                                    ) : React.createElement('div', null), // Placeholder to keep links to the right
+                                React.createElement('div', { className: "flex items-center space-x-2" },
+                                    currentAttachment.primaryUrl && React.createElement('a', { href: currentAttachment.primaryUrl, target: "_blank", rel: "noopener noreferrer", className: "px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-md" }, "Source"),
+                                    currentAttachment.markdownUrl && React.createElement('a', { href: currentAttachment.markdownUrl, target: "_blank", rel: "noopener noreferrer", className: "px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-md" }, "Markdown"),
+                                    currentAttachment.airtableUrl && React.createElement('a', { href: currentAttachment.airtableUrl, target: "_blank", rel: "noopener noreferrer", className: "px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-md" }, "Airtable")
+                                )
+                            ),
+                            isContentVisible && currentAttachment.sourceContent && React.createElement('div', { className: "p-4 bg-gray-800 rounded-b-lg max-h-48 overflow-y-auto mt-1" },
+                                React.createElement('div', { className: "prose dark:prose-invert max-w-none", dangerouslySetInnerHTML: { __html: parsedContentHtml } })
+                            )
+                        )
+                    ),
+                    React.createElement('button', { onClick: goToNext, className: "flex-shrink-0 p-2 rounded-full bg-black/50 hover:bg-black/80 text-white" }, React.createElement(ChevronRight, { className: "w-8 h-8" }))
+                )
+            )
+        )
+    );
+};
+
+const SourcesViewer = ({ sources, isLoading }) => {
+    const [openSources, setOpenSources] = useState({});
+
+    if (isLoading) {
+        return React.createElement('div', { className: "mt-12 pt-6 border-t" },
+            React.createElement('h2', { className: "text-2xl font-bold mb-4 flex items-center" }, React.createElement(Paperclip, { className: "mr-2" }), "Sources"),
+            React.createElement(LoadingSpinner)
+        );
+    }
+    if (!sources || sources.length === 0) return null;
+
+    const toggleSource = (id) => setOpenSources(prev => ({ ...prev, [id]: !prev[id] }));
+
+    return React.createElement('div', { className: "mt-12 pt-6 border-t" },
+        React.createElement('h2', { className: "text-2xl font-bold mb-4 flex items-center" }, React.createElement(Paperclip, { className: "mr-2" }), "Sources"),
+        React.createElement('div', { className: "space-y-2" },
+            sources.map(source => React.createElement('div', { key: source.id, className: "border rounded-lg overflow-hidden" },
+                React.createElement('button', { onClick: () => toggleSource(source.id), className: "w-full flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700" },
+                    React.createElement('span', { className: "font-semibold text-left" }, source.fields.Name || 'Untitled Source'),
+                    openSources[source.id] ? React.createElement(ChevronDown) : React.createElement(ChevronRight)
+                ),
+                openSources[source.id] && React.createElement('div', { className: "p-4 bg-white dark:bg-gray-900 border-t" },
+                    React.createElement('div', { className: 'flex flex-col space-y-2 mb-4' },
+                        source.fields.URL && React.createElement('a', { href: source.fields.URL, target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "Primary URL")),
+                        source.fields['View URL'] && React.createElement('a', { href: source.fields['View URL'], target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "View Source Page")),
+                        source.fields['Airtable URL'] && React.createElement('a', { href: source.fields['Airtable URL'], target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "View in Airtable"))
+                    ),
+                    React.createElement(AttachmentViewer, { attachments: source.fields.Attachments }),
+                    source.fields.Content && React.createElement('div', { className: "prose dark:prose-invert max-w-none mt-4 pt-4 border-t border-gray-200 dark:border-gray-700" },
+                        React.createElement('h4', { className: "font-semibold" }, "Content"),
+                        React.createElement('div', { dangerouslySetInnerHTML: { __html: window.marked.parse(source.fields.Content) } })
+                    ),
+                    source.fields.Notes && React.createElement('div', { className: "prose dark:prose-invert max-w-none mt-4 pt-4 border-t border-gray-200 dark:border-gray-700" },
+                        React.createElement('h4', { className: "font-semibold" }, "Notes"),
+                        React.createElement('div', { dangerouslySetInnerHTML: { __html: window.marked.parse(source.fields.Notes) } })
+                    )
+                )
+            ))
+        )
+    );
+};
+
+const AtomicNotesViewer = ({ notes, isLoading }) => {
+    const [openNotes, setOpenNotes] = useState({});
+
+    if (isLoading) {
+        return React.createElement('div', { className: "mt-12 pt-6 border-t" },
+            React.createElement('h2', { className: "text-2xl font-bold mb-4 flex items-center" }, React.createElement(StickyNote, { className: "mr-2" }), "Atomic Notes"),
+            React.createElement(LoadingSpinner)
+        );
+    }
+    if (!notes || notes.length === 0) return null;
+
+    const toggleNote = (id) => setOpenNotes(prev => ({ ...prev, [id]: !prev[id] }));
+
+    return React.createElement('div', { className: "mt-12 pt-6 border-t" },
+        React.createElement('h2', { className: "text-2xl font-bold mb-4 flex items-center" }, React.createElement(StickyNote, { className: "mr-2" }), "Atomic Notes"),
+        React.createElement('div', { className: "space-y-2" },
+            notes.map(note => React.createElement('div', { key: note.id, className: "border rounded-lg overflow-hidden" },
+                React.createElement('button', { onClick: () => toggleNote(note.id), className: "w-full flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700" },
+                    React.createElement('span', { className: "font-semibold text-left" }, note.fields.Name || 'Untitled Note'),
+                    openNotes[note.id] ? React.createElement(ChevronDown) : React.createElement(ChevronRight)
+                ),
+                openNotes[note.id] && React.createElement('div', { className: "p-4 bg-white dark:bg-gray-900 border-t" },
+                    React.createElement('div', { className: 'flex flex-col space-y-2 mb-4' },
+                        note.fields.URL && React.createElement('a', { href: note.fields.URL, target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "Primary URL")),
+                        note.fields['View URL'] && React.createElement('a', { href: note.fields['View URL'], target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "View Note Page")),
+                        note.fields['Airtable URL'] && React.createElement('a', { href: note.fields['Airtable URL'], target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "View in Airtable"))
+                    ),
+                    React.createElement(AttachmentViewer, { attachments: note.fields.Attachments }),
+                    note.fields.Content && React.createElement('div', { className: "prose dark:prose-invert max-w-none mt-4 pt-4 border-t border-gray-200 dark:border-gray-700" },
+                        React.createElement('div', { dangerouslySetInnerHTML: { __html: window.marked.parse(note.fields.Content) } })
+                    ),
+                    note.fields.Tags && React.createElement('p', { className: "text-sm text-gray-500 mt-4 pt-4 border-t" }, React.createElement('strong', null, "Tags: "), note.fields.Tags)
+                )
+            ))
+        )
+    );
+};
+
+
+const SnapshotViewer = ({ snapshotsContent }) => {
+    const [openSnapshots, setOpenSnapshots] = useState({});
+    const snapshots = useMemo(() => {
+        if (!snapshotsContent) return [];
+        
+        const contentString = Array.isArray(snapshotsContent) ? snapshotsContent.join('\n---------\n') : snapshotsContent;
+        if (typeof contentString !== 'string') return [];
+
+        return contentString.split(/(?<=Z)---------/).map((s, i) => {
+            const [header, ...contentParts] = s.split('\n');
+            const content = contentParts.join('\n').trim();
+            const dateMatch = header.match(/(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z)/);
+            const date = dateMatch ? new Date(dateMatch[0]).toLocaleString() : `Snapshot ${i + 1}`;
+            return { id: i, date, content };
+        }).filter(s => s.content);
+    }, [snapshotsContent]);
+
+    if (!snapshots.length) return null;
+    const toggleSnapshot = (id) => setOpenSnapshots(prev => ({ ...prev, [id]: !prev[id] }));
+
+    return React.createElement('div', { className: "mt-12 pt-6 border-t" },
+        React.createElement('h2', { className: "text-2xl font-bold mb-4" }, "Version History"),
+        React.createElement('div', { className: "space-y-2" },
+            snapshots.map(snapshot => React.createElement('div', { key: snapshot.id, className: "border rounded-lg overflow-hidden" },
+                React.createElement('button', { onClick: () => toggleSnapshot(snapshot.id), className: "w-full flex justify-between items-center p-4 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700" },
+                    React.createElement('span', { className: "font-semibold flex items-center" }, React.createElement(Clock, { className: "mr-2 w-4 h-4" }), ` ${snapshot.date}`),
+                    openSnapshots[snapshot.id] ? React.createElement(ChevronDown) : React.createElement(ChevronRight)
+                ),
+                openSnapshots[snapshot.id] && React.createElement('div', { className: "p-4 bg-white dark:bg-gray-900 border-t" },
+                    React.createElement('pre', { className: "whitespace-pre-wrap font-sans text-sm" }, snapshot.content)
+                )
+            ))
+        )
+    );
+};
+
+const ActionButton = ({ onClick, icon, text, variant = 'primary', disabled = false, className = '', iconOnlyOnMobile = false, type = 'button' }) => {
+    const baseClasses = "flex items-center justify-center text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors";
+    const variantClasses = {
+        primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500',
+        secondary: 'bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 focus:ring-gray-500',
+    };
+
+    const IconComponent = icon;
+
+    if (iconOnlyOnMobile) {
+        return React.createElement('button', { 
+            type,
+            onClick, 
+            disabled, 
+            title: text, // Tooltip for icon-only button
+            className: `${baseClasses} ${variantClasses[variant]} p-2 md:px-3 md:py-2` 
+        },
+            IconComponent && React.createElement(IconComponent, { className: `w-5 h-5 md:mr-2 ${className}` }),
+            React.createElement('span', { className: "hidden md:inline" }, text)
+        );
+    }
+
+    return React.createElement('button', { 
+        type,
+        onClick, 
+        disabled, 
+        className: `${baseClasses} ${variantClasses[variant]} px-3 py-2` 
+    },
+        IconComponent && React.createElement(IconComponent, { className: `w-4 h-4 mr-2 ${className}` }),
+        React.createElement('span', null, text)
+    );
+};
+
+const LoadingSpinner = () => React.createElement('div', { className: "flex items-center justify-center h-full" }, React.createElement(Loader2, { className: "w-8 h-8 animate-spin text-blue-500" }));
+const WelcomeScreen = () => React.createElement('div', { className: "flex flex-col items-center justify-center h-full text-center p-4 text-gray-500 dark:text-gray-400" }, React.createElement(BookOpen, { className: "w-16 h-16 mb-4" }), React.createElement('h2', { className: "text-2xl font-semibold" }, "Welcome to the Artifact Manager"), React.createElement('p', { className: "mt-2" }, "Select an artifact from the list or create a new one."));
+
+const container = document.getElementById('root');
+const root = ReactDOM.createRoot(container);
+root.render(React.createElement(App));
+
+    </script>
+</body>
+</html>

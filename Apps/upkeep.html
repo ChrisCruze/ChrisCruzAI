@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upkeep: Apartment Cleaning Manager</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Firebase (Compat libraries for easier transition) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, useCallback } = React;
+
+        // --- Helper Functions & Constants ---
+
+        // Provided Firebase Configuration for Realtime Database
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+            measurementId: "G-LVHF0VP8RM"
+        };
+
+        const CADENCE_OPTIONS = ['daily', 'weekly', 'monthly'];
+
+        const formatDuration = (ms, style = 'm_s') => {
+            if (!ms || ms < 1000) return style === 'h_m' ? '0m' : '0s';
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            const parts = [];
+            if (style === 'h_m') {
+                if (hours > 0) parts.push(`${hours}h`);
+                if (minutes > 0 || hours > 0) parts.push(`${minutes}m`);
+                return parts.length > 0 ? parts.join(' ') : '< 1m';
+            }
+            if (hours > 0) parts.push(`${hours}h`);
+            if (minutes > 0) parts.push(`${minutes}m`);
+            if (seconds > 0) parts.push(`${seconds}s`);
+            return parts.join(' ') || '< 1s';
+        };
+
+        // --- Icon Components ---
+        const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>;
+        const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>;
+        const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><path d="m9 11 3 3L22 4"/></svg>;
+        const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>;
+        const HistoryIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>;
+        const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/><path d="m15 5 4 4"/></svg>;
+        const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>;
+        const LogbookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/><path d="M4 15h16"/></svg>;
+
+        // --- Main App Component ---
+        function App() {
+            const [db, setDb] = useState(null);
+            const [tasks, setTasks] = useState([]);
+            const [isLoading, setIsLoading] = useState(true);
+            const [isModalOpen, setIsModalOpen] = useState(false);
+            const [editingTask, setEditingTask] = useState(null);
+            const [taskToDelete, setTaskToDelete] = useState(null);
+            const [viewingHistoryForTask, setViewingHistoryForTask] = useState(null);
+            const [filter, setFilter] = useState('all');
+            const [sortBy, setSortBy] = useState('createdAt-asc');
+
+            // --- Firebase Initialization & Data Fetching ---
+            useEffect(() => {
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(firebaseConfig);
+                    }
+                    const database = firebase.database();
+                    setDb(database);
+                    
+                    const tasksRef = database.ref('tasks');
+                    const listener = tasksRef.on('value', (snapshot) => {
+                        const data = snapshot.val();
+                        const tasksData = data ? Object.keys(data).map(key => ({ id: key, history: {}, ...data[key] })) : [];
+                        setTasks(tasksData);
+                        setIsLoading(false);
+                    }, (error) => {
+                        console.error("Error fetching tasks:", error);
+                        setIsLoading(false);
+                    });
+                    
+                    return () => tasksRef.off('value', listener);
+                } catch (error) {
+                    console.error("Firebase initialization failed:", error);
+                    setIsLoading(false);
+                }
+            }, []);
+
+            // --- Derived State & KPI Calculations ---
+            const activeTask = useMemo(() => tasks.find(t => t.timerStartTime), [tasks]);
+            const now = useMemo(() => new Date(), []);
+            const startOfToday = useMemo(() => new Date(now.getFullYear(), now.getMonth(), now.getDate()), [now]);
+
+            const completedToday = useMemo(() => tasks.filter(t => {
+                if (!t.history) return false;
+                return Object.values(t.history).some(h => new Date(h.completedAt) >= startOfToday);
+            }), [tasks, startOfToday]);
+
+            const totalTimeTrackedTodayMs = useMemo(() => tasks.reduce((total, task) => {
+                const historyToday = Object.values(task.history || {}).filter(h => new Date(h.completedAt) >= startOfToday);
+                const taskTotalToday = historyToday.reduce((sum, h) => sum + h.duration, 0);
+                return total + taskTotalToday;
+            }, 0), [tasks, startOfToday]);
+
+            const tasksDue = useMemo(() => tasks.filter(t => !t.lastCompleted || (t.nextDueDate && new Date(t.nextDueDate) < now)).length, [tasks, now]);
+            const completionPercentage = useMemo(() => tasks.length > 0 ? Math.round((completedToday.length / tasks.length) * 100) : 0, [completedToday.length, tasks.length]);
+
+            // --- Filtering and Sorting Logic ---
+            const filteredAndSortedTasks = useMemo(() => {
+                let processedTasks = [...tasks];
+                if (filter === 'due') {
+                    processedTasks = processedTasks.filter(t => !t.lastCompleted || (t.nextDueDate && new Date(t.nextDueDate) < now));
+                } else if (filter === 'completed') {
+                    processedTasks = completedToday;
+                }
+                processedTasks.sort((a, b) => {
+                    const [sortKey, sortOrder] = sortBy.split('-');
+                    let valA = a[sortKey], valB = b[sortKey];
+                    if (valA == null) return 1; if (valB == null) return -1;
+                    if (sortKey === 'name') return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);
+                    if (sortKey === 'nextDueDate' || sortKey === 'lastCompleted') { valA = new Date(valA).getTime(); valB = new Date(valB).getTime(); }
+                    if (valA < valB) return sortOrder === 'asc' ? -1 : 1;
+                    if (valA > valB) return sortOrder === 'asc' ? 1 : -1;
+                    return 0;
+                });
+                return processedTasks;
+            }, [tasks, filter, sortBy, now, completedToday]);
+
+            // --- Core Logic Functions ---
+            const getNextDueDate = (cadence, fromDate = new Date()) => {
+                const date = new Date(fromDate);
+                switch (cadence) {
+                    case 'daily': date.setDate(date.getDate() + 1); break;
+                    case 'weekly': date.setDate(date.getDate() + 7); break;
+                    case 'monthly': date.setMonth(date.getMonth() + 1); break;
+                }
+                return date.toISOString();
+            };
+
+            const handleSaveTask = async (taskData) => {
+                if (!db) return;
+                const { id, name, cadence } = taskData;
+                try {
+                    if (id) {
+                        await db.ref('tasks/' + id).update({ name, cadence });
+                    } else {
+                        await db.ref('tasks').push({
+                            name, cadence, createdAt: firebase.database.ServerValue.TIMESTAMP,
+                            lastCompleted: null, nextDueDate: new Date().toISOString(),
+                            timerStartTime: null, history: {}
+                        });
+                    }
+                    closeModal();
+                } catch (error) { console.error("Error saving task:", error); }
+            };
+
+            const handleDeleteTask = async () => {
+                if (!db || !taskToDelete) return;
+                try {
+                    await db.ref('tasks/' + taskToDelete.id).remove();
+                    setTaskToDelete(null);
+                } catch (error) { console.error("Error deleting task:", error); }
+            };
+
+            const handleTimerToggle = async (task) => {
+                if (!db) return;
+                const taskRef = db.ref('tasks/' + task.id);
+                if (activeTask && activeTask.id === task.id) {
+                    const completionTime = new Date();
+                    const duration = Date.now() - task.timerStartTime;
+                    const newHistoryKey = db.ref('history').push().key;
+                    const updates = {};
+                    updates[`/tasks/${task.id}/timerStartTime`] = null;
+                    updates[`/tasks/${task.id}/lastCompleted`] = completionTime.toISOString();
+                    updates[`/tasks/${task.id}/nextDueDate`] = getNextDueDate(task.cadence, completionTime);
+                    updates[`/tasks/${task.id}/history/${newHistoryKey}`] = { completedAt: firebase.database.ServerValue.TIMESTAMP, duration };
+                    await db.ref().update(updates);
+                } else if (!activeTask) {
+                    await taskRef.update({ timerStartTime: firebase.database.ServerValue.TIMESTAMP });
+                }
+            };
+            
+            const openModalForEdit = (task) => { setEditingTask(task); setIsModalOpen(true); };
+            const openModalForNew = () => { setEditingTask(null); setIsModalOpen(true); };
+            const closeModal = () => { setIsModalOpen(false); setEditingTask(null); };
+
+            // --- UI Components ---
+            const KpiCard = ({ title, value, icon, color }) => (<div className={`bg-white p-4 rounded-2xl shadow-lg flex items-center space-x-4 border-l-4 ${color}`}><div className="text-3xl">{icon}</div><div><p className="text-gray-500 text-sm font-medium">{title}</p><p className="text-2xl font-bold text-gray-800">{value}</p></div></div>);
+            const ProgressBar = ({ percentage, completedCount, totalCount }) => (<div className="bg-white p-4 rounded-2xl shadow-lg col-span-2 lg:col-span-4"><div className="flex justify-between items-center mb-1"><span className="text-gray-500 text-sm font-medium">Daily Progress</span><span className="font-bold text-gray-800">{percentage}% <span className="text-sm font-medium text-gray-500">({completedCount}/{totalCount})</span></span></div><div className="w-full bg-gray-200 rounded-full h-2.5"><div className="bg-green-500 h-2.5 rounded-full" style={{ width: `${percentage}%`, transition: 'width 0.5s ease-in-out' }}></div></div></div>);
+            const TaskModal = ({ isOpen, onClose, onSave, initialData }) => {
+                const [taskName, setTaskName] = useState('');
+                const [cadence, setCadence] = useState(CADENCE_OPTIONS[1]);
+                useEffect(() => { if (initialData) { setTaskName(initialData.name); setCadence(initialData.cadence); } else { setTaskName(''); setCadence(CADENCE_OPTIONS[1]); } }, [initialData, isOpen]);
+                if (!isOpen) return null;
+                const handleSubmit = (e) => { e.preventDefault(); if (taskName.trim()) { onSave({ id: initialData?.id, name: taskName.trim(), cadence }); } };
+                return (<div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4"><div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all"><h2 className="text-2xl font-bold text-gray-800 mb-6">{initialData ? "Edit Task" : "Add New Task"}</h2><form onSubmit={handleSubmit}><div className="mb-4"><label htmlFor="taskName" className="block text-sm font-medium text-gray-600 mb-2">Task Name</label><input id="taskName" type="text" value={taskName} onChange={(e) => setTaskName(e.target.value)} placeholder="e.g., Wipe kitchen counters" className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition" required /></div><div className="mb-6"><label className="block text-sm font-medium text-gray-600 mb-2">How often?</label><div className="flex space-x-2">{CADENCE_OPTIONS.map(option => (<button key={option} type="button" onClick={() => setCadence(option)} className={`flex-1 py-3 px-2 text-sm font-semibold rounded-lg transition capitalize ${cadence === option ? 'bg-blue-600 text-white shadow-md' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}>{option}</button>))}</div></div><div className="flex justify-end space-x-4"><button type="button" onClick={onClose} className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-semibold hover:bg-gray-200 transition">Cancel</button><button type="submit" className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition shadow-sm">Save Task</button></div></form></div></div>);
+            };
+            const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, taskName }) => {
+                if (!isOpen) return null;
+                return (<div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center z-50 p-4"><div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm"><h2 className="text-xl font-bold text-gray-800 mb-4">Confirm Deletion</h2><p className="text-gray-600 mb-6">Are you sure you want to delete <strong className="text-gray-800">{taskName}</strong>? This can't be undone.</p><div className="flex justify-end space-x-4"><button onClick={onClose} className="px-6 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition">Cancel</button><button onClick={onConfirm} className="px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition">Delete</button></div></div></div>);
+            };
+            const HistoryModal = ({ isOpen, onClose, task }) => {
+                if (!isOpen || !task) return null;
+                const historyEntries = useMemo(() => {
+                    if (!task.history) return [];
+                    return Object.values(task.history)
+                        .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+                }, [task.history]);
+
+                return (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
+                        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 w-full max-w-xl transform transition-all">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <h2 className="text-2xl font-bold text-gray-800">History for</h2>
+                                    <p className="text-lg text-blue-600 font-semibold">{task.name}</p>
+                                </div>
+                                <button onClick={onClose} className="text-3xl font-light text-gray-400 hover:text-gray-600 leading-none">&times;</button>
+                            </div>
+                            <div className="mt-6 max-h-[60vh] overflow-y-auto pr-2 -mr-2">
+                                {historyEntries.length > 0 ? (
+                                    <ul className="space-y-4">
+                                        {historyEntries.map((entry, index) => {
+                                            if (!entry.completedAt || !entry.duration) return null;
+                                            
+                                            const endTime = new Date(entry.completedAt);
+                                            const startTime = new Date(entry.completedAt - entry.duration);
+
+                                            const dateOptions = { weekday: 'short', year: '2-digit', month: 'numeric', day: 'numeric' };
+                                            const timeOptions = { hour: 'numeric', minute: '2-digit', hour12: true };
+
+                                            const dateStr = startTime.toLocaleDateString('en-US', dateOptions);
+                                            const startTimeStr = startTime.toLocaleTimeString('en-US', timeOptions);
+                                            const endTimeStr = endTime.toLocaleTimeString('en-US', timeOptions);
+
+                                            return (
+                                                <li key={index} className="flex flex-col sm:flex-row justify-between sm:items-center bg-gray-50 p-4 rounded-lg border-l-4 border-gray-200">
+                                                    <div className="flex-grow">
+                                                        <p className="font-semibold text-gray-800">{dateStr}</p>
+                                                        <p className="text-sm text-gray-600">{`${startTimeStr} - ${endTimeStr}`}</p>
+                                                    </div>
+                                                    <div className="font-bold text-blue-600 text-lg text-left sm:text-right mt-2 sm:mt-0">
+                                                        {formatDuration(entry.duration, 'h_m_s')}
+                                                    </div>
+                                                </li>
+                                            );
+                                        })}
+                                    </ul>
+                                ) : (
+                                    <p className="text-center text-gray-500 py-8">No completion history for this task yet.</p>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            const TimerDisplay = ({ startTime }) => {
+                const [elapsed, setElapsed] = useState(Date.now() - startTime);
+                useEffect(() => { const interval = setInterval(() => setElapsed(Date.now() - startTime), 1000); return () => clearInterval(interval); }, [startTime]);
+                const minutes = Math.floor(elapsed / 1000 / 60).toString().padStart(2, '0');
+                const seconds = Math.floor((elapsed / 1000) % 60).toString().padStart(2, '0');
+                return <span className="font-mono text-lg">{`${minutes}:${seconds}`}</span>;
+            };
+
+            const TaskItem = ({ task, onToggleTimer, onEdit, onDelete, onShowHistory, activeTask }) => {
+                const isTimerActive = activeTask?.id === task.id;
+                const dueDate = task.nextDueDate ? new Date(task.nextDueDate) : null;
+                const isDue = !task.lastCompleted || (dueDate && dueDate < new Date());
+                const lastHistoryEntry = useMemo(() => {
+                    if (!task.history) return null;
+                    return Object.values(task.history).sort((a,b) => b.completedAt - a.completedAt)[0];
+                }, [task.history]);
+
+                return (
+                    <li className="bg-white p-4 rounded-xl shadow-md flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="flex-grow">
+                            <p className="font-semibold text-lg text-gray-800">{task.name}</p>
+                            <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-gray-500 mt-2">
+                                <span className={`capitalize px-2 py-0.5 rounded-full text-xs font-medium ${task.cadence === 'daily' ? 'bg-green-100 text-green-800' : task.cadence === 'weekly' ? 'bg-yellow-100 text-yellow-800' : 'bg-purple-100 text-purple-800'}`}>{task.cadence}</span>
+                                <div className={`flex items-center gap-1 ${isDue ? 'text-red-500 font-semibold' : ''}`}><CalendarIcon width="16" height="16" /><span>Due: {!dueDate ? 'N/A' : !task.lastCompleted ? 'Now' : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(dueDate)}</span></div>
+                                <div className="flex items-center gap-1"><CheckCircleIcon width="16" height="16" /><span>Last done: {!task.lastCompleted ? 'Never' : new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(task.lastCompleted))}</span></div>
+                                <div className="flex items-center gap-1"><HistoryIcon width="16" height="16" /><span>Last time: {lastHistoryEntry ? formatDuration(lastHistoryEntry.duration) : 'N/A'}</span></div>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-1 flex-shrink-0">
+                            <button onClick={onShowHistory} className="p-2 text-gray-500 hover:text-indigo-600 hover:bg-gray-100 rounded-full transition"><LogbookIcon /></button>
+                            <button onClick={onEdit} className="p-2 text-gray-500 hover:text-blue-600 hover:bg-gray-100 rounded-full transition"><EditIcon /></button>
+                            <button onClick={onDelete} className="p-2 text-gray-500 hover:text-red-600 hover:bg-gray-100 rounded-full transition"><TrashIcon /></button>
+                            <button onClick={() => onToggleTimer(task)} disabled={activeTask && !isTimerActive} className={`flex items-center justify-center gap-2 w-32 px-4 py-3 rounded-lg font-semibold transition text-white ${isTimerActive ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} disabled:bg-gray-400 disabled:cursor-not-allowed`}>{isTimerActive ? <TimerDisplay startTime={task.timerStartTime} /> : <><ClockIcon width="20" height="20" /><span>Start</span></>}</button>
+                        </div>
+                    </li>
+                );
+            };
+
+            return (
+                <div className="font-sans text-gray-900">
+                    <div className="container mx-auto p-4 md:p-8 max-w-5xl">
+                        <header className="mb-8"><h1 className="text-4xl md:text-5xl font-bold text-gray-800">Upkeep ✨</h1><p className="text-gray-500 mt-2">Your personal apartment cleaning dashboard.</p></header>
+                        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
+                            <KpiCard title="Total Tasks" value={tasks.length} icon="📋" color="border-blue-500" />
+                            <KpiCard title="Tasks Due" value={tasksDue} icon="❗️" color="border-red-500" />
+                            <KpiCard title="Completion %" value={`${completionPercentage}%`} icon={<CheckCircleIcon />} color="border-green-500" />
+                            <KpiCard title="Time Today" value={formatDuration(totalTimeTrackedTodayMs, 'h_m')} icon={<HistoryIcon />} color="border-indigo-500" />
+                            <ProgressBar percentage={completionPercentage} completedCount={completedToday.length} totalCount={tasks.length} />
+                        </section>
+                        <main>
+                            <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4"><h2 className="text-2xl font-bold text-gray-700">Cleaning Schedule</h2><button onClick={openModalForNew} className="flex items-center space-x-2 bg-blue-600 text-white font-semibold px-5 py-3 rounded-lg shadow-md hover:bg-blue-700 transition-transform transform hover:scale-105 w-full sm:w-auto"><PlusIcon /><span>Add Task</span></button></div>
+                            <div className="flex flex-col sm:flex-row justify-between items-center mb-6 bg-white p-3 rounded-xl shadow-sm gap-4">
+                                <div className="flex items-center bg-gray-100 p-1 rounded-lg">
+                                    <button onClick={() => setFilter('all')} className={`px-4 py-2 text-sm font-semibold rounded-md transition ${filter === 'all' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:bg-gray-200'}`}>All</button>
+                                    <button onClick={() => setFilter('due')} className={`px-4 py-2 text-sm font-semibold rounded-md transition ${filter === 'due' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:bg-gray-200'}`}>Due</button>
+                                    <button onClick={() => setFilter('completed')} className={`px-4 py-2 text-sm font-semibold rounded-md transition ${filter === 'completed' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:bg-gray-200'}`}>Completed</button>
+                                </div>
+                                <div className="flex items-center gap-2"><label htmlFor="sort" className="text-sm font-medium text-gray-600">Sort by:</label><select id="sort" value={sortBy} onChange={e => setSortBy(e.target.value)} className="bg-gray-100 border-none rounded-lg px-3 py-2 text-sm font-semibold text-gray-800 focus:ring-2 focus:ring-blue-500"><option value="createdAt-asc">Date Added</option><option value="nextDueDate-asc">Due Date</option><option value="name-asc">Name (A-Z)</option></select></div>
+                            </div>
+                            {isLoading ? (<p className="text-center text-gray-500 py-10">Loading your tasks...</p>) : tasks.length === 0 ? (<div className="text-center bg-white p-10 rounded-xl shadow-sm"><h3 className="text-xl font-semibold text-gray-700">No tasks yet!</h3><p className="text-gray-500 mt-2">Click "Add Task" to get your cleaning schedule started.</p></div>) : filteredAndSortedTasks.length === 0 ? (<div className="text-center bg-white p-10 rounded-xl shadow-sm"><h3 className="text-xl font-semibold text-gray-700">No tasks match your filter.</h3><p className="text-gray-500 mt-2">Try selecting a different filter to see your tasks.</p></div>) : (<ul className="space-y-4">{filteredAndSortedTasks.map(task => (<TaskItem key={task.id} task={task} onToggleTimer={handleTimerToggle} onEdit={() => openModalForEdit(task)} onDelete={() => setTaskToDelete(task)} onShowHistory={() => setViewingHistoryForTask(task)} activeTask={activeTask} />))}</ul>)}
+                        </main>
+                    </div>
+                    <TaskModal isOpen={isModalOpen} onClose={closeModal} onSave={handleSaveTask} initialData={editingTask} />
+                    <DeleteConfirmationModal isOpen={!!taskToDelete} onClose={() => setTaskToDelete(null)} onConfirm={handleDeleteTask} taskName={taskToDelete?.name} />
+                    <HistoryModal isOpen={!!viewingHistoryForTask} onClose={() => setViewingHistoryForTask(null)} task={viewingHistoryForTask} />
+                </div>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

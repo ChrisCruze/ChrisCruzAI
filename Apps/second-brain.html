@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Second Brain Knowledge App</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- React & Babel for JSX in the browser -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Additional Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
+    <style>
+        /* Basic styles for the app */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+        }
+        /* Custom scrollbar for a better look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* bg-gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4f46e5; /* bg-indigo-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4338ca; /* bg-indigo-700 */
+        }
+        /* Prose styles for markdown rendering */
+        .prose-invert a { color: #818cf8; }
+        .prose-invert blockquote { border-left-color: #818cf8; }
+        /* Simple fade-in animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useMemo } = React;
+
+        // --- Firebase Configuration ---
+        // IMPORTANT: This is a sample config. Replace with your actual Firebase project configuration.
+        const firebaseConfig = {
+          apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+          authDomain: "chriscruz-d62ea.firebaseapp.com",
+          databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+          projectId: "chriscruz-d62ea",
+          storageBucket: "chriscruz-d62ea.firebasestorage.app",
+          messagingSenderId: "817856028090",
+          appId: "1:817856028090:web:983d8c52bb3c7202dc5183"
+        };
+
+        // --- Gemini API Configuration ---
+        const API_KEY = ""; // Your API key here, if required.
+        const API_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=${API_KEY}`;
+        
+        // --- Initialize Firebase ---
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const DB_PATH = 'second-brain/notes/';
+
+        // --- Lucide Icon Component ---
+        // A helper to use Lucide icons with string names, similar to lucide-react
+        const LucideIcon = ({ name, className, size = 24, strokeWidth = 2 }) => {
+            const iconNode = lucide.icons[name];
+            if (!iconNode) {
+                console.warn(`Icon "${name}" not found in lucide-icons.`);
+                return null;
+            }
+            const [tag, attrs, children] = iconNode;
+            
+            // The children need to be processed to create React elements
+            const renderedChildren = children.map(([childTag, childAttrs], index) => {
+                return React.createElement(childTag, { key: index, ...childAttrs });
+            });
+
+            return React.createElement(tag, {
+                ...attrs,
+                width: size,
+                height: size,
+                strokeWidth,
+                className,
+            }, renderedChildren);
+        };
+        
+        // --- Helper Functions ---
+        const formatTimestamp = (isoString) => {
+            if (!isoString) return null;
+            try {
+                return new Date(isoString).toLocaleString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+            } catch (e) { return null; }
+        };
+
+        // --- Helper Components ---
+        const MarkdownRenderer = ({ markdown }) => {
+            const [html, setHtml] = useState('');
+
+            useEffect(() => {
+                if (window.marked) {
+                    setHtml(window.marked(markdown || ''));
+                }
+            }, [markdown]);
+
+            return (
+                <div 
+                    className="prose prose-invert prose-sm sm:prose-base max-w-none text-gray-300 prose-headings:text-white prose-strong:text-white" 
+                    dangerouslySetInnerHTML={{ __html: html }} 
+                />
+            );
+        };
+
+        const MetricCard = ({ title, value, icon, color }) => (
+            <div className="bg-white/10 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-white/20 flex items-center space-x-4">
+                <div className={`p-3 rounded-full ${color}`}>{icon}</div>
+                <div>
+                    <p className="text-sm text-gray-300">{title}</p>
+                    <p className="text-2xl font-bold text-white">{value}</p>
+                </div>
+            </div>
+        );
+
+        const NoteCard = ({ note, onProcess, isProcessing, onSelect }) => {
+            const getStatusChip = (status) => {
+                switch (status) {
+                    case 'fleeting': return <div className="flex items-center text-xs text-yellow-300 bg-yellow-900/50 px-2 py-1 rounded-full"><LucideIcon name="clock" className="w-3 h-3 mr-1" size={12}/>Fleeting</div>;
+                    case 'literature': return <div className="flex items-center text-xs text-blue-300 bg-blue-900/50 px-2 py-1 rounded-full"><LucideIcon name="book-open" className="w-3 h-3 mr-1" size={12}/>Literature</div>;
+                    case 'permanent': return <div className="flex items-center text-xs text-green-300 bg-green-900/50 px-2 py-1 rounded-full"><LucideIcon name="check-circle" className="w-3 h-3 mr-1" size={12}/>Permanent</div>;
+                    default: return null;
+                }
+            };
+
+            return (
+                <div className="bg-gray-800/50 p-4 rounded-lg shadow-md border border-gray-700 flex flex-col justify-between transition-all hover:border-indigo-500 hover:shadow-indigo-500/20 cursor-pointer" onClick={() => onSelect(note)}>
+                    <div>
+                        <div className="flex justify-between items-start mb-2">
+                            <div className="flex-1 pr-2">
+                                <h3 className="font-bold text-white mb-1">{note.title || 'Untitled Note'}</h3>
+                                <p className="text-gray-300 text-sm break-words">{note.atomicNote || note.original}</p>
+                            </div>
+                            {getStatusChip(note.status)}
+                        </div>
+                        <div className="flex flex-wrap gap-2 items-center mb-3">
+                            {note.tags && note.tags.map(tag => <span key={tag} className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded-full">{tag}</span>)}
+                        </div>
+                    </div>
+                    <div className="space-y-3">
+                        {note.luhmannId && <p className="text-xs font-mono text-purple-400">ID: {note.luhmannId}</p>}
+                        <div className="text-xs text-gray-500 flex items-center justify-between border-t border-gray-700/50 pt-2">
+                            {note.createdAt && <span className="flex items-center"><LucideIcon name="calendar" className="w-3 h-3 mr-1.5" size={12}/> {formatTimestamp(note.createdAt)}</span>}
+                            {note.lastModified && <span className="flex items-center"><LucideIcon name="pencil" className="w-3 h-3 mr-1.5" size={12}/> {formatTimestamp(note.lastModified)}</span>}
+                        </div>
+                        {note.status === 'fleeting' && (
+                            <button onClick={(e) => { e.stopPropagation(); onProcess(note.id, note.original); }} disabled={isProcessing} className="w-full mt-2 bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-indigo-500 disabled:bg-gray-500 disabled:cursor-not-allowed flex items-center justify-center transition-colors">
+                                <LucideIcon name="brain-circuit" className="w-4 h-4 mr-2" size={16}/>
+                                {isProcessing ? 'Processing...' : 'Process with AI'}
+                            </button>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const AnkiCard = ({ note, onFeedback, showAnswer, onShowAnswer, onEdit }) => {
+            if (!note) return <div className="flex items-center justify-center h-full text-gray-400">No notes to review.</div>;
+
+            return (
+                <div className="bg-gray-800/80 backdrop-blur-md rounded-xl shadow-2xl border border-gray-700 p-6 h-full flex flex-col justify-between">
+                    <div>
+                        <p className="text-xs font-mono text-purple-400 mb-2">{note.luhmannId || 'Fleeting Note'}</p>
+                        <h3 className="text-xl font-bold text-white mb-2">{note.title || 'Untitled Note'}</h3>
+                        <div className="text-lg text-white mb-4 break-words">{note.atomicNote || note.original}</div>
+                        {showAnswer && (
+                            <div className="space-y-4 border-t border-gray-600 pt-4 mt-4 animate-fade-in">
+                                {note.content && (
+                                    <div>
+                                        <h4 className="font-semibold text-gray-400 text-sm mb-2">Details</h4>
+                                        <div className="bg-gray-900/50 p-3 rounded-lg"><MarkdownRenderer markdown={note.content} /></div>
+                                    </div>
+                                )}
+                                <div className="flex flex-wrap gap-2">
+                                    {note.tags?.map(tag => <span key={tag} className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded-full">{tag}</span>)}
+                                </div>
+                                {note.sources && note.sources.length > 0 && (
+                                     <div className="text-sm text-gray-300 space-y-1">
+                                        <p className="font-semibold text-gray-400 flex items-center"><LucideIcon name="link" className="w-4 h-4 mr-1.5" size={16}/>Sources:</p>
+                                        <ul className="list-disc list-inside pl-2 space-y-1">
+                                            {note.sources.map((source, index) => (
+                                                <li key={index}><a href={source.url} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:underline">{source.title || source.url}</a></li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                    <div className="mt-6">
+                        {!showAnswer ? (
+                            <button onClick={onShowAnswer} className="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-500 transition-colors text-lg font-semibold">Show Answer</button>
+                        ) : (
+                            <div className="flex space-x-4">
+                                <button onClick={() => onEdit(note)} className="w-1/4 bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition-colors flex items-center justify-center"><LucideIcon name="edit" className="w-4 h-4 mr-2" size={16}/> Edit</button>
+                                <button onClick={() => onFeedback(note.id, 'hard')} className="flex-1 bg-red-600/80 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center justify-center"><LucideIcon name="thumbs-down" className="w-4 h-4 mr-2" size={16}/> Hard (Review Again)</button>
+                                <button onClick={() => onFeedback(note.id, 'easy')} className="flex-1 bg-green-600/80 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center"><LucideIcon name="thumbs-up" className="w-4 h-4 mr-2" size={16}/> Easy (Got It)</button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        };
+
+        const EditModal = ({ noteToEdit, onSave, onCancel, onGenerateTitle, onGenerateAtomic, onGenerateContent, isGenerating, allNotesList }) => {
+            const [formData, setFormData] = useState(null);
+            const [copySuccess, setCopySuccess] = useState('');
+
+            useEffect(() => { if (noteToEdit) setFormData(noteToEdit); }, [noteToEdit]);
+
+            const handleInputChange = (e) => {
+                const { name, value } = e.target;
+                setFormData(prev => ({ ...prev, [name]: value }));
+            };
+
+            const handleTagsChange = (e) => {
+                const { value } = e.target;
+                setFormData(prev => ({ ...prev, tags: value.split(',').map(t => t.trim()).filter(Boolean) }));
+            };
+
+            const handleSourceChange = (index, field, value) => {
+                const newSources = [...(formData.sources || [])];
+                newSources[index][field] = value;
+                setFormData(prev => ({ ...prev, sources: newSources }));
+            };
+
+            const handleAddSource = () => {
+                setFormData(prev => ({ ...prev, sources: [...(prev.sources || []), { title: '', url: '' }] }));
+            };
+
+            const handleRemoveSource = (index) => {
+                setFormData(prev => ({ ...prev, sources: formData.sources.filter((_, i) => i !== index) }));
+            };
+
+            const handleSave = () => onSave(formData);
+            
+            const handleCopyRelationships = () => {
+                if (!formData) return;
+                const parentNote = allNotesList.find(n => n.id === formData.parentId);
+                const childNotes = allNotesList.filter(n => n.parentId === formData.id);
+                let textToCopy = `--- RELATIONSHIPS FOR: ${formData.title || 'Untitled Note'} (${formData.luhmannId || 'No ID'}) ---\n\n`;
+                textToCopy += `PARENT:\n${parentNote ? `Title: ${parentNote.title || 'Untitled'}\nID: ${parentNote.luhmannId || 'N/A'}\nContent: ${parentNote.atomicNote || parentNote.original || ''}` : 'None'}\n\n`;
+                textToCopy += `CHILDREN (${childNotes.length}):\n`;
+                childNotes.forEach((child, index) => { textToCopy += `${index + 1}. Title: ${child.title || 'Untitled'}\n   ID: ${child.luhmannId || 'N/A'}\n   Content: ${child.atomicNote || child.original || ''}\n\n`; });
+                if(childNotes.length === 0) textToCopy += 'None\n';
+                const textArea = document.createElement("textarea");
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.focus(); textArea.select();
+                try { document.execCommand('copy'); setCopySuccess('Copied!'); } catch (err) { setCopySuccess('Failed!'); }
+                document.body.removeChild(textArea);
+                setTimeout(() => setCopySuccess(''), 2000);
+            };
+
+            if (!noteToEdit || !formData) return null;
+
+            const modalTitle = noteToEdit.status === 'fleeting' ? "Review & Refine Note" : "Edit Note";
+            const potentialParents = allNotesList.filter(n => n.id !== formData.id);
+
+            return (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 w-full max-w-4xl max-h-[90vh] flex flex-col">
+                        <div className="p-6 border-b border-gray-700 flex justify-between items-center">
+                            <h2 className="text-2xl font-bold text-white flex items-center">
+                                {noteToEdit.status === 'fleeting' ? <LucideIcon name="user-check" className="mr-3 text-indigo-400" size={24}/> : <LucideIcon name="edit" className="mr-3 text-indigo-400" size={24}/>}
+                                {modalTitle}
+                            </h2>
+                            <button onClick={onCancel} className="text-gray-400 hover:text-white"><LucideIcon name="x" size={24}/></button>
+                        </div>
+                        <div className="p-6 space-y-4 overflow-y-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label htmlFor="title" className="text-sm font-semibold text-gray-400">Title</label>
+                                    <div className="flex items-center space-x-2">
+                                       <input type="text" id="title" name="title" value={formData.title || ''} onChange={handleInputChange} className="flex-grow w-full bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition text-white" />
+                                       <button onClick={() => onGenerateTitle(formData.atomicNote || formData.original)} disabled={isGenerating.title} className="text-xs flex items-center px-2 py-1 rounded-md bg-indigo-600/50 hover:bg-indigo-600/80 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                            <LucideIcon name="sparkles" className="w-3 h-3 mr-1.5" size={12}/>
+                                            {isGenerating.title ? '...' : 'AI'}
+                                        </button>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label htmlFor="atomicNote" className="text-sm font-semibold text-gray-400">Atomic Idea</label>
+                                    <div className="flex items-center space-x-2">
+                                        <textarea id="atomicNote" name="atomicNote" value={formData.atomicNote || ''} onChange={handleInputChange} className="w-full h-20 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition text-white" />
+                                        <button onClick={() => onGenerateAtomic(formData.original)} disabled={isGenerating.atomic} className="text-xs flex items-center px-2 py-1 rounded-md bg-indigo-600/50 hover:bg-indigo-600/80 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                            <LucideIcon name="sparkles" className="w-3 h-3 mr-1.5" size={12}/>
+                                            {isGenerating.atomic ? '...' : 'AI'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label htmlFor="content" className="text-sm font-semibold text-gray-400 flex items-center"><LucideIcon name="file-text" className="w-4 h-4 mr-2" size={16}/>Detailed Content (Markdown)</label>
+                                <div className="flex items-center space-x-2 mt-1">
+                                    <textarea id="content" name="content" value={formData.content || ''} onChange={handleInputChange} placeholder="Add more details, context, or reflections here. Markdown is supported." className="w-full h-32 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition text-white" />
+                                    <button onClick={() => onGenerateContent(formData.atomicNote || formData.original)} disabled={isGenerating.content} className="text-xs flex items-center px-2 py-1 rounded-md bg-indigo-600/50 hover:bg-indigo-600/80 transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed">
+                                        <LucideIcon name="sparkles" className="w-3 h-3 mr-1.5" size={12}/>
+                                        {isGenerating.content ? '...' : 'AI'}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-4 p-3 bg-gray-900/50 rounded-lg">
+                                    <h3 className="text-sm font-semibold text-gray-400 flex items-center"><LucideIcon name="link" className="w-4 h-4 mr-2" size={16}/>Sources</h3>
+                                    <div className="space-y-2 max-h-32 overflow-y-auto pr-2">
+                                        {formData.sources?.map((source, index) => (
+                                            <div key={index} className="flex items-center space-x-2">
+                                                <input type="text" value={source.title} onChange={(e) => handleSourceChange(index, 'title', e.target.value)} placeholder="Title" className="w-1/3 bg-gray-700 border border-gray-600 rounded p-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"/>
+                                                <input type="url" value={source.url} onChange={(e) => handleSourceChange(index, 'url', e.target.value)} placeholder="https://example.com" className="flex-grow bg-gray-700 border border-gray-600 rounded p-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"/>
+                                                <button onClick={() => handleRemoveSource(index)} className="p-2 text-gray-400 hover:text-red-500 transition-colors"><LucideIcon name="trash-2" className="w-4 h-4" size={16}/></button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <button onClick={handleAddSource} className="text-xs w-full mt-2 bg-indigo-600/30 hover:bg-indigo-600/50 text-white py-1.5 rounded-md transition-colors">Add Source</button>
+                                </div>
+                                <div className="space-y-4 p-3 bg-gray-900/50 rounded-lg">
+                                     <div className="flex justify-between items-center">
+                                        <h3 className="text-sm font-semibold text-gray-400 flex items-center"><LucideIcon name="git-merge" className="w-4 h-4 mr-2" size={16}/>Relationships</h3>
+                                        <button onClick={handleCopyRelationships} className="text-xs flex items-center px-2 py-1 rounded-md bg-gray-700 hover:bg-gray-600 transition-colors w-20 justify-center">
+                                            {copySuccess ? copySuccess : <><LucideIcon name="clipboard" className="w-3 h-3 mr-1.5" size={12}/> Copy</>}
+                                        </button>
+                                    </div>
+                                    <div>
+                                        <label htmlFor="parentId" className="text-xs font-semibold text-gray-400">Parent Note</label>
+                                        <select id="parentId" name="parentId" value={formData.parentId || ''} onChange={handleInputChange} className="w-full mt-1 bg-gray-700 border border-gray-600 rounded-md p-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition appearance-none text-white text-sm">
+                                            <option value="">None</option>
+                                            {potentialParents.map(p => <option key={p.id} value={p.id}>{p.title || 'Untitled'}</option>)}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <label htmlFor="luhmannId" className="text-sm font-semibold text-gray-400">Luhmann ID</label>
+                                    <input type="text" id="luhmannId" name="luhmannId" value={formData.luhmannId || ''} onChange={handleInputChange} className="w-full mt-1 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition font-mono text-white" />
+                                </div>
+                                <div>
+                                    <label htmlFor="status" className="text-sm font-semibold text-gray-400">Status</label>
+                                    <select id="status" name="status" value={formData.status || ''} onChange={handleInputChange} className="w-full mt-1 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition appearance-none text-white">
+                                        <option value="fleeting">Fleeting</option>
+                                        <option value="literature">Literature</option>
+                                        <option value="permanent">Permanent</option>
+                                    </select>
+                                </div>
+                                <div className="md:col-span-1">
+                                     <label htmlFor="tags" className="text-sm font-semibold text-gray-400">Tags (comma-separated)</label>
+                                     <input type="text" id="tags" name="tags" value={formData.tags ? formData.tags.join(', ') : ''} onChange={handleTagsChange} className="w-full mt-1 bg-gray-700 border border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition text-white" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="p-6 border-t border-gray-700 flex justify-between items-center">
+                             <div className="text-xs text-gray-500 flex items-center space-x-4">
+                                {formData.createdAt && <span className="flex items-center"><LucideIcon name="calendar" className="w-3 h-3 mr-1.5" size={12}/> {formatTimestamp(formData.createdAt)}</span>}
+                                {formData.lastModified && <span className="flex items-center"><LucideIcon name="pencil" className="w-3 h-3 mr-1.5" size={12}/> {formatTimestamp(formData.lastModified)}</span>}
+                            </div>
+                            <div className="flex space-x-4">
+                                <button onClick={onCancel} className="px-4 py-2 rounded-lg bg-gray-600 hover:bg-gray-500 transition-colors">Cancel</button>
+                                <button onClick={handleSave} className="px-6 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 font-semibold transition-colors flex items-center">
+                                    <LucideIcon name="check-circle" className="w-4 h-4 mr-2" size={16}/> Save Changes
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        const SettingsModal = ({ isOpen, onClose }) => {
+            const [activeTab, setActiveTab] = useState('readme');
+
+            if (!isOpen) return null;
+
+            const TabButton = ({ id, label, icon }) => (
+                <button
+                    onClick={() => setActiveTab(id)}
+                    className={`flex items-center px-4 py-2 text-sm font-medium rounded-md transition-colors ${activeTab === id ? 'bg-indigo-600 text-white' : 'text-gray-300 hover:bg-gray-700'}`}
+                >
+                    {icon}
+                    <span className="ml-2">{label}</span>
+                </button>
+            );
+
+            return (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-gray-800 rounded-xl shadow-2xl border border-gray-700 w-full max-w-3xl max-h-[90vh] flex flex-col">
+                        <div className="p-6 border-b border-gray-700 flex justify-between items-center">
+                            <h2 className="text-2xl font-bold text-white flex items-center">
+                                <LucideIcon name="settings" className="mr-3 text-indigo-400" size={24}/>
+                                Settings & Information
+                            </h2>
+                            <button onClick={onClose} className="text-gray-400 hover:text-white"><LucideIcon name="x" size={24}/></button>
+                        </div>
+                        <div className="flex p-6 space-x-4 border-b border-gray-700">
+                            <TabButton id="readme" label="Readme" icon={<LucideIcon name="info" className="w-4 h-4" size={16}/>} />
+                            <TabButton id="changelog" label="Changelog" icon={<LucideIcon name="file-clock" className="w-4 h-4" size={16}/>} />
+                            <TabButton id="schema" label="Data Schema" icon={<LucideIcon name="database" className="w-4 h-4" size={16}/>} />
+                        </div>
+                        <div className="p-6 overflow-y-auto prose prose-invert prose-sm sm:prose-base max-w-none text-gray-300">
+                            {activeTab === 'readme' && (
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-4">About This App</h3>
+                                    <p>This "Second Brain" application is a tool for knowledge management based on the Zettelkasten method.</p>
+                                    <p>Capture fleeting thoughts, process them with AI into atomic notes, and connect them to build a web of knowledge. Use the Anki-style review mode to reinforce your learning.</p>
+                                    <p>For more details, please refer to the full documentation artifact.</p>
+                                </div>
+                            )}
+                            {activeTab === 'changelog' && (
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-4">Version History</h3>
+                                    <ul className="list-disc pl-5 space-y-2">
+                                        <li><strong>v1.1.0 (Current):</strong> Added Settings modal with Readme, Changelog, and Data Schema tabs.</li>
+                                        <li><strong>v1.0.0:</strong> Initial release. Core features include note capture, AI-powered processing, Zettelkasten linking, and Anki-style review mode.</li>
+                                    </ul>
+                                </div>
+                            )}
+                            {activeTab === 'schema' && (
+                                <div>
+                                    <h3 className="text-xl font-bold text-white mb-4">Note Data Schema</h3>
+                                    <p>Each note object in the database has the following structure:</p>
+                                    <ul className="list-disc pl-5 space-y-1 font-mono text-sm">
+                                        <li><code className="text-purple-400">original:</code> The initial, unprocessed text.</li>
+                                        <li><code className="text-purple-400">status:</code> 'fleeting', 'literature', or 'permanent'.</li>
+                                        <li><code className="text-purple-400">title:</code> The note's title.</li>
+                                        <li><code className="text-purple-400">atomicNote:</code> The core idea, distilled to a single sentence.</li>
+                                        <li><code className="text-purple-400">content:</code> Detailed explanation in Markdown.</li>
+                                        <li><code className="text-purple-400">luhmannId:</code> The Zettelkasten-style ID for linking (e.g., '1', '1a', '2b1').</li>
+                                        <li><code className="text-purple-400">parentId:</code> The database ID of the parent note.</li>
+                                    </ul>
+                                </div>
+                            )}
+                        </div>
+                         <div className="p-4 border-t border-gray-700 mt-auto flex justify-end">
+                            <button onClick={onClose} className="px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 transition-colors">Close</button>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+
+        // --- Main App Component ---
+        function App() {
+            const [notes, setNotes] = useState({});
+            const [allTags, setAllTags] =useState([]);
+            const [newNote, setNewNote] = useState('');
+            const [isSubmitting, setIsSubmitting] = useState(false);
+            const [processingNoteId, setProcessingNoteId] = useState(null);
+            const [noteToEdit, setNoteToEdit] = useState(null);
+            const [isGeneratingAI, setIsGeneratingAI] = useState({ title: false, atomic: false, content: false });
+            const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+            
+            // Anki state
+            const [reviewNotes, setReviewNotes] = useState([]);
+            const [currentCardIndex, setCurrentCardIndex] = useState(0);
+            const [showAnkiAnswer, setShowAnkiAnswer] = useState(false);
+            const [ankiMode, setAnkiMode] = useState(false);
+
+            // --- Firebase Data Fetching ---
+            useEffect(() => {
+                const notesRef = db.ref(DB_PATH);
+                const listener = notesRef.on('value', (snapshot) => {
+                    const data = snapshot.val() || {};
+                    setNotes(data);
+                    const tags = new Set();
+                    Object.values(data).forEach(note => {
+                        if (note.tags) note.tags.forEach(tag => tags.add(tag));
+                    });
+                    setAllTags(Array.from(tags));
+                });
+                return () => notesRef.off('value', listener);
+            }, []);
+            
+            const notesList = useMemo(() => {
+                return Object.entries(notes)
+                    .map(([id, note]) => ({ id, ...note }))
+                    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+            }, [notes]);
+
+            // --- Memoized Metrics Calculations ---
+            const metrics = useMemo(() => ({
+                total: notesList.length,
+                fleeting: notesList.filter(n => n.status === 'fleeting').length,
+                literature: notesList.filter(n => n.status === 'literature').length,
+                permanent: notesList.filter(n => n.status === 'permanent').length,
+            }), [notesList]);
+
+            // --- API Call Helper ---
+            const callGeminiAPI = async (prompt) => {
+                try {
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                    });
+                    if (!response.ok) throw new Error(`API Error: ${response.status}`);
+                    const result = await response.json();
+                    return result?.candidates?.[0]?.content?.parts?.[0]?.text;
+                } catch (error) {
+                    console.error("Error calling Gemini API:", error);
+                    return null;
+                }
+            };
+            
+            // --- In-Modal AI Generation ---
+            const handleGenerateTitle = async (context) => {
+                if (!context) return;
+                setIsGeneratingAI(prev => ({ ...prev, title: true }));
+                const prompt = `Based on the following note, create a short, descriptive title (5-10 words maximum). Return only the title text, without quotes. NOTE: "${context}"`;
+                const generatedTitle = await callGeminiAPI(prompt);
+                if (generatedTitle) setNoteToEdit(prev => ({ ...prev, title: generatedTitle.replace(/"/g, '') }));
+                setIsGeneratingAI(prev => ({ ...prev, title: false }));
+            };
+
+            const handleGenerateAtomicNote = async (context) => {
+                if (!context) return;
+                setIsGeneratingAI(prev => ({ ...prev, atomic: true }));
+                const prompt = `Transform the following note into a single, atomic idea. The output should be a concise sentence expressing one core concept. NOTE: "${context}"`;
+                const generatedAtomicNote = await callGeminiAPI(prompt);
+                if (generatedAtomicNote) setNoteToEdit(prev => ({ ...prev, atomicNote: generatedAtomicNote }));
+                setIsGeneratingAI(prev => ({ ...prev, atomic: false }));
+            };
+
+            const handleGenerateContent = async (context) => {
+                if (!context) return;
+                setIsGeneratingAI(prev => ({ ...prev, content: true }));
+                const prompt = `Based on the core idea "${context}", expand this into a more detailed note. Provide context, potential implications, or related concepts. Use Markdown for formatting (e.g., headers, lists, bold). Return only the Markdown content.`;
+                const generatedContent = await callGeminiAPI(prompt);
+                if (generatedContent) setNoteToEdit(prev => ({ ...prev, content: generatedContent }));
+                setIsGeneratingAI(prev => ({ ...prev, content: false }));
+            };
+
+            // --- Note Processing Logic ---
+            const handleProcessNote = useCallback(async (noteId, content) => {
+                setProcessingNoteId(noteId);
+                const otherNotes = Object.entries(notes).filter(([id]) => id !== noteId).map(([id, note]) => ({ id, ...note }));
+                try {
+                    const atomicPrompt = `Transform the following note into a single, atomic idea. The output should be a concise sentence expressing one core concept. NOTE: "${content}"`;
+                    const atomicNote = await callGeminiAPI(atomicPrompt) || '';
+                    
+                    const titlePromise = callGeminiAPI(`Based on the note "${atomicNote || content}", create a short, descriptive title (5-10 words). Return only the title text.`);
+                    const tagsPromise = callGeminiAPI(`Based on the note "${atomicNote || content}" and existing tags [${allTags.join(', ')}], suggest 2-4 relevant tags. Return a comma-separated list.`);
+                    const contentPromise = callGeminiAPI(`Based on the core idea "${atomicNote || content}", expand this into a detailed note. Provide context, implications, or related concepts. Use Markdown for formatting. Return only the Markdown content.`);
+                    
+                    const [title, tagsResponse, detailedContent] = await Promise.all([titlePromise, tagsPromise, contentPromise]);
+
+                    const tags = tagsResponse ? tagsResponse.split(',').map(t => t.trim()).filter(Boolean) : [];
+
+                    const relevancePrompt = `Which of these notes is most similar to: "${atomicNote}"? Provide only the Luhmann ID. If none, say "none".\n\nNotes:\n${otherNotes.filter(n => n.luhmannId).map(n => `- ID: ${n.luhmannId}, Content: ${n.atomicNote || n.original}`).join('\n')}`;
+                    const mostRelevantIdResponse = await callGeminiAPI(relevancePrompt);
+                    let newLuhmannId; let parentId = null;
+                    const relevantNote = otherNotes.find(n => n.luhmannId === mostRelevantIdResponse?.trim());
+                    if (relevantNote?.luhmannId) {
+                        parentId = relevantNote.id;
+                        const childCount = otherNotes.filter(n => n.parentId === relevantNote.id).length;
+                        newLuhmannId = `${relevantNote.luhmannId}${String.fromCharCode(97 + childCount)}`;
+                    } else {
+                        const topLevelCount = otherNotes.filter(n => !n.parentId && n.luhmannId && /^\d+$/.test(n.luhmannId)).length;
+                        newLuhmannId = `${topLevelCount + 1}`;
+                    }
+
+                    setNoteToEdit({ 
+                        ...notes[noteId], 
+                        id: noteId, 
+                        original: content, 
+                        title: (title || 'Untitled Note').replace(/"/g, ''), 
+                        atomicNote, 
+                        tags, 
+                        content: detailedContent,
+                        luhmannId: newLuhmannId, 
+                        status: 'permanent', 
+                        parentId: parentId, 
+                        lastModified: new Date().toISOString() 
+                    });
+                } catch (error) { console.error("Failed to process note:", error); } 
+                finally { setProcessingNoteId(null); }
+            }, [notes, allTags]);
+
+            // --- Save reviewed changes ---
+            const handleSaveChanges = async (editedNote) => {
+                const { id, ...dataToSave } = editedNote;
+                if (!dataToSave.title) dataToSave.title = "Untitled Note";
+                if (id === dataToSave.parentId) { alert("A note cannot be its own parent."); return; }
+                dataToSave.lastModified = new Date().toISOString();
+                try { await db.ref(`${DB_PATH}${id}`).update(dataToSave); } 
+                catch (error) { console.error("Error saving changes:", error); } 
+                finally { setNoteToEdit(null); }
+            };
+
+            // --- Note Submission ---
+            const handleAddNote = async (e) => {
+                e.preventDefault();
+                if (!newNote.trim()) return;
+                setIsSubmitting(true);
+                const now = new Date().toISOString();
+                const newNoteData = { 
+                    original: newNote, 
+                    status: 'fleeting', 
+                    title: 'New Note', 
+                    createdAt: now, 
+                    lastModified: now, 
+                    content: '', 
+                    sources: [],
+                    lastReviewed: null,
+                    reviewStrength: 0,
+                };
+                try {
+                    await db.ref(DB_PATH).push(newNoteData);
+                    setNewNote('');
+                } catch (error) { console.error("Error adding note:", error); } 
+                finally { setIsSubmitting(false); }
+            };
+            
+            // --- Anki Mode Logic ---
+            const startAnkiMode = () => {
+                if (notesList.length === 0) return;
+                const shuffled = [...notesList].sort(() => Math.random() - 0.5);
+                setReviewNotes(shuffled);
+                setCurrentCardIndex(0);
+                setShowAnkiAnswer(false);
+                setAnkiMode(true);
+            };
+
+            const handleNextCard = () => {
+                setShowAnkiAnswer(false);
+                setCurrentCardIndex(prev => (prev + 1) % reviewNotes.length);
+            };
+
+            const handleReviewFeedback = async (noteId, feedback) => {
+                const note = notes[noteId];
+                if (!note) return;
+                const currentStrength = note.reviewStrength || 0;
+                let newStrength = feedback === 'hard' ? Math.max(0, currentStrength - 1) : currentStrength + 1;
+                const updates = { lastReviewed: new Date().toISOString(), reviewStrength: newStrength };
+                try { await db.ref(`${DB_PATH}${noteId}`).update(updates); } 
+                catch (error) { console.error("Error updating review feedback:", error); }
+                handleNextCard();
+            };
+
+            const handleEditFromAnki = (note) => {
+                setAnkiMode(false);
+                setNoteToEdit(note);
+            };
+            
+            // Initializing lucide icons after component mount
+            useEffect(() => {
+                lucide.createIcons();
+            }, []);
+
+            if (ankiMode) {
+                return (
+                    <div className="min-h-screen bg-gray-900 text-white font-sans p-4 sm:p-8 flex flex-col items-center justify-center">
+                        <div className="w-full max-w-3xl">
+                            <h1 className="text-3xl font-bold text-center mb-6 text-indigo-400">Anki Review</h1>
+                            <AnkiCard note={reviewNotes[currentCardIndex]} onFeedback={handleReviewFeedback} showAnswer={showAnkiAnswer} onShowAnswer={() => setShowAnkiAnswer(!showAnkiAnswer)} onEdit={handleEditFromAnki} />
+                            <button onClick={() => setAnkiMode(false)} className="mt-6 w-full text-center text-gray-400 hover:text-white transition-colors">Exit Review Mode</button>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <React.Fragment>
+                    <EditModal 
+                        noteToEdit={noteToEdit} 
+                        onSave={handleSaveChanges} 
+                        onCancel={() => setNoteToEdit(null)} 
+                        onGenerateTitle={handleGenerateTitle} 
+                        onGenerateAtomic={handleGenerateAtomicNote} 
+                        onGenerateContent={handleGenerateContent}
+                        isGenerating={isGeneratingAI} 
+                        allNotesList={notesList}
+                    />
+                    <SettingsModal isOpen={isSettingsModalOpen} onClose={() => setIsSettingsModalOpen(false)} />
+                    <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8">
+                        <div className="max-w-7xl mx-auto">
+                            <header className="mb-8">
+                                <div className="flex justify-between items-center mb-6">
+                                  <h1 className="text-4xl font-bold flex items-center"><LucideIcon name="brain-circuit" className="w-10 h-10 mr-3 text-indigo-400" size={40}/>Second Brain</h1>
+                                  <div className="flex items-center space-x-4">
+                                    <button onClick={startAnkiMode} disabled={notesList.length === 0} className="bg-green-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-green-500 flex items-center transition-colors disabled:bg-gray-500 disabled:cursor-not-allowed"><LucideIcon name="layers" className="w-4 h-4 mr-2" size={16}/> Review Notes</button>
+                                    <button onClick={() => setIsSettingsModalOpen(true)} className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-full transition-colors"><LucideIcon name="settings" className="w-6 h-6" size={24}/></button>
+                                  </div>
+                                </div>
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <MetricCard title="Total Notes" value={metrics.total} icon={<LucideIcon name="book-open" className="w-6 h-6 text-white" size={24}/>} color="bg-blue-500" />
+                                    <MetricCard title="Fleeting" value={metrics.fleeting} icon={<LucideIcon name="clock" className="w-6 h-6 text-white" size={24}/>} color="bg-yellow-500" />
+                                    <MetricCard title="Literature" value={metrics.literature} icon={<LucideIcon name="book-open" className="w-6 h-6 text-white" size={24}/>} color="bg-purple-500" />
+                                    <MetricCard title="Permanent" value={metrics.permanent} icon={<LucideIcon name="check-circle" className="w-6 h-6 text-white" size={24}/>} color="bg-green-500" />
+                                </div>
+                            </header>
+                            <main className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                                <div className="lg:col-span-2 space-y-6">
+                                    <div>
+                                        <h2 className="text-2xl font-semibold mb-4">Inbox</h2>
+                                        <form onSubmit={handleAddNote} className="bg-gray-800/50 p-4 rounded-lg shadow-lg border border-gray-700">
+                                            <textarea value={newNote} onChange={(e) => setNewNote(e.target.value)} placeholder="Capture a thought, idea, or quote..." className="w-full h-24 bg-gray-900 border border-gray-600 rounded-md p-3 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition text-white" />
+                                            <button type="submit" disabled={isSubmitting} className="mt-3 w-full bg-indigo-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-indigo-500 disabled:bg-gray-500 flex items-center justify-center transition-colors">
+                                                <LucideIcon name="plus" className="w-5 h-5 mr-2" size={20}/>
+                                                {isSubmitting ? 'Adding...' : 'Add Note'}
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div>
+                                        <h2 className="text-2xl font-semibold mb-4">All Notes</h2>
+                                        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                                            {notesList.length > 0 ? (
+                                                notesList.map(note => <NoteCard key={note.id} note={note} onProcess={handleProcessNote} isProcessing={processingNoteId === note.id} onSelect={setNoteToEdit} />)
+                                            ) : (
+                                                <div className="text-gray-400 text-center py-12 bg-gray-800/30 rounded-lg">
+                                                    <p className="text-lg">Your knowledge base is empty.</p>
+                                                    <p>Add a note in the inbox above to begin!</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="bg-gray-800/30 rounded-lg p-6 border border-gray-700/50 hidden lg:block">
+                                    <h2 className="text-2xl font-semibold mb-4">Knowledge Graph (Coming Soon)</h2>
+                                    <div className="flex items-center justify-center h-full text-gray-500"><p>A visual representation of your connected notes will appear here.</p></div>
+                                </div>
+                            </main>
+                        </div>
+                    </div>
+                </React.Fragment>
+            );
+        }
+
+        ReactDOM.render(<App />, document.getElementById('root'));
+    </script>
+</body>
+</html>

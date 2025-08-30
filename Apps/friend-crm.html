@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Friend CRM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple spinner for loading state */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, .1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #09f;
+            animation: spin 1s ease infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Style for disabled buttons */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-900">FriendShip CRM</h1>
+            <p class="text-lg text-gray-600">Maintain and strengthen your friendships.</p>
+        </header>
+
+        <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
+            <div class="flex-1 min-w-[200px]">
+                <input type="text" id="searchInput" class="w-full max-w-md p-3 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Search by name, tag, or notes...">
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="reviewFriendsBtn" class="bg-purple-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-purple-700 transition duration-300">
+                    Review Friends
+                </button>
+                <button id="addFriendBtn" class="bg-blue-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-blue-700 transition duration-300">
+                    Add New Friend
+                </button>
+            </div>
+        </div>
+
+        <div id="friendList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Loading Spinner -->
+            <div id="loading" class="col-span-full flex justify-center items-center h-64">
+                <div class="spinner"></div>
+            </div>
+            <!-- Friend cards will be inserted here -->
+        </div>
+    </div>
+
+    <!-- Add/Edit/Review Friend Modal -->
+    <div id="friendModal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-2xl p-8 w-full max-w-2xl transform transition-all scale-95">
+            <h2 id="modalTitle" class="text-2xl font-bold mb-6 text-gray-900">Add New Friend</h2>
+            <form id="friendForm">
+                <input type="hidden" id="friendId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                        <input type="text" id="name" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" required>
+                    </div>
+                    <div>
+                        <label for="lastContact" class="block text-sm font-medium text-gray-700">Last Contact</label>
+                        <input type="date" id="lastContact" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div>
+                        <label for="cadence" class="block text-sm font-medium text-gray-700">Cadence (days)</label>
+                        <input type="number" id="cadence" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500" min="1">
+                    </div>
+                    <div>
+                        <label for="group" class="block text-sm font-medium text-gray-700">Group</label>
+                        <input type="text" id="group" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                     <div class="md:col-span-2">
+                        <label for="tags" class="block text-sm font-medium text-gray-700">Tags (comma-separated)</label>
+                        <input type="text" id="tags" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label for="note" class="block text-sm font-medium text-gray-700">Note</label>
+                        <textarea id="note" rows="4" class="mt-1 block w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                </div>
+                <div id="formActions" class="mt-8 flex justify-end space-x-4">
+                    <button type="button" id="cancelBtn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400 transition duration-300">Cancel</button>
+                    <button type="submit" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">Save Friend</button>
+                </div>
+            </form>
+            <!-- Review Actions -->
+            <div id="reviewActions" class="hidden mt-6 border-t border-gray-200 pt-4 flex justify-between items-center">
+                <button type="button" id="finishReviewBtn" class="bg-gray-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-600 transition">Finish Review</button>
+                <span id="reviewProgress" class="text-sm font-semibold text-gray-700"></span>
+                <div class="space-x-2">
+                    <button type="button" id="prevBtn" class="bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg hover:bg-gray-400 transition">&larr; Previous</button>
+                    <button type="button" id="nextBtn" class="bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 transition">Save & Next &rarr;</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // --- Airtable Configuration ---
+        const AIRTABLE_API_KEY = "patdMoOPya9xAXGLG.3a26ab9163b441fa24a5e1edc3d775c4608e447dd7c0ffa50d6de697d121c022";
+        const AIRTABLE_BASE_ID = "appaxtoj0JmpSN2hE";
+        const AIRTABLE_TABLE_NAME = "People";
+        const AIRTABLE_API_URL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}/${AIRTABLE_TABLE_NAME}`;
+
+        // --- DOM Elements ---
+        const addFriendBtn = document.getElementById('addFriendBtn');
+        const reviewFriendsBtn = document.getElementById('reviewFriendsBtn');
+        const friendModal = document.getElementById('friendModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const friendForm = document.getElementById('friendForm');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const friendList = document.getElementById('friendList');
+        const searchInput = document.getElementById('searchInput');
+        const loadingIndicator = document.getElementById('loading');
+        const formActions = document.getElementById('formActions');
+        const reviewActions = document.getElementById('reviewActions');
+        const reviewProgress = document.getElementById('reviewProgress');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const finishReviewBtn = document.getElementById('finishReviewBtn');
+
+        // --- State ---
+        let allFriends = [];
+        let friendsToReview = [];
+        let currentReviewIndex = -1;
+
+        // --- Airtable API Functions ---
+        const airtableFetch = async (url, options = {}) => {
+            const defaultHeaders = {
+                'Authorization': `Bearer ${AIRTABLE_API_KEY}`,
+                'Content-Type': 'application/json'
+            };
+            options.headers = { ...defaultHeaders, ...options.headers };
+
+            try {
+                const response = await fetch(url, options);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(`Airtable API Error: ${errorData.error?.message || response.statusText}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error("Error communicating with Airtable:", error);
+                // Use a more user-friendly notification in a real app
+                alert("Could not connect to Airtable. Please check your configuration and network.");
+                return null;
+            }
+        };
+
+        const fetchFriends = async () => {
+            loadingIndicator.style.display = 'flex';
+            friendList.innerHTML = '';
+            const data = await airtableFetch(`${AIRTABLE_API_URL}?view=Grid view`);
+            
+            loadingIndicator.style.display = 'none';
+            if (data && data.records) {
+                allFriends = data.records.map(record => ({ id: record.id, ...record.fields }));
+                renderFriends();
+            }
+        };
+
+        const saveFriend = async (friendData, refreshList = true) => {
+            const id = document.getElementById('friendId').value;
+            const fields = {
+                "Name": friendData.Name,
+                "Last Contact": friendData["Last Contact"],
+            };
+
+            // **FIX**: Only add fields to the payload if they have a value.
+            // This prevents sending empty strings to single-select fields like "Group",
+            // which causes the "insufficient permissions to create new select option" error.
+            if (friendData.Cadence) {
+                fields.Cadence = friendData.Cadence;
+            }
+            if (friendData.Group) {
+                fields.Group = friendData.Group;
+            }
+            if (friendData.Note) {
+                fields.Note = friendData.Note;
+            }
+
+            let response;
+            let savedRecord;
+
+            if (id) {
+                // Update existing friend
+                response = await airtableFetch(`${AIRTABLE_API_URL}/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({ fields })
+                });
+                savedRecord = response;
+            } else {
+                // Add new friend
+                const createResponse = await airtableFetch(AIRTABLE_API_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ records: [{ fields }] })
+                });
+                if (createResponse && createResponse.records) {
+                    savedRecord = createResponse.records[0];
+                    response = createResponse;
+                }
+            }
+
+            if (response && savedRecord) {
+                const friendIndex = allFriends.findIndex(f => f.id === savedRecord.id);
+                const newFriendData = { id: savedRecord.id, ...savedRecord.fields };
+                if (friendIndex > -1) {
+                    allFriends[friendIndex] = newFriendData;
+                } else {
+                    allFriends.push(newFriendData);
+                }
+
+                if (refreshList) {
+                    // Re-fetch instead of local update to get fresh formula fields
+                    fetchFriends();
+                    closeModal();
+                }
+            }
+            return response;
+        };
+
+        const deleteFriend = async (id) => {
+            if (confirm('Are you sure you want to delete this friend? This cannot be undone.')) {
+                const response = await airtableFetch(`${AIRTABLE_API_URL}/${id}`, { method: 'DELETE' });
+                if (response) fetchFriends();
+            }
+        };
+
+        const logContact = async (id) => {
+            const fields = { "Last Contact": moment().format('YYYY-MM-DD') };
+            const response = await airtableFetch(`${AIRTABLE_API_URL}/${id}`, {
+                method: 'PATCH',
+                body: JSON.stringify({ fields })
+            });
+            if (response) {
+                // Re-fetch is necessary to get updated formula fields from Airtable (like the status color).
+                fetchFriends();
+            }
+        };
+
+        // --- Modal Logic ---
+        const openModal = (friend = null) => {
+            friendForm.reset();
+            formActions.classList.remove('hidden');
+            reviewActions.classList.add('hidden');
+
+            if (friend) {
+                modalTitle.textContent = 'Edit Friend';
+                document.getElementById('friendId').value = friend.id;
+                document.getElementById('name').value = friend.Name || '';
+                document.getElementById('lastContact').value = friend['Last Contact'] || '';
+                document.getElementById('cadence').value = friend.Cadence || '';
+                document.getElementById('group').value = friend.Group || '';
+                document.getElementById('note').value = friend.Note || '';
+                document.getElementById('tags').value = friend.Tags ? (Array.isArray(friend.Tags) ? friend.Tags.join(', ') : friend.Tags) : '';
+            } else {
+                modalTitle.textContent = 'Add New Friend';
+                document.getElementById('friendId').value = '';
+            }
+            friendModal.classList.remove('hidden');
+            friendModal.querySelector('div').classList.remove('scale-95');
+        };
+
+        const closeModal = () => {
+            friendModal.querySelector('div').classList.add('scale-95');
+            friendModal.classList.add('hidden');
+        };
+
+        // --- Review Friends Logic ---
+        const startReview = () => {
+            friendsToReview = [...allFriends];
+            if (friendsToReview.length === 0) {
+                alert("No friends to review.");
+                return;
+            }
+            currentReviewIndex = 0;
+            displayCurrentReviewFriend();
+        };
+
+        const displayCurrentReviewFriend = () => {
+            if (currentReviewIndex < 0 || currentReviewIndex >= friendsToReview.length) {
+                endReview();
+                return;
+            }
+            const friend = friendsToReview[currentReviewIndex];
+            openModal(friend);
+
+            modalTitle.textContent = 'Reviewing Friends';
+            formActions.classList.add('hidden');
+            reviewActions.classList.remove('hidden');
+            reviewProgress.textContent = `Friend ${currentReviewIndex + 1} of ${friendsToReview.length}`;
+
+            prevBtn.disabled = currentReviewIndex === 0;
+            nextBtn.textContent = (currentReviewIndex === friendsToReview.length - 1) ? 'Save & Finish' : 'Save & Next →';
+        };
+
+        const handleNextFriend = async () => {
+            const friendData = getFriendDataFromForm();
+            const success = await saveFriend(friendData, false);
+
+            if (success) {
+                // Update the local data for the friend we just saved
+                const updatedFriend = friendsToReview[currentReviewIndex];
+                Object.assign(updatedFriend, friendData, {id: updatedFriend.id}); // Keep original ID
+
+                if (currentReviewIndex === friendsToReview.length - 1) {
+                    endReview();
+                } else {
+                    currentReviewIndex++;
+                    displayCurrentReviewFriend();
+                }
+            } else {
+                alert("Failed to save friend. Please try again.");
+            }
+        };
+
+        const handlePreviousFriend = () => {
+            if (currentReviewIndex > 0) {
+                currentReviewIndex--;
+                displayCurrentReviewFriend();
+            }
+        };
+
+        const endReview = () => {
+            friendsToReview = [];
+            currentReviewIndex = -1;
+            closeModal();
+            fetchFriends(); // Full refresh after review session
+        };
+
+        // --- Helpers ---
+        const getFriendDataFromForm = () => ({
+            "Name": document.getElementById('name').value,
+            "Last Contact": document.getElementById('lastContact').value || moment().format('YYYY-MM-DD'),
+            "Cadence": parseInt(document.getElementById('cadence').value, 10) || null,
+            "Group": document.getElementById('group').value,
+            "Note": document.getElementById('note').value,
+            "Tags": document.getElementById('tags').value.split(',').map(t => t.trim()).filter(Boolean)
+        });
+
+        // --- Event Listeners ---
+        addFriendBtn.addEventListener('click', () => openModal());
+        cancelBtn.addEventListener('click', closeModal);
+        friendModal.addEventListener('click', (e) => {
+            if (e.target === friendModal) {
+                if (friendsToReview.length > 0) {
+                    if (confirm("Are you sure you want to end the review session?")) endReview();
+                } else {
+                    closeModal();
+                }
+            }
+        });
+
+        friendForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const friendData = getFriendDataFromForm();
+            saveFriend(friendData);
+        });
+        
+        searchInput.addEventListener('input', renderFriends);
+
+        reviewFriendsBtn.addEventListener('click', startReview);
+        nextBtn.addEventListener('click', handleNextFriend);
+        prevBtn.addEventListener('click', handlePreviousFriend);
+        finishReviewBtn.addEventListener('click', endReview);
+
+        // --- Display Logic ---
+        function renderFriends() {
+            friendList.innerHTML = '';
+            const searchTerm = searchInput.value.toLowerCase();
+            
+            const filteredFriends = allFriends.filter(friend => {
+                const friendString = [friend.Name, friend.Note, friend.Group].filter(Boolean).join(' ').toLowerCase();
+                return friend.Name && friendString.includes(searchTerm) && !friend.Archive;
+            });
+
+            if (filteredFriends.length === 0 && allFriends.length > 0) {
+                friendList.innerHTML = `<p class="text-gray-500 col-span-full text-center">No friends match your search.</p>`;
+            } else if (filteredFriends.length === 0) {
+                friendList.innerHTML = `<p class="text-gray-500 col-span-full text-center">No friends found. Add one to get started!</p>`;
+            } else {
+                filteredFriends.forEach(friend => {
+                    const friendCard = createFriendCard(friend);
+                    friendList.appendChild(friendCard);
+                });
+            }
+        }
+
+        function createFriendCard(friend) {
+            const card = document.createElement('div');
+            const isDue = friend.is_due === 'Overdue';
+            const isSoon = friend.is_due === 'Due Soon';
+
+            let statusColor = 'bg-green-500';
+            let statusText = 'Up to date';
+            if (isDue) {
+                statusColor = 'bg-red-500';
+                statusText = 'Overdue';
+            } else if (isSoon) {
+                statusColor = 'bg-yellow-500';
+                statusText = 'Contact soon';
+            }
+
+            card.className = `bg-white rounded-xl shadow-lg p-6 flex flex-col justify-between transition-transform transform hover:scale-105`;
+            const pictureUrl = friend.Picture && friend.Picture[0] ? friend.Picture[0].thumbnails.large.url : `https://placehold.co/100x100/E2E8F0/4A5568?text=${friend.Name.charAt(0)}`;
+
+            card.innerHTML = `
+                <div>
+                    <div class="flex items-start">
+                        <img src="${pictureUrl}" alt="Profile picture of ${friend.Name}" class="w-16 h-16 rounded-full mr-4 object-cover" onerror="this.onerror=null;this.src='https://placehold.co/100x100/E2E8F0/4A5568?text=${friend.Name.charAt(0)}';">
+                        <div class="flex-grow">
+                             <div class="flex justify-between items-start">
+                                <h3 class="text-xl font-bold text-gray-800">${friend.Name}</h3>
+                                <div class="flex-shrink-0 w-4 h-4 rounded-full ${statusColor}" title="${statusText}"></div>
+                            </div>
+                            <p class="text-sm text-gray-500 mb-2">Last contacted: ${friend['Last Contact'] ? moment(friend['Last Contact']).format('MMMM Do, YYYY') : 'N/A'}</p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <p class="text-sm font-semibold text-gray-600">Note:</p>
+                        <p class="text-sm text-gray-600 break-words">${friend.Note || 'No notes yet.'}</p>
+                    </div>
+                    <div class="mt-4 flex flex-wrap gap-2">
+                        ${friend.Group ? `<span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">${friend.Group}</span>` : ''}
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-between items-center">
+                    <button class="log-contact-btn bg-green-500 text-white font-semibold py-2 px-4 rounded-lg text-sm hover:bg-green-600" data-id="${friend.id}">Log Contact</button>
+                    <div>
+                        <button class="edit-btn text-gray-500 hover:text-blue-600 font-semibold py-2 px-3 text-sm" data-id="${friend.id}">Edit</button>
+                        <button class="delete-btn text-gray-500 hover:text-red-600 font-semibold py-2 px-3 text-sm" data-id="${friend.id}">Delete</button>
+                    </div>
+                </div>
+            `;
+
+            card.querySelector('.edit-btn').addEventListener('click', () => openModal(friend));
+            card.querySelector('.delete-btn').addEventListener('click', () => deleteFriend(friend.id));
+            card.querySelector('.log-contact-btn').addEventListener('click', () => logContact(friend.id));
+            return card;
+        }
+
+        // --- Initial Load ---
+        document.addEventListener('DOMContentLoaded', fetchFriends);
+    </script>
+</body>
+</html>
