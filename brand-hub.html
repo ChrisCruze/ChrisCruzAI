@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChrisCruz.ai | Digital Empire Command Center</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #4f46e5, #c026d3, #db2777);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .tag {
+            background-color: rgba(79, 70, 229, 0.2);
+            color: #a5b4fc;
+            border: 1px solid #4f46e5;
+        }
+        .empire-card {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.1), rgba(192, 38, 211, 0.1));
+            border: 1px solid rgba(79, 70, 229, 0.3);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tighter">ChrisCruz<span class="text-indigo-400">.ai</span></h1>
+            <nav class="hidden md:flex space-x-8">
+                <a href="#empire" class="hover:text-indigo-400 transition-colors">The Empire</a>
+                <a href="#lifeos" class="hover:text-indigo-400 transition-colors">LifeOS</a>
+                <a href="#ai-agency" class="hover:text-indigo-400 transition-colors">AI Agency</a>
+                <a href="#command-center" class="hover:text-indigo-400 transition-colors">Command Center</a>
+            </nav>
+            <span class="tag text-xs font-semibold py-1 px-3 rounded-full">Digital Empire</span>
+        </div>
+    </header>
+
+    <main class="pt-24">
+        <!-- Hero Section -->
+        <section class="text-center py-20 md:py-32 px-6">
+            <div class="container mx-auto max-w-4xl">
+                <p class="font-semibold text-indigo-400 mb-2">Digital Empire Builder & AI Architect</p>
+                <h2 class="text-4xl md:text-6xl lg:text-7xl font-black tracking-tighter mb-6">
+                    Welcome to <span class="gradient-text">My Digital Empire.</span>
+                </h2>
+                <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-8">
+                    I'm Christopher Manuel Cruz-Guzman. This is my command center, my digital throne, and the foundation of an empire that's unmistakably mine.
+                </p>
+                <div class="flex justify-center items-center space-x-2 text-sm text-gray-500">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-geo-alt-fill" viewBox="0 0 16 16">
+                      <path d="M8 16s6-5.686 6-10A6 6 0 0 0 2 6c0 4.314 6 10 6 10zm0-7a3 3 0 1 1 0-6 3 3 0 0 1 0 6z"/>
+                    </svg>
+                    <span>Command Center Activated &ndash; January 2025</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Empire Overview -->
+        <section id="empire" class="py-20 px-6">
+            <div class="container mx-auto">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">The Empire</h3>
+                    <p class="text-gray-400">Multiple ventures, one vision: building systems that transform how people live and work.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- LifeOS -->
+                    <div class="empire-card p-6 rounded-2xl transform hover:scale-105 transition-transform duration-300">
+                        <div class="bg-indigo-500/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4 border border-indigo-500/30">
+                            <span class="text-2xl">🧠</span>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">LifeOS</h4>
+                        <p class="text-sm text-gray-400">Personal operating system that unifies knowledge, habits, and projects into one seamless platform.</p>
+                        <a href="lifeos.html" class="text-indigo-400 text-sm hover:underline">Explore →</a>
+                    </div>
+
+                    <!-- Cruz AI -->
+                    <div class="empire-card p-6 rounded-2xl transform hover:scale-105 transition-transform duration-300">
+                        <div class="bg-purple-500/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4 border border-purple-500/30">
+                            <span class="text-2xl">🤖</span>
+                        </div>
+                        <h4 class="font-bold text-lg mb-2">Cruz AI</h4>
+                        <p class="text-sm text-gray-400">AI consulting agency helping businesses leverage artificial intelligence for growth and innovation.</p>
+                        <a href="cruz-ai.html" class="text-purple-400 text-sm hover:underline">Explore →</a>
+                    </div>
+
+                    <!-- J.P. Morgan -->
+                    <div class="empire-card p-6 rounded-2xl transform hover:scale-105 transition-transform duration-300">
+                        <div class="bg-blue-500/10 w-12 h-12 rounded-lg flex items-center justify-center mb-4 border border-blue-500/30">
+                            <span class="text-2xl">🏦</span>
+                        </div>
+                        <h4 class="text-lg mb-2">J.P. Morgan</h4>
+                        <p class="text-sm text-gray-400">Leading AI initiatives and financial infrastructure projects at the world's largest bank.</p>
+                        <span class="text-blue-400 text-sm">Active</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Command Center -->
+        <section id="command-center" class="py-20 px-6 bg-white/5">
+            <div class="container mx-auto">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <h3 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">Command Center</h3>
+                    <p class="text-gray-400">Real-time access to my digital operations, projects, and systems.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="card p-4 rounded-xl text-center">
+                        <div class="text-2xl mb-2">📊</div>
+                        <h4 class="font-bold mb-1">LifeOS Status</h4>
+                        <p class="text-xs text-green-400">Online</p>
+                    </div>
+                    <div class="card p-4 rounded-xl text-center">
+                        <div class="text-2xl mb-2">🤖</div>
+                        <h4 class="font-bold mb-1">AI Systems</h4>
+                        <p class="text-xs text-blue-400">Active</p>
+                    </div>
+                    <div class="card p-4 rounded-xl text-center">
+                        <div class="text-2xl mb-2">🌍</div>
+                        <h4 class="font-bold mb-1">Global Reach</h4>
+                        <p class="text-xs text-purple-400">15+ Countries</p>
+                    </div>
+                    <div class="card p-4 rounded-xl text-center">
+                        <div class="text-2xl mb-2">⚡</div>
+                        <h4 class="font-bold mb-1">Performance</h4>
+                        <p class="text-xs text-yellow-400">Peak</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Vision Statement -->
+        <section class="py-20 md:py-32 px-6">
+            <div class="container mx-auto text-center max-w-3xl">
+                <h3 class="text-3xl md:text-4xl font-bold tracking-tight mb-4">Building the Future</h3>
+                <p class="text-lg text-gray-400 mb-8">This isn't just about me. It's about creating systems, tools, and platforms that empower others to build their own digital empires. The future belongs to those who can harness technology to create meaningful impact.</p>
+                <h4 class="text-2xl font-bold gradient-text">Let's build empires together.</h4>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="border-t border-white/10 py-8 px-6">
+        <div class="container mx-auto text-center text-gray-500">
+            <p class="font-bold text-lg tracking-tighter">ChrisCruz<span class="text-indigo-400">.ai</span></p>
+            <p class="text-sm">&copy; 2025. Digital Empire. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

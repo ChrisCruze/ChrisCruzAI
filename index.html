@@ -3,166 +3,462 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cruz AI | Transforming Business Through AI Innovation</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            scroll-behavior: smooth;
-        }
-        .hero-gradient {
-            background: radial-gradient(circle at top, #1e3a8a, #111827);
-        }
-        .section-title {
-            @apply text-3xl font-bold text-slate-800 tracking-tight sm:text-4xl;
-        }
-        .cta-button {
-            @apply inline-block bg-blue-600 text-white font-bold py-3 px-8 rounded-lg text-lg hover:bg-blue-700 transition-transform transform hover:scale-105 shadow-lg;
-        }
-    </style>
-</head>
-<body class="bg-slate-50 text-slate-700">
+    <title>Christopher Manuel Cruz-Guzman - AI Entrepreneur & Technologist</title>
+    <meta name="description" content="Christopher Manuel Cruz-Guzman is an AI entrepreneur, technologist, and digital nomad building the future of productivity and human-AI collaboration.">
+    <meta name="keywords" content="Christopher Cruz-Guzman, AI entrepreneur, technologist, Cruz AI, LifeOS, productivity, digital nomad">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://chriscruz.ai/">
+    <meta property="og:title" content="Christopher Manuel Cruz-Guzman - AI Entrepreneur & Technologist">
+    <meta property="og:description" content="Building the future of productivity and human-AI collaboration">
+    <meta property="og:image" content="https://chriscruz.ai/images/og-image.jpg">
 
-    <!-- Header / Nav -->
-    <header class="bg-slate-900/80 backdrop-blur-sm sticky top-0 z-50">
-        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <div class="flex-shrink-0">
-                    <a href="#" class="text-2xl font-bold text-white">Cruz AI</a>
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://chriscruz.ai/">
+    <meta property="twitter:title" content="Christopher Manuel Cruz-Guzman - AI Entrepreneur & Technologist">
+    <meta property="twitter:description" content="Building the future of productivity and human-AI collaboration">
+    <meta property="twitter:image" content="https://chriscruz.ai/images/twitter-image.jpg">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles/main.css">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Christopher Manuel Cruz-Guzman",
+        "jobTitle": "AI Entrepreneur & Technologist",
+        "worksFor": {
+            "@type": "Organization",
+            "name": "J.P. Morgan"
+        },
+        "founder": {
+            "@type": "Organization",
+            "name": "Cruz AI"
+        },
+        "alumniOf": {
+            "@type": "Organization",
+            "name": "University of Pennsylvania"
+        },
+        "knowsAbout": ["Artificial Intelligence", "Productivity Systems", "Entrepreneurship", "Financial Technology"],
+        "url": "https://chriscruz.ai"
+    }
+    </script>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <a href="/">CC</a>
+            </div>
+            <div class="nav-menu">
+                <a href="#about" class="nav-link">About</a>
+                <a href="#work" class="nav-link">Work</a>
+                <a href="#projects" class="nav-link">Projects</a>
+                <a href="#writing" class="nav-link">Writing</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </div>
+            <div class="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-container">
+            <div class="hero-content">
+                <div class="hero-badge">
+                    <span class="badge-text">AI Entrepreneur & Technologist</span>
                 </div>
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#about" class="text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">About</a>
-                        <a href="#services" class="text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Services</a>
-                        <a href="#contact" class="text-slate-300 hover:bg-slate-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Contact</a>
+                <h1 class="hero-title">
+                    Christopher Manuel<br>
+                    <span class="gradient-text">Cruz-Guzman</span>
+                </h1>
+                <p class="hero-subtitle">
+                    Building the future of productivity and human-AI collaboration. 
+                    Currently leading AI initiatives at J.P. Morgan while scaling Cruz AI agency.
+                </p>
+                <div class="hero-actions">
+                    <a href="#about" class="btn btn-primary">Learn More</a>
+                    <a href="#contact" class="btn btn-secondary">Get in Touch</a>
+                </div>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">200+</span>
+                        <span class="stat-label">Team Members Scaled</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">15+</span>
+                        <span class="stat-label">Countries Explored</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">∞</span>
+                        <span class="stat-label">Systems Built</span>
                     </div>
                 </div>
             </div>
-        </nav>
-    </header>
-
-    <!-- Hero Section -->
-    <section class="hero-gradient text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-32 text-center">
-            <h1 class="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
-                Transforming Business Through AI Innovation
-            </h1>
-            <p class="mt-6 max-w-2xl mx-auto text-lg sm:text-xl text-slate-300">
-                From Wall Street to venture-backed startups, I build enterprise-grade AI solutions that drive real-world results and give you a competitive edge.
-            </p>
-            <div class="mt-10">
-                <a href="https://airtable.com/appfbKeY87qT4mpe6/pagn1Rd6dlBtzLDlB/form" target="_blank" class="cta-button">
-                    Book Your Free Consultation
-                </a>
+            <div class="hero-visual">
+                <div class="floating-card card-1">
+                    <div class="card-icon">🤖</div>
+                    <div class="card-text">AI Systems</div>
+                </div>
+                <div class="floating-card card-2">
+                    <div class="card-icon">🌍</div>
+                    <div class="card-text">Global Nomad</div>
+                </div>
+                <div class="floating-card card-3">
+                    <div class="card-icon">⚡</div>
+                    <div class="card-text">Productivity</div>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- About Section -->
-    <section id="about" class="py-20 sm:py-28 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="lg:grid lg:grid-cols-12 lg:gap-16 lg:items-center">
-                <div class="lg:col-span-7">
-                    <h2 class="section-title">Meet Chris Cruz, Founder of Cruz AI</h2>
-                    <p class="mt-4 text-lg text-slate-600">My career has been defined by a journey at the intersection of high-finance technology and agile startup innovation. This unique blend of experience is the foundation of Cruz AI.</p>
-                    <div class="mt-8 space-y-6">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9V3m0 18a9 9 0 009-9m-9 9a9 9 0 00-9-9"/></svg>
-                            </div>
-                            <div class="ml-4">
-                                <h4 class="text-lg font-bold text-slate-800">Financial Technology Expertise</h4>
-                                <p class="mt-1 text-slate-600">Currently building cutting-edge data enrichment products at JPMorgan Chase & Co., where I leverage AI to solve complex financial challenges at enterprise scale.</p>
-                            </div>
+    <section id="about" class="about">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">About Me</h2>
+                <p class="section-subtitle">A seeker, builder, and connector who thrives at the intersection of tech, creativity, and human connection.</p>
+            </div>
+            <div class="about-content">
+                <div class="about-text">
+                    <p class="about-paragraph">
+                        Born in Pleasantville, New York to Ecuadorian and Dominican parents, I've always been drawn to building bridges between different worlds. 
+                        My journey has taken me from founding startups that scaled to 200+ people, to leading AI initiatives at J.P. Morgan, 
+                        to exploring 15+ countries as a digital nomad.
+                    </p>
+                    <p class="about-paragraph">
+                        I believe that structure creates freedom, and that the best technology enhances human potential rather than replacing it. 
+                        This philosophy drives everything I build - from productivity systems to AI solutions to the comprehensive life management 
+                        platform I'm developing called LifeOS.
+                    </p>
+                    <div class="about-highlights">
+                        <div class="highlight">
+                            <span class="highlight-icon">🎓</span>
+                            <span class="highlight-text">Philosophy, Politics & Economics at UPenn</span>
                         </div>
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                            </div>
-                            <div class="ml-4">
-                                <h4 class="text-lg font-bold text-slate-800">Proven Entrepreneurial Success</h4>
-                                <p class="mt-1 text-slate-600">Co-founded Curalate, a venture-backed startup, giving me firsthand experience in building companies, securing funding, and scaling innovative solutions from the ground up.</p>
-                            </div>
+                        <div class="highlight">
+                            <span class="highlight-icon">🚀</span>
+                            <span class="highlight-text">Venture for America Fellow</span>
+                        </div>
+                        <div class="highlight">
+                            <span class="highlight-icon">🏦</span>
+                            <span class="highlight-text">AI & Financial Infrastructure at J.P. Morgan</span>
+                        </div>
+                        <div class="highlight">
+                            <span class="highlight-icon">🌎</span>
+                            <span class="highlight-text">Fluent in English & Spanish</span>
                         </div>
                     </div>
                 </div>
-                <div class="mt-10 lg:mt-0 lg:col-span-5">
-                    <div class="bg-slate-100 p-8 rounded-2xl shadow-lg">
-                        <h3 class="font-bold text-xl text-slate-800">Why Choose Cruz AI?</h3>
-                        <ul class="mt-6 space-y-4">
-                            <li class="flex items-start"><span class="text-blue-500 font-bold mr-3">✓</span><span><strong>Startup Agility, Enterprise Quality:</strong> Get the best of both worlds—fast execution backed by corporate-level reliability and security.</span></li>
-                            <li class="flex items-start"><span class="text-blue-500 font-bold mr-3">✓</span><span><strong>Real-World Implementation:</strong> I build and deploy complex AI systems in high-stakes environments, not just talk about them.</span></li>
-                            <li class="flex items-start"><span class="text-blue-500 font-bold mr-3">✓</span><span><strong>End-to-End Partnership:</strong> From strategic vision to technical deployment, I guide you through the entire AI transformation journey.</span></li>
-                        </ul>
+                <div class="about-image">
+                    <div class="image-placeholder">
+                        <span class="placeholder-text">Christopher Cruz-Guzman</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Services Section -->
-    <section id="services" class="py-20 sm:py-28">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center">
-                <h2 class="section-title">Services That Drive Results</h2>
-                <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">I provide full-stack AI solutions designed to solve your most pressing business challenges and unlock new opportunities for growth.</p>
+    <!-- Work Section -->
+    <section id="work" class="work">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Current Work</h2>
+                <p class="section-subtitle">Leading AI innovation in financial services while building the future of productivity.</p>
             </div>
-            <div class="mt-16 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-shadow">
-                    <h3 class="text-xl font-bold text-slate-800">Custom AI Development</h3>
-                    <p class="mt-2 text-slate-600">Bespoke solutions tailored to your unique business challenges and objectives.</p>
+            <div class="work-grid">
+                <div class="work-card">
+                    <div class="work-card-header">
+                        <div class="work-logo">🏦</div>
+                        <h3 class="work-title">J.P. Morgan</h3>
+                        <p class="work-role">AI & Financial Infrastructure</p>
+                    </div>
+                    <p class="work-description">
+                        Leading strategic initiatives including DDA Going Primary and AI-powered enrichment models 
+                        for transaction clarity. Managing teams and driving digital transformation in banking.
+                    </p>
+                    <div class="work-tags">
+                        <span class="tag">AI/ML</span>
+                        <span class="tag">Team Leadership</span>
+                        <span class="tag">Financial Tech</span>
+                    </div>
                 </div>
-                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-shadow">
-                    <h3 class="text-xl font-bold text-slate-800">Machine Learning Solutions</h3>
-                    <p class="mt-2 text-slate-600">Predictive models that enhance decision-making and automate complex processes.</p>
+                <div class="work-card">
+                    <div class="work-card-header">
+                        <div class="work-logo">🤖</div>
+                        <h3 class="work-title">Cruz AI</h3>
+                        <p class="work-role">Founder & CEO</p>
+                    </div>
+                    <p class="work-description">
+                        Building an AI agency that consults and creates AI solutions for businesses. 
+                        Democratizing AI access and helping organizations leverage technology for growth.
+                    </p>
+                    <div class="work-tags">
+                        <span class="tag">AI Consulting</span>
+                        <span class="tag">Entrepreneurship</span>
+                        <span class="tag">Innovation</span>
+                    </div>
                 </div>
-                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-shadow">
-                    <h3 class="text-xl font-bold text-slate-800">Natural Language Processing</h3>
-                    <p class="mt-2 text-slate-600">Intelligent automation for customer interactions, document analysis, and more.</p>
-                </div>
-                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-shadow">
-                    <h3 class="text-xl font-bold text-slate-800">Computer Vision Applications</h3>
-                    <p class="mt-2 text-slate-600">Unlock insights from visual data to improve quality control and automate inspection.</p>
-                </div>
-                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-shadow">
-                    <h3 class="text-xl font-bold text-slate-800">Predictive Analytics</h3>
-                    <p class="mt-2 text-slate-600">Future-focused insights for strategic planning, demand forecasting, and risk management.</p>
-                </div>
-                <div class="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-shadow">
-                    <h3 class="text-xl font-bold text-slate-800">AI Strategy Consulting</h3>
-                    <p class="mt-2 text-slate-600">A clear, actionable roadmap for a successful and scalable AI transformation.</p>
+                <div class="work-card">
+                    <div class="work-card-header">
+                        <div class="work-logo">📚</div>
+                        <h3 class="work-title">Content Creation</h3>
+                        <p class="work-role">Author & Educator</p>
+                    </div>
+                    <p class="work-description">
+                        Writing a book on Apple Shortcuts & AI automation, sharing insights on productivity, 
+                        and building educational content around AI and personal development.
+                    </p>
+                    <div class="work-tags">
+                        <span class="tag">Writing</span>
+                        <span class="tag">Education</span>
+                        <span class="tag">Automation</span>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Final CTA Section -->
-    <section id="contact" class="bg-slate-800">
-        <div class="max-w-4xl mx-auto text-center py-16 px-4 sm:py-20 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-extrabold text-white sm:text-4xl">
-                <span class="block">Ready to Transform Your Business?</span>
-            </h2>
-            <p class="mt-4 text-lg leading-6 text-slate-300">The AI revolution is here. The companies that embrace it now will dominate tomorrow's marketplace. Let's discuss how Cruz AI can accelerate your business transformation.</p>
-            <a href="https://airtable.com/appfbKeY87qT4mpe6/pagn1Rd6dlBtzLDlB/form" target="_blank" class="mt-8 cta-button">
-                Schedule Your Free AI Strategy Call
-            </a>
+    <!-- Projects Section -->
+    <section id="projects" class="projects">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Featured Projects</h2>
+                <p class="section-subtitle">Systems, tools, and platforms that enhance human potential and productivity.</p>
+            </div>
+            <div class="projects-grid">
+                <div class="project-card featured">
+                    <div class="project-image">
+                        <div class="project-placeholder">
+                            <span class="project-icon">🧠</span>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">LifeOS</h3>
+                        <p class="project-description">
+                            A comprehensive life management platform that connects knowledge, habits, and projects 
+                            into a living ecosystem. Built with AI to optimize personal productivity and decision-making.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">AI</span>
+                            <span class="tag">Productivity</span>
+                            <span class="tag">Systems</span>
+                        </div>
+                        <a href="/projects/lifeos" class="project-link">Learn More →</a>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-image">
+                        <div class="project-placeholder">
+                            <span class="project-icon">🏠</span>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Camper Van</h3>
+                        <p class="project-description">
+                            Built a fully livable camper van during the pandemic with my brother Omar. 
+                            A mobile adventure space that represents freedom and family collaboration.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">DIY</span>
+                            <span class="tag">Adventure</span>
+                            <span class="tag">Family</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="project-card">
+                    <div class="project-image">
+                        <div class="project-placeholder">
+                            <span class="project-icon">🍽️</span>
+                        </div>
+                    </div>
+                    <div class="project-content">
+                        <h3 class="project-title">Cuculi</h3>
+                        <p class="project-description">
+                            Social dining experiment that brings people together through shared meals. 
+                            Building community and meaningful connections through food and conversation.
+                        </p>
+                        <div class="project-tags">
+                            <span class="tag">Community</span>
+                            <span class="tag">Social</span>
+                            <span class="tag">Innovation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="projects-cta">
+                <a href="/projects" class="btn btn-outline">View All Projects</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Writing Section -->
+    <section id="writing" class="writing">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Latest Writing</h2>
+                <p class="section-subtitle">Thoughts on AI, productivity, entrepreneurship, and building a meaningful life.</p>
+            </div>
+            <div class="writing-grid">
+                <article class="writing-card">
+                    <div class="writing-meta">
+                        <span class="writing-category">AI & Productivity</span>
+                        <span class="writing-date">Coming Soon</span>
+                    </div>
+                    <h3 class="writing-title">Apple Shortcuts & AI Automation: A Complete Guide</h3>
+                    <p class="writing-excerpt">
+                        How to leverage Apple Shortcuts and AI to automate your daily workflows, 
+                        boost productivity, and create systems that work for you.
+                    </p>
+                    <a href="/writing/apple-shortcuts-ai-automation" class="writing-link">Read More →</a>
+                </article>
+                <article class="writing-card">
+                    <div class="writing-meta">
+                        <span class="writing-category">Life Systems</span>
+                        <span class="writing-date">Coming Soon</span>
+                    </div>
+                    <h3 class="writing-title">Building Your Second Brain: A Practical Approach</h3>
+                    <p class="writing-excerpt">
+                        How to create an external knowledge management system that grows with you, 
+                        connects ideas, and enhances your thinking and creativity.
+                    </p>
+                    <a href="/writing/second-brain-practical-approach" class="writing-link">Read More →</a>
+                </article>
+                <article class="writing-card">
+                    <div class="writing-meta">
+                        <span class="writing-category">Entrepreneurship</span>
+                        <span class="writing-date">Coming Soon</span>
+                    </div>
+                    <h3 class="writing-title">Scaling from 0 to 200: Lessons from Building Kirillate</h3>
+                    <p class="writing-excerpt">
+                        Key insights and hard-won lessons from scaling a startup from founding 
+                        to 200 employees with First Round Capital backing.
+                    </p>
+                    <a href="/writing/scaling-startup-lessons" class="writing-link">Read More →</a>
+                </article>
+            </div>
+            <div class="writing-cta">
+                <a href="/writing" class="btn btn-outline">Read All Articles</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Let's Connect</h2>
+                <p class="section-subtitle">Interested in AI, productivity, entrepreneurship, or just want to say hello? I'd love to hear from you.</p>
+            </div>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <span class="contact-icon">📧</span>
+                        <div class="contact-details">
+                            <h4>Email</h4>
+                            <a href="mailto:hello@chriscruz.ai" class="contact-link">hello@chriscruz.ai</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">🐦</span>
+                        <div class="contact-details">
+                            <h4>Twitter</h4>
+                            <a href="https://twitter.com/chriscruzai" target="_blank" rel="noopener" class="contact-link">@chriscruzai</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">💼</span>
+                        <div class="contact-details">
+                            <h4>LinkedIn</h4>
+                            <a href="https://linkedin.com/in/christophercruzguzman" target="_blank" rel="noopener" class="contact-link">Christopher Cruz-Guzman</a>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-icon">📱</span>
+                        <div class="contact-details">
+                            <h4>Newsletter</h4>
+                            <a href="/newsletter" class="contact-link">AI & Productivity Insights</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <form class="form">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" id="name" name="name" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" name="email" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea id="message" name="message" rows="4" class="form-textarea" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Send Message</button>
+                    </form>
+                </div>
+            </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-slate-900 text-white">
-        <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8 text-center">
-            <p>"AI isn't just about technology – it's about reimagining what's possible for your business." - Chris Cruz</p>
-            <div class="mt-8 flex justify-center space-x-6">
-                <a href="mailto:chris.cruz.enterprises@gmail.com" class="text-slate-400 hover:text-white">Email</a>
-                <a href="https://chriscruz.nyc/" target="_blank" class="text-slate-400 hover:text-white">Website</a>
-                <a href="tel:6468270518" class="text-slate-400 hover:text-white">Phone</a>
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <div class="footer-logo">CC</div>
+                    <p class="footer-tagline">Building the future, one system at a time.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4>Navigation</h4>
+                        <a href="#about">About</a>
+                        <a href="#work">Work</a>
+                        <a href="#projects">Projects</a>
+                        <a href="#writing">Writing</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Resources</h4>
+                        <a href="/lifeos">LifeOS</a>
+                        <a href="/cruz-ai">Cruz AI</a>
+                        <a href="/newsletter">Newsletter</a>
+                        <a href="/docs">Documentation</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Connect</h4>
+                        <a href="https://twitter.com/chriscruzai" target="_blank" rel="noopener">Twitter</a>
+                        <a href="https://linkedin.com/in/christophercruzguzman" target="_blank" rel="noopener">LinkedIn</a>
+                        <a href="mailto:hello@chriscruz.ai">Email</a>
+                        <a href="/contact">Contact</a>
+                    </div>
+                </div>
             </div>
-            <p class="mt-8 text-slate-500">Based in New York, NY | Serving Clients Globally</p>
-            <p class="mt-2 text-sm text-slate-600">&copy; 2024 Cruz AI. All rights reserved.</p>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Christopher Manuel Cruz-Guzman. All rights reserved.</p>
+                <p>Built with ❤️ and lots of ☕</p>
+            </div>
         </div>
     </footer>
 
+    <!-- JavaScript -->
+    <script src="js/main.js"></script>
 </body>
 </html>
