@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manhattan Event Discovery - AI-Powered Weekend Planner</title>
+    <meta name="description" content="Discover Manhattan events happening today using AI. Swipe through curated events from Eventbrite, Meetup, and Luma with Tinder-like interface.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .event-card {
+            transition: all 0.3s ease;
+            transform-style: preserve-3d;
+        }
+        .event-card.swipe-left {
+            transform: translateX(-150%) rotate(-15deg);
+            opacity: 0;
+        }
+        .event-card.swipe-right {
+            transform: translateX(150%) rotate(15deg);
+            opacity: 0;
+        }
+        .swipe-area {
+            touch-action: pan-y pinch-zoom;
+        }
+        .event-image {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 0%, #f093fb 100%);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold text-gray-900">Chris Cruz</a>
+                    <span class="ml-2 text-gray-500">/</span>
+                    <span class="ml-2 text-gray-700">Manhattan Event Discovery</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
+                    <a href="/blogs/" class="text-gray-600 hover:text-gray-900 transition-colors">Blog</a>
+                    <a href="/contact.html" class="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">🗽 Manhattan Event Discovery</h1>
+            <p class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-8">
+                AI-powered weekend planner that finds events happening today across all platforms
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 text-sm">
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">AI Discovery</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Tinder-like Interface</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Real-time Events</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Firebase Storage</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <main>
+            <!-- Input Section -->
+            <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-md mb-8">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">What kind of day are you looking for?</h2>
+                    <p class="text-gray-600">Describe your mood or what you want to experience today</p>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row gap-4 mb-4">
+                    <input type="text" id="userInput" class="flex-grow w-full px-4 py-3 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 'romantic evening', 'cultural afternoon', 'adventure with friends'">
+                    <button id="generateBtn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                        Find Events
+                    </button>
+                </div>
+
+                <!-- URL Input Section -->
+                <div class="border-t pt-4">
+                    <div class="text-center mb-4">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-2">Add Custom Event</h3>
+                        <p class="text-sm text-gray-600">Paste any event URL and the AI will analyze it</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <input type="url" id="eventUrl" class="flex-grow w-full px-4 py-3 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://... (any event URL)">
+                        <button id="addUrlBtn" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out">
+                            Add Event
+                        </button>
+                    </div>
+                </div>
+
+                <div id="loader" class="text-center mt-4" style="display: none;">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="text-gray-600 mt-2">Searching for events...</p>
+                </div>
+            </div>
+
+            <!-- Event Discovery Section -->
+            <div id="eventDiscovery" class="max-w-md mx-auto" style="display: none;">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900 mb-2">Swipe Through Events</h2>
+                    <p class="text-gray-600">Swipe right to save, left to pass</p>
+                </div>
+                
+                <div id="eventCardContainer" class="relative">
+                    <!-- Event cards will be inserted here -->
+                </div>
+
+                <div class="flex justify-center gap-6 mt-8">
+                    <button id="dislikeBtn" class="p-4 rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition transform hover:scale-110">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
+                    </button>
+                    <button id="likeBtn" class="p-4 rounded-full bg-green-100 text-green-500 hover:bg-green-200 transition transform hover:scale-110">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Saved Events Section -->
+            <div class="mt-12">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800">Saved Events</h2>
+                    <div class="flex items-center gap-2">
+                        <button id="cardViewBtn" class="p-2 rounded-md bg-gray-200 text-gray-600 hover:bg-gray-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" />
+                            </svg>
+                        </button>
+                        <button id="tableViewBtn" class="p-2 rounded-md bg-blue-500 text-white">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card View (Mobile First) -->
+                <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Event cards will be inserted here -->
+                </div>
+
+                <!-- Table View (Desktop) -->
+                <div id="tableView" class="bg-white rounded-xl shadow-md overflow-hidden hidden md:block">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Event</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date & Time</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Source</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventsTable" class="bg-white divide-y divide-gray-200">
+                                <!-- Event rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>Powered by Perplexity AI & Firebase • Built by Chris Cruz</p>
+            <div class="mt-4">
+                <a href="/blogs/solving-manhattan-event-discovery-ai-powered-weekend-planner.html" class="text-blue-600 hover:text-blue-800 underline">📖 Read the full story behind this app</a>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Event Detail Modal -->
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative">
+            <div id="detailModalContent" class="p-6"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+            measurementId: "G-LVHF0VP8RM"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // DOM Elements
+        const generateBtn = document.getElementById('generateBtn');
+        const userInput = document.getElementById('userInput');
+        const eventUrl = document.getElementById('eventUrl');
+        const addUrlBtn = document.getElementById('addUrlBtn');
+        const eventsTable = document.getElementById('eventsTable');
+        const cardView = document.getElementById('cardView');
+        const tableView = document.getElementById('tableView');
+        const cardViewBtn = document.getElementById('cardViewBtn');
+        const tableViewBtn = document.getElementById('tableViewBtn');
+        const loader = document.getElementById('loader');
+        const eventDiscovery = document.getElementById('eventDiscovery');
+        const eventCardContainer = document.getElementById('eventCardContainer');
+        const likeBtn = document.getElementById('likeBtn');
+        const dislikeBtn = document.getElementById('dislikeBtn');
+        const detailModal = document.getElementById('detailModal');
+        const detailModalContent = document.getElementById('detailModalContent');
+
+        // Perplexity AI Configuration
+        const perplexityApiKey = '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';
+        const perplexityApiUrl = 'https://api.perplexity.ai/chat/completions';
+
+        // App State
+        let allEvents = [];
+        let currentEvents = [];
+        let currentEventIndex = 0;
+
+        // Listen for real-time updates from Firebase
+        function listenForEvents() {
+            const eventsRef = ref(db, 'manhattanEvents/');
+            onValue(eventsRef, (snapshot) => {
+                eventsTable.innerHTML = '';
+                cardView.innerHTML = '';
+                allEvents = [];
+                const data = snapshot.val();
+                if (data) {
+                    for (const key in data) {
+                        allEvents.push({ id: key, ...data[key] });
+                    }
+                }
+                allEvents.reverse(); // Show newest first
+                allEvents.forEach(event => {
+                    addEventToTable(event);
+                    addEventToCardView(event);
+                });
+            });
+        }
+
+        function addEventToTable(event) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <a href="${event.sourceUrl || '#'}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${event.title || 'N/A'}</a>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${event.date || 'N/A'} • ${event.time || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${event.location || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${event.price || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <span class="px-2 py-1 text-xs rounded-full ${getSourceColor(event.source)}">${event.source || 'N/A'}</span>
+                </td>
+            `;
+            eventsTable.appendChild(row);
+        }
+
+        function addEventToCardView(event) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer';
+            card.innerHTML = `
+                <div class="p-6">
+                    <div class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">${event.category ? event.category.join(' • ') : 'Event'} • ${event.date || 'Today'}</div>
+                    <h3 class="mt-1 text-xl font-semibold text-gray-900 leading-tight truncate">${event.title || 'N/A'}</h3>
+                    <p class="mt-2 text-gray-600">${event.location || 'N/A'}</p>
+                    <p class="mt-1 text-sm text-gray-500">${event.time || 'N/A'} • ${event.price || 'N/A'}</p>
+                    <div class="mt-2">
+                        <span class="px-2 py-1 text-xs rounded-full ${getSourceColor(event.source)}">${event.source || 'N/A'}</span>
+                    </div>
+                </div>
+            `;
+            card.addEventListener('click', () => showDetailModal(event));
+            cardView.appendChild(card);
+        }
+
+        function getSourceColor(source) {
+            switch (source?.toLowerCase()) {
+                case 'eventbrite': return 'bg-orange-100 text-orange-800';
+                case 'meetup': return 'bg-red-100 text-red-800';
+                case 'luma': return 'bg-blue-100 text-blue-800';
+                default: return 'bg-gray-100 text-gray-800';
+            }
+        }
+
+        async function generateEvents() {
+            const userQuery = userInput.value.trim();
+            if (!userQuery) {
+                alert('Please describe what kind of day you\'re looking for.');
+                return;
+            }
+            loader.style.display = 'block';
+            generateBtn.disabled = true;
+
+            const systemPrompt = `You are an AI assistant that finds events happening in Manhattan today across all platforms. 
+            Search for events happening specifically today, ${new Date().toLocaleDateString()}, that match the user's request.
+            
+            Return exactly 5 events in this JSON array format:
+            [
+                {
+                    "eventId": "unique_identifier",
+                    "title": "Event Name",
+                    "description": "Event description",
+                    "date": "YYYY-MM-DD",
+                    "time": "Start Time - End Time",
+                    "location": "Venue Name, Address",
+                    "neighborhood": "Manhattan neighborhood",
+                    "price": "Price or Free",
+                    "category": ["category1", "category2"],
+                    "source": "platform name",
+                    "sourceUrl": "URL to the event page",
+                    "imageUrl": "Event image URL if available",
+                    "organizer": "Event organizer name",
+                    "tags": ["tag1", "tag2"],
+                    "whyWorthIt": "Brief explanation of why this event is worth attending",
+                    "specialRequirements": "Any special requirements or tips"
+                }
+            ]
+            
+            Focus on events that are:
+            - Happening specifically today
+            - Match the user's described mood/intent
+            
+            Do not include any other text or formatting. Return only the JSON array.`;
+
+            const payload = { 
+                model: "sonar-pro", 
+                messages: [
+                    { "role": "system", "content": systemPrompt }, 
+                    { "role": "user", "content": `Find events for: "${userQuery}"` }
+                ] 
+            };
+
+            try {
+                const response = await fetch(perplexityApiUrl, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Authorization': `Bearer ${perplexityApiKey}`, 
+                        'Content-Type': 'application/json' 
+                    }, 
+                    body: JSON.stringify(payload) 
+                });
+                
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const data = await response.json();
+                const messageContent = data.choices[0].message.content;
+                let events = JSON.parse(messageContent);
+                
+                if (Array.isArray(events)) {
+                    currentEvents = events;
+                    currentEventIndex = 0;
+                    displayCurrentEvent();
+                    eventDiscovery.style.display = 'block';
+                    userInput.value = '';
+                } else {
+                    throw new Error('Invalid response format');
+                }
+            } catch (error) {
+                console.error('Error generating events:', error);
+                alert("Sorry, there was an error finding events. Please try again.");
+            } finally {
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        }
+
+        async function addCustomEvent() {
+            const url = eventUrl.value.trim();
+            if (!url) {
+                alert('Please enter an event URL.');
+                return;
+            }
+            
+            // Validate URL format
+            try {
+                new URL(url);
+            } catch (error) {
+                alert('Please enter a valid URL (e.g., https://www.eventbrite.com/...).');
+                return;
+            }
+            
+            loader.style.display = 'block';
+            addUrlBtn.disabled = true;
+
+            const systemPrompt = `You are an AI assistant that analyzes event URLs and extracts event information.
+            Analyze the provided event URL and return the event data in this exact JSON structure:
+            {
+                "eventId": "unique_identifier",
+                "title": "Event Name",
+                "description": "Event description",
+                "date": "YYYY-MM-DD",
+                "time": "Start Time - End Time",
+                "location": "Venue Name, Address",
+                "neighborhood": "Manhattan neighborhood",
+                "price": "Price or Free",
+                "category": ["category1", "category2"],
+                "source": "platform name",
+                "sourceUrl": "URL to the event page",
+                "imageUrl": "Event image URL if available",
+                "organizer": "Event organizer name",
+                "tags": ["tag1", "tag2"],
+                "whyWorthIt": "Brief explanation of why this event is worth attending",
+                "specialRequirements": "Any special requirements or tips"
+            }
+            
+            Do not include any other text or formatting. Return only the JSON object.`;
+
+            const payload = { 
+                model: "sonar-pro", 
+                messages: [
+                    { "role": "system", "content": systemPrompt }, 
+                    { "role": "user", "content": `Analyze this event URL: ${url}` }
+                ] 
+            };
+
+            try {
+                const response = await fetch(perplexityApiUrl, { 
+                    method: 'POST', 
+                    headers: { 
+                        'Authorization': `Bearer ${perplexityApiKey}`, 
+                        'Content-Type': 'application/json' 
+                    }, 
+                    body: JSON.stringify(payload) 
+                });
+                
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const data = await response.json();
+                const messageContent = data.choices[0].message.content;
+                let event = JSON.parse(messageContent);
+                
+                await saveEventToDB(event);
+                eventUrl.value = '';
+                alert('Event added successfully!');
+            } catch (error) {
+                console.error('Error adding custom event:', error);
+                alert("Sorry, there was an error adding the event. Please try again.");
+            } finally {
+                loader.style.display = 'none';
+                addUrlBtn.disabled = false;
+            }
+        }
+
+        function displayCurrentEvent() {
+            if (currentEventIndex >= currentEvents.length) {
+                eventDiscovery.style.display = 'none';
+                alert('You\'ve seen all the events! Generate more to continue.');
+                return;
+            }
+
+            const event = currentEvents[currentEventIndex];
+            eventCardContainer.innerHTML = `
+                <div class="event-card bg-white rounded-xl shadow-lg overflow-hidden swipe-area">
+                    <div class="event-image h-48 flex items-center justify-center text-white text-center p-6">
+                        <div>
+                            <h3 class="text-2xl font-bold mb-2">${event.title}</h3>
+                            <p class="text-lg opacity-90">${event.neighborhood || 'Manhattan'}</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">${event.price || 'Free'}</span>
+                            <span class="px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full">${event.source}</span>
+                        </div>
+                        <p class="text-gray-600 mb-4">${event.description}</p>
+                        <div class="space-y-2 text-sm text-gray-500">
+                            <p><span class="font-semibold">When:</span> ${event.date} • ${event.time}</p>
+                            <p><span class="font-semibold">Where:</span> ${event.location}</p>
+                            <p><span class="font-semibold">Why:</span> ${event.whyWorthIt}</p>
+                        </div>
+                        <div class="mt-4">
+                            <a href="${event.sourceUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline font-medium">Learn More →</a>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function handleSwipeAction(action) {
+            const card = eventCardContainer.querySelector('.event-card');
+            if (!card) return;
+            
+            const currentEvent = currentEvents[currentEventIndex];
+            if (!currentEvent) return;
+
+            try {
+                if (action === 'like') {
+                    await saveEventToDB(currentEvent);
+                }
+                
+                // Animate card out
+                card.classList.add(action === 'like' ? 'swipe-right' : 'swipe-left');
+                
+                setTimeout(() => {
+                    currentEventIndex++;
+                    displayCurrentEvent();
+                }, 300);
+            } catch (error) {
+                console.error("Error handling swipe action:", error);
+            }
+        }
+
+        async function saveEventToDB(event) {
+            try {
+                const eventsRef = ref(db, 'manhattanEvents/');
+                await push(eventsRef, event);
+            } catch (error) {
+                console.error("Error saving event:", error);
+                throw error;
+            }
+        }
+
+        function showDetailModal(event) {
+            detailModalContent.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">${event.title}</h3>
+                    <button id="closeDetailModalBtn" class="text-gray-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">${event.price || 'Free'}</span>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 text-sm rounded-full">${event.source}</span>
+                </div>
+                <p class="text-gray-600 font-semibold mb-2">${event.location}</p>
+                <p class="text-sm text-gray-500 mb-4">${event.date} • ${event.time}</p>
+                <p class="text-gray-700 max-h-60 overflow-y-auto mb-4">${event.description}</p>
+                <p class="text-gray-700 mb-4"><span class="font-semibold">Why it's worth it:</span> ${event.whyWorthIt}</p>
+                ${event.specialRequirements ? `<p class="text-gray-700 mb-4"><span class="font-semibold">Special requirements:</span> ${event.specialRequirements}</p>` : ''}
+                <a href="${event.sourceUrl || '#'}" target="_blank" rel="noopener noreferrer" class="inline-block mt-4 text-blue-600 font-bold hover:underline">Visit Event Page →</a>
+            `;
+            detailModal.style.display = 'flex';
+            document.getElementById('closeDetailModalBtn').addEventListener('click', () => detailModal.style.display = 'none');
+        }
+
+        // View Toggling
+        function showCardView() {
+            cardView.classList.remove('hidden');
+            tableView.classList.add('hidden');
+            cardViewBtn.classList.add('bg-blue-500', 'text-white');
+            cardViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
+            tableViewBtn.classList.remove('bg-blue-500', 'text-white');
+            tableViewBtn.classList.add('bg-gray-200', 'text-gray-600');
+        }
+
+        function showTableView() {
+            cardView.classList.add('hidden');
+            tableView.classList.remove('hidden');
+            tableViewBtn.classList.add('bg-blue-500', 'text-white');
+            tableViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
+            cardViewBtn.classList.remove('bg-blue-500', 'text-white');
+            cardViewBtn.classList.add('bg-gray-200', 'text-gray-600');
+        }
+
+        // Initial Setup
+        listenForEvents();
+        if (window.innerWidth < 768) {
+            showCardView();
+        } else {
+            showTableView();
+        }
+
+        // Event Listeners
+        generateBtn.addEventListener('click', generateEvents);
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') generateBtn.click(); });
+        addUrlBtn.addEventListener('click', addCustomEvent);
+        eventUrl.addEventListener('keypress', (e) => { if (e.key === 'Enter') addUrlBtn.click(); });
+        likeBtn.addEventListener('click', () => handleSwipeAction('like'));
+        dislikeBtn.addEventListener('click', () => handleSwipeAction('dislike'));
+        detailModal.addEventListener('click', (e) => { if (e.target === detailModal) detailModal.style.display = 'none'; });
+        cardViewBtn.addEventListener('click', showCardView);
+        tableViewBtn.addEventListener('click', showTableView);
+        
+        window.addEventListener('resize', () => {
+            if (window.innerWidth < 768) {
+                showCardView();
+            } else {
+                showTableView();
+            }
+        });
+    </script>
+</body>
+</html>

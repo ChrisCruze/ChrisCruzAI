@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fun Planner</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .review-card {
+            transition: transform 0.5s ease;
+        }
+        .review-card.exit-left {
+            transform: translateX(-150%) rotate(-15deg);
+        }
+        .review-card.exit-right {
+            transform: translateX(150%) rotate(15deg);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Main Container -->
+    <div class="container mx-auto px-4 py-8 md:py-12">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-900">Fun Planner</h1>
+            <p class="mt-2 text-lg text-gray-600">AI-powered inspiration for your next adventure.</p>
+        </header>
+
+        <main>
+            <!-- Input Section -->
+            <div class="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow-md">
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <input type="text" id="userInput" class="flex-grow w-full px-4 py-3 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., 'a cheap weekend activity for two in NYC'">
+                    <button id="generateBtn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105">
+                        Generate Idea
+                    </button>
+                </div>
+                 <div class="mt-4 text-center">
+                    <button id="reviewBtn" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-300 ease-in-out">
+                        Review Ideas
+                    </button>
+                </div>
+                <div id="loader" class="text-center mt-4" style="display: none;">
+                    <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                    <p class="text-gray-600 mt-2">Generating a fun idea...</p>
+                </div>
+            </div>
+
+            <!-- Global Activity Board -->
+            <div class="mt-12">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-semibold text-gray-800">Global Activity Board</h2>
+                    <div class="hidden md:flex items-center gap-2">
+                        <button id="cardViewBtn" class="p-2 rounded-md bg-gray-200 text-gray-600 hover:bg-gray-300">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5z" /></svg>
+                        </button>
+                        <button id="tableViewBtn" class="p-2 rounded-md bg-blue-500 text-white">
+                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Card View (Mobile First) -->
+                <div id="cardView" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Activity cards will be inserted here -->
+                </div>
+
+                <!-- Table View (Desktop) -->
+                <div id="tableView" class="bg-white rounded-xl shadow-md overflow-hidden hidden md:block">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Activity</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Description</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ideasTable" class="bg-white divide-y divide-gray-200">
+                                <!-- Activity rows will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer class="text-center mt-12 text-gray-500 text-sm">
+            <p>Powered by Perplexity AI & Firebase</p>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="detailModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg relative">
+            <div id="detailModalContent" class="p-6"></div>
+        </div>
+    </div>
+    
+    <div id="reviewModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style="display: none;">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md relative">
+            <button id="closeReviewModalBtn" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+            <div id="reviewCardContainer" class="p-6 pt-12"></div>
+            <div id="reviewFinishedMessage" class="text-center p-12 text-gray-600" style="display: none;">
+                <h3 class="text-xl font-bold mb-2">All Done!</h3>
+                <p>You've reviewed all the available ideas. Generate more to keep going!</p>
+            </div>
+            <div id="reviewActions" class="flex justify-center gap-4 p-4 border-t border-gray-200">
+                <button id="dislikeBtn" class="p-4 rounded-full bg-red-100 text-red-500 hover:bg-red-200 transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg></button>
+                <button id="likeBtn" class="p-4 rounded-full bg-green-100 text-green-500 hover:bg-green-200 transition"><svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg></button>
+            </div>
+        </div>
+    </div>
+
+
+    <script type="module">
+        // Firebase Imports
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+            measurementId: "G-LVHF0VP8RM"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // DOM Elements
+        const generateBtn = document.getElementById('generateBtn');
+        const userInput = document.getElementById('userInput');
+        const ideasTable = document.getElementById('ideasTable');
+        const cardView = document.getElementById('cardView');
+        const tableView = document.getElementById('tableView');
+        const cardViewBtn = document.getElementById('cardViewBtn');
+        const tableViewBtn = document.getElementById('tableViewBtn');
+        const loader = document.getElementById('loader');
+        const reviewBtn = document.getElementById('reviewBtn');
+        const reviewModal = document.getElementById('reviewModal');
+        const closeReviewModalBtn = document.getElementById('closeReviewModalBtn');
+        const reviewCardContainer = document.getElementById('reviewCardContainer');
+        const likeBtn = document.getElementById('likeBtn');
+        const dislikeBtn = document.getElementById('dislikeBtn');
+        const reviewActions = document.getElementById('reviewActions');
+        const reviewFinishedMessage = document.getElementById('reviewFinishedMessage');
+        const detailModal = document.getElementById('detailModal');
+        const detailModalContent = document.getElementById('detailModalContent');
+
+        // Perplexity AI Configuration
+        const perplexityApiKey = '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';
+        const perplexityApiUrl = 'https://api.perplexity.ai/chat/completions';
+
+        // App State
+        let allIdeas = [];
+        let currentReviewIndex = 0;
+
+        // Listen for real-time updates from Firebase Realtime Database
+        function listenForIdeas() {
+            const ideasRef = ref(db, 'ideas/');
+            onValue(ideasRef, (snapshot) => {
+                ideasTable.innerHTML = '';
+                cardView.innerHTML = '';
+                allIdeas = [];
+                const data = snapshot.val();
+                if (data) {
+                    for (const key in data) {
+                        allIdeas.push({ id: key, ...data[key] });
+                    }
+                }
+                allIdeas.reverse(); // Show newest first
+                allIdeas.forEach(idea => {
+                    addIdeaToTable(idea);
+                    addIdeaToCardView(idea);
+                });
+            });
+        }
+
+        function addIdeaToTable(idea) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    <a href="${idea.url || '#'}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${idea.activity || 'N/A'}</a>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${idea.date || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-normal text-sm text-gray-500 truncate" style="max-width: 200px;">${idea.description || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${idea.category || 'N/A'}</td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${idea.location || 'N/A'}</td>
+            `;
+            ideasTable.appendChild(row);
+        }
+
+        function addIdeaToCardView(idea) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300 cursor-pointer';
+            card.innerHTML = `
+                <div class="p-6">
+                    <div class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">${idea.category || 'General'} &bull; ${idea.date || 'Anytime'}</div>
+                    <h3 class="mt-1 text-xl font-semibold text-gray-900 leading-tight truncate">${idea.activity}</h3>
+                    <p class="mt-2 text-gray-600">${idea.location}</p>
+                </div>
+            `;
+            card.addEventListener('click', () => showDetailModal(idea));
+            cardView.appendChild(card);
+        }
+        
+        async function generateIdea() {
+            const userQuery = userInput.value.trim();
+            if (!userQuery) {
+                alert('Please enter a preference to generate an idea.');
+                return;
+            }
+            loader.style.display = 'block';
+            generateBtn.disabled = true;
+
+            const systemPrompt = `You are an AI assistant that generates fun activity ideas. Respond with a single JSON object with the keys "activity", "description", "category", "location", "url", and "date". The url should be a valid, relevant link to learn more about the activity. For the "date", analyze the user's request and provide a specific, plausible date (e.g., "2025-08-09"). If the user's request is vague about timing (e.g., "a fun activity"), suggest a date in the near future, like the upcoming weekend. Do not include any other text or formatting. Current date is ${new Date().toLocaleDateString()}.`;
+            const payload = { model: "sonar-pro", messages: [{ "role": "system", "content": systemPrompt }, { "role": "user", "content": `Generate a fun activity idea based on this preference: "${userQuery}"` }] };
+
+            try {
+                const response = await fetch(perplexityApiUrl, { method: 'POST', headers: { 'Authorization': `Bearer ${perplexityApiKey}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const data = await response.json();
+                const messageContent = data.choices[0].message.content;
+                let idea = JSON.parse(messageContent);
+                await saveIdeaToDB(idea);
+                userInput.value = '';
+            } catch (error) {
+                console.error('Error generating or saving idea:', error);
+                alert("Sorry, there was an error generating an idea. Please try again.");
+            } finally {
+                loader.style.display = 'none';
+                generateBtn.disabled = false;
+            }
+        }
+
+        async function saveIdeaToDB(idea) {
+            try {
+                const ideasRef = ref(db, 'ideas/');
+                await push(ideasRef, idea);
+            } catch (error) {
+                console.error("Error adding document: ", error);
+            }
+        }
+
+        // --- View Toggling ---
+        function showCardView() {
+            cardView.classList.remove('hidden');
+            tableView.classList.add('hidden');
+            cardViewBtn.classList.add('bg-blue-500', 'text-white');
+            cardViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
+            tableViewBtn.classList.remove('bg-blue-500', 'text-white');
+            tableViewBtn.classList.add('bg-gray-200', 'text-gray-600');
+        }
+
+        function showTableView() {
+            cardView.classList.add('hidden');
+            tableView.classList.remove('hidden');
+            tableViewBtn.classList.add('bg-blue-500', 'text-white');
+            tableViewBtn.classList.remove('bg-gray-200', 'text-gray-600');
+            cardViewBtn.classList.remove('bg-blue-500', 'text-white');
+            cardViewBtn.classList.add('bg-gray-200', 'text-gray-600');
+        }
+        
+        // --- Modal Logic ---
+        function showDetailModal(idea) {
+            detailModalContent.innerHTML = `
+                <div class="flex justify-between items-start">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">${idea.activity}</h3>
+                     <button id="closeDetailModalBtn" class=" text-gray-400 hover:text-gray-600">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
+                <p class="text-sm font-semibold text-indigo-600 uppercase tracking-wide">${idea.category || 'General'} &bull; ${idea.date || 'Anytime'}</p>
+                <p class="mt-1 text-gray-600 font-semibold">${idea.location}</p>
+                <p class="mt-4 text-gray-700 max-h-60 overflow-y-auto">${idea.description}</p>
+                <a href="${idea.url || '#'}" target="_blank" rel="noopener noreferrer" class="inline-block mt-4 text-blue-600 font-bold hover:underline">Learn More &rarr;</a>
+            `;
+            detailModal.style.display = 'flex';
+            document.getElementById('closeDetailModalBtn').addEventListener('click', () => detailModal.style.display = 'none');
+        }
+
+
+        function openReviewModal() {
+            if (allIdeas.length === 0) {
+                alert("No ideas to review yet. Try generating some first!");
+                return;
+            }
+            currentReviewIndex = 0;
+            reviewFinishedMessage.style.display = 'none';
+            reviewActions.style.display = 'flex';
+            displayCurrentReviewIdea();
+            reviewModal.style.display = 'flex';
+        }
+
+        function closeReviewModal() {
+            reviewModal.style.display = 'none';
+        }
+
+        function displayCurrentReviewIdea() {
+            if (currentReviewIndex >= allIdeas.length) {
+                reviewCardContainer.innerHTML = '';
+                reviewActions.style.display = 'none';
+                reviewFinishedMessage.style.display = 'block';
+                return;
+            }
+            const idea = allIdeas[currentReviewIndex];
+            reviewCardContainer.innerHTML = `<div class="review-card bg-white p-6 rounded-lg"><h3 class="text-2xl font-bold text-gray-900 mb-2">${idea.activity}</h3><p class="text-gray-500 mb-1"><span class="font-semibold">Date:</span> ${idea.date || 'N/A'}</p><p class="text-gray-500 mb-4"><span class="font-semibold">Location:</span> ${idea.location}</p><p class="text-gray-700 h-32 overflow-y-auto">${idea.description}</p><a href="${idea.url || '#'}" target="_blank" rel="noopener noreferrer" class="inline-block mt-4 text-blue-600 hover:underline">Learn More &rarr;</a></div>`;
+        }
+
+        async function handleReviewAction(action) {
+            const card = reviewCardContainer.querySelector('.review-card');
+            if (!card) return;
+            const currentIdea = allIdeas[currentReviewIndex];
+            if (!currentIdea) return;
+
+            try {
+                const reviewsRef = ref(db, 'reviews/');
+                await push(reviewsRef, { ideaId: currentIdea.id, activity: currentIdea.activity, action: action, timestamp: new Date().toISOString() });
+            } catch (error) {
+                console.error("Error saving review:", error);
+            }
+
+            card.classList.add(action === 'like' ? 'exit-right' : 'exit-left');
+            setTimeout(() => {
+                currentReviewIndex++;
+                displayCurrentReviewIdea();
+            }, 500);
+        }
+
+        // Initial Data Load & View Setup
+        listenForIdeas();
+        if (window.innerWidth < 768) {
+            showCardView();
+        } else {
+            showTableView();
+        }
+
+        // Event Listeners
+        generateBtn.addEventListener('click', generateIdea);
+        userInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') generateBtn.click(); });
+        reviewBtn.addEventListener('click', openReviewModal);
+        closeReviewModalBtn.addEventListener('click', closeReviewModal);
+        likeBtn.addEventListener('click', () => handleReviewAction('like'));
+        dislikeBtn.addEventListener('click', () => handleReviewAction('dislike'));
+        reviewModal.addEventListener('click', (e) => { if (e.target === reviewModal) closeReviewModal(); });
+        detailModal.addEventListener('click', (e) => { if (e.target === detailModal) detailModal.style.display = 'none'; });
+        cardViewBtn.addEventListener('click', showCardView);
+        tableViewBtn.addEventListener('click', showTableView);
+        window.addEventListener('resize', () => {
+             if (window.innerWidth < 768) {
+                showCardView();
+            } else {
+                showTableView();
+            }
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link crossorigin="" href="https://fonts.gstatic.com/" rel="preconnect"/>
+    <link as="style" href="https://fonts.googleapis.com/css2?display=swap&amp;family=Noto+Sans%3Awght%40400%3B500%3B700%3B900&amp;family=Spline+Sans%3Awght%40400%3B500%3B700" onload="this.rel='stylesheet'" rel="stylesheet"/>
+    <title>Data Vectorizer - Chris Cruz</title>
+    <meta name="description" content="Transform your raw data into powerful vectors optimized for MongoDB. AI-powered data vectorization tool for intelligent applications.">
+    <link href="data:image/x-icon;base64," rel="icon" type="image/x-icon"/>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet"/>
+</head>
+<body class="bg-[#fcfcf8]">
+    <div class="relative flex size-full min-h-screen flex-col group/design-root overflow-x-hidden" style='font-family: "Spline Sans", "Noto Sans", sans-serif;'>
+        <div class="layout-container flex h-full grow flex-col">
+            <header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-b-[#f4f4e6] px-10 py-4">
+                <div class="flex items-center gap-3 text-[#1c1c0d]">
+                    <svg class="size-7" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM12.89 16.6C12.54 17.11 11.89 17.26 11.38 16.91L8.23 14.86C7.72 14.51 7.57 13.86 7.92 13.35C8.27 12.84 8.92 12.69 9.43 13.04L11.5 14.43V9.5C11.5 8.95 11.95 8.5 12.5 8.5C13.05 8.5 13.5 8.95 13.5 9.5V14.43L15.57 13.04C16.08 12.69 16.73 12.84 17.08 13.35C17.43 13.86 17.28 14.51 16.77 14.86L13.62 16.91C13.43 17.03 13.22 17.09 13 17.09C12.96 17.09 12.92 17.08 12.89 17.07V16.6Z" fill="#1c1c0d"></path>
+                    </svg>
+                    <h1 class="text-[#1c1c0d] text-xl font-bold tracking-[-0.015em]">Data Vectorizer</h1>
+                </div>
+                <div class="flex items-center gap-6">
+                    <a class="text-[#1c1c0d] text-sm font-medium leading-normal hover:text-[#F9F506] transition-colors" href="/apps/">App Gallery</a>
+                    <a class="text-[#1c1c0d] text-sm font-medium leading-normal hover:text-[#F9F506] transition-colors" href="/">Home</a>
+                    <button onclick="scrollToWorkspace()" class="flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-full h-10 px-6 bg-[#f9f506] text-[#1c1c0d] text-sm font-bold leading-normal tracking-[0.015em] hover:bg-yellow-400 transition-colors">
+                        <span class="truncate">Get Started</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <main class="flex-1">
+                <div class="flex flex-col items-center justify-center text-center px-4 py-20 lg:py-32">
+                    <div class="w-full max-w-2xl">
+                        <h2 class="text-4xl md:text-5xl font-bold text-[#1c1c0d] tracking-tighter mb-4">Unlock the Power of Your Data</h2>
+                        <p class="text-lg text-slate-600 max-w-xl mx-auto mb-8">
+                            Effortlessly transform your raw data into powerful vectors, optimized for MongoDB. Start building intelligent applications in just a few clicks.
+                        </p>
+                        <div class="flex justify-center">
+                            <button onclick="scrollToWorkspace()" class="flex items-center gap-2 min-w-[84px] max-w-[480px] cursor-pointer justify-center overflow-hidden rounded-full h-12 px-8 bg-[#f9f506] text-[#1c1c0d] text-base font-bold leading-normal tracking-[0.015em] transition-transform hover:scale-105">
+                                <span class="truncate">Vectorize Your Data Now</span>
+                                <span class="material-symbols-outlined"> arrow_forward </span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Workspace Section -->
+    <section id="workspace" class="bg-[#FCFCF8] text-[#1C1C0D] py-20">
+        <div class="max-w-4xl mx-auto px-10">
+            <div class="text-center mb-8">
+                <h1 class="text-4xl font-bold tracking-tight text-[#1c1c0d] mb-2">Input Your JSON Data</h1>
+                <p class="text-lg text-[#6B6B61]">
+                    Paste your JSON data below or upload a file. Our AI will analyze your data structure and create an optimized vectorization strategy.
+                </p>
+            </div>
+            
+            <!-- Step 1: JSON Input -->
+            <div class="bg-white rounded-lg shadow-sm border border-[#E9E8CE] p-8 mb-8">
+                <h3 class="text-xl font-semibold text-[#1c1c0d] mb-4">Step 1: Data Input</h3>
+                <textarea id="jsonInput" class="form-textarea w-full h-64 resize-y rounded-md bg-[#F8F8F4] border border-[#E9E8CE] focus:ring-2 focus:ring-[#F9F506] focus:border-[#F9F506] p-4 text-base font-mono placeholder:text-[#9e9d47]" placeholder='{
+  "name": "John Doe",
+  "age": 30,
+  "isStudent": false,
+  "courses": [
+    {"title": "History", "credits": 3},
+    {"title": "Math", "credits": 4}
+  ]
+}'></textarea>
+                <div class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <button onclick="uploadFile()" class="flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 rounded-md bg-white border border-[#E9E8CE] text-[#1C1C0D] font-semibold hover:bg-[#F4F4E6] transition-colors">
+                        <span class="material-symbols-outlined">upload_file</span>
+                        Upload JSON File
+                    </button>
+                    <button onclick="analyzeData()" class="flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3 rounded-md bg-[#F9F506] text-[#1C1C0D] font-bold hover:bg-yellow-400 transition-colors">
+                        <span class="material-symbols-outlined">rocket_launch</span>
+                        Analyze & Vectorize
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: AI Analysis Results -->
+            <div id="analysisResults" class="hidden bg-white rounded-lg shadow-sm border border-[#E9E8CE] p-8 mb-8">
+                <h3 class="text-xl font-semibold text-[#1c1c0d] mb-4">Step 2: AI Analysis & Vectorization Strategy</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-[#1c1c0d] mb-3">Generated YAML Configuration</h4>
+                        <div id="yamlOutput" class="bg-[#F8F8F4] border border-[#E9E8CE] rounded-md p-4 font-mono text-sm overflow-x-auto"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-[#1c1c0d] mb-3">Sample Vector Output</h4>
+                        <div id="vectorOutput" class="bg-[#F8F8F4] border border-[#E9E8CE] rounded-md p-4 font-mono text-sm overflow-x-auto"></div>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-center">
+                    <button onclick="generateMongoDBCode()" class="flex items-center justify-center gap-2 px-8 py-3 rounded-md bg-[#F9F506] text-[#1C1C0D] font-bold hover:bg-yellow-400 transition-colors">
+                        <span class="material-symbols-outlined">code</span>
+                        Generate MongoDB Integration Code
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: MongoDB Integration -->
+            <div id="mongoDBResults" class="hidden bg-white rounded-lg shadow-sm border border-[#E9E8CE] p-8 mb-8">
+                <h3 class="text-xl font-semibold text-[#1c1c0d] mb-4">Step 3: MongoDB Integration</h3>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="font-semibold text-[#1c1c0d] mb-3">Database Schema</h4>
+                        <div id="schemaOutput" class="bg-[#F8F8F4] border border-[#E9E8CE] rounded-md p-4 font-mono text-sm overflow-x-auto"></div>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-[#1c1c0d] mb-3">Vectorization Pipeline</h4>
+                        <div id="pipelineOutput" class="bg-[#F8F8F4] border border-[#E9E8CE] rounded-md p-4 font-mono text-sm overflow-x-auto"></div>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-center">
+                    <button onclick="downloadCode()" class="flex items-center justify-center gap-2 px-8 py-3 rounded-md bg-[#F9F506] text-[#1C1C0D] font-bold hover:bg-yellow-400 transition-colors">
+                        <span class="material-symbols-outlined">download</span>
+                        Download Complete Solution
+                    </button>
+                </div>
+            </div>
+
+            <!-- Information Panel -->
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-6">
+                <h3 class="text-lg font-semibold text-blue-900 mb-3">About Data Vectorization</h3>
+                <p class="text-blue-800 mb-3">
+                    Vectorization transforms your structured data into numerical representations that enable powerful AI applications like semantic search, 
+                    recommendation systems, and machine learning models. This tool is specifically designed for MongoDB integration.
+                </p>
+                <p class="text-blue-800 text-sm">
+                    <strong>Chief AI Officer Note:</strong> This tool was developed by Chris Cruz, Chief AI Officer at Cuculi, to streamline 
+                    data vectorization processes for intelligent applications.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        function scrollToWorkspace() {
+            document.getElementById('workspace').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function uploadFile() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.getElementById('jsonInput').value = e.target.result;
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function analyzeData() {
+            const jsonInput = document.getElementById('jsonInput').value;
+            if (!jsonInput.trim()) {
+                alert('Please enter JSON data first');
+                return;
+            }
+
+            try {
+                const data = JSON.parse(jsonInput);
+                
+                // Generate YAML configuration
+                const yaml = generateYAML(data);
+                document.getElementById('yamlOutput').textContent = yaml;
+                
+                // Generate sample vector
+                const vector = generateSampleVector(data);
+                document.getElementById('vectorOutput').textContent = JSON.stringify(vector, null, 2);
+                
+                document.getElementById('analysisResults').classList.remove('hidden');
+                
+                // Scroll to results
+                document.getElementById('analysisResults').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                alert('Invalid JSON format: ' + error.message);
+            }
+        }
+
+        function generateYAML(data) {
+            const fields = analyzeFields(data);
+            let yaml = 'vectorization_config:\n';
+            yaml += '  model: "text-embedding-ada-002"\n';
+            yaml += '  dimensions: 1536\n';
+            yaml += '  fields:\n';
+            
+            fields.forEach(field => {
+                yaml += `    ${field.name}:\n`;
+                yaml += `      type: "${field.type}"\n`;
+                yaml += `      vectorize: ${field.vectorize}\n`;
+                yaml += `      weight: ${field.weight}\n`;
+            });
+            
+            return yaml;
+        }
+
+        function analyzeFields(obj, prefix = '') {
+            const fields = [];
+            
+            for (const [key, value] of Object.entries(obj)) {
+                const fieldName = prefix ? `${prefix}.${key}` : key;
+                const type = Array.isArray(value) ? 'array' : typeof value;
+                
+                let vectorize = false;
+                let weight = 1.0;
+                
+                if (typeof value === 'string' && value.length > 10) {
+                    vectorize = true;
+                    weight = 1.0;
+                } else if (typeof value === 'number') {
+                    vectorize = false;
+                    weight = 0.5;
+                } else if (Array.isArray(value) && value.length > 0) {
+                    vectorize = true;
+                    weight = 0.8;
+                }
+                
+                fields.push({ name: fieldName, type, vectorize, weight });
+                
+                if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+                    fields.push(...analyzeFields(value, fieldName));
+                }
+            }
+            
+            return fields;
+        }
+
+        function generateSampleVector(data) {
+            // Simulate vector generation
+            const vector = [];
+            for (let i = 0; i < 1536; i++) {
+                vector.push(Math.random() * 2 - 1);
+            }
+            
+            return {
+                original_data: data,
+                vector: vector,
+                metadata: {
+                    dimensions: 1536,
+                    model: "text-embedding-ada-002",
+                    timestamp: new Date().toISOString()
+                }
+            };
+        }
+
+        function generateMongoDBCode() {
+            const schema = `// MongoDB Schema with Vector Support
+const mongoose = require('mongoose');
+
+const vectorSchema = new mongoose.Schema({
+  originalData: mongoose.Schema.Types.Mixed,
+  vector: [Number],
+  metadata: {
+    model: String,
+    dimensions: Number,
+    timestamp: Date
+  }
+}, { timestamps: true });
+
+// Create vector index for similarity search
+vectorSchema.index({ vector: "2dsphere" });
+
+module.exports = mongoose.model('Vector', vectorSchema);`;
+
+            const pipeline = `// Vectorization Pipeline
+const { OpenAIEmbeddings } = require('langchain/embeddings/openai');
+const Vector = require('./models/vector');
+
+async function vectorizeData(data) {
+  const embeddings = new OpenAIEmbeddings();
+  const vector = await embeddings.embedQuery(JSON.stringify(data));
+  
+  const vectorDoc = new Vector({
+    originalData: data,
+    vector: vector,
+    metadata: {
+      model: 'text-embedding-ada-002',
+      dimensions: vector.length,
+      timestamp: new Date()
+    }
+  });
+  
+  return await vectorDoc.save();
+}`;
+
+            document.getElementById('schemaOutput').textContent = schema;
+            document.getElementById('pipelineOutput').textContent = pipeline;
+            document.getElementById('mongoDBResults').classList.remove('hidden');
+            
+            document.getElementById('mongoDBResults').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function downloadCode() {
+            const content = `# Data Vectorizer Solution
+
+## Generated Files:
+1. MongoDB Schema
+2. Vectorization Pipeline
+3. YAML Configuration
+4. Sample Vector Output
+
+Generated on: ${new Date().toLocaleDateString()}
+Chief AI Officer: Chris Cruz (Cuculi)`;
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'vectorizer-solution.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

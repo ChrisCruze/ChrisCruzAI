@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>App Gallery - Chris Cruz</title>
+    <meta name="description" content="Explore 20+ productivity, health, and knowledge management apps built by Chris Cruz. From fitness trackers to project planners, discover tools that enhance your daily life.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .app-card { transition: all 0.3s ease; }
+        .app-card:hover { transform: translateY(-4px); }
+        .category-badge { transition: all 0.2s ease; }
+        .category-badge:hover { transform: scale(1.05); }
+        .gradient-bg { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .hero-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 0%, #f093fb 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <a href="/" class="text-xl font-bold text-gray-900">Chris Cruz</a>
+                    <span class="ml-2 text-gray-500">/</span>
+                    <span class="ml-2 text-gray-700">App Gallery</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
+                    <a href="/blogs/" class="text-gray-600 hover:text-gray-900 transition-colors">Blog</a>
+                    <a href="/contact.html" class="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">App Gallery</h1>
+            <p class="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto mb-8">
+                Discover 24+ productivity, health, and knowledge management apps built to enhance your daily life
+            </p>
+            <div class="flex flex-wrap justify-center gap-4 text-sm">
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Productivity</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Health & Fitness</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Knowledge Management</span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">Personal Organization</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <div class="text-4xl font-bold text-blue-600 mb-2">24</div>
+                    <div class="text-gray-600">Total Apps</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-purple-600 mb-2">4</div>
+                    <div class="text-gray-600">Categories</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-green-600 mb-2">100%</div>
+                    <div class="text-gray-600">Custom Built</div>
+                </div>
+                <div>
+                    <div class="text-4xl font-bold text-orange-600 mb-2">∞</div>
+                    <div class="text-gray-600">Possibilities</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Productivity Apps -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">🚀 Productivity & Project Management</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Tools to organize, prioritize, and execute with clarity</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">Productivity</span>
+                            <span class="text-gray-500 text-sm">Live</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Fun Planner</h3>
+                        <p class="text-gray-600 mb-4">AI-powered weekend and activity planner that helps you discover and plan exciting things to do in your area.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Planning</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">AI</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Activities</span>
+                            </div>
+                            <a href="fun-planner.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">Productivity</span>
+                            <span class="text-gray-500 text-sm">Advanced</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Project Planner</h3>
+                        <p class="text-gray-600 mb-4">Eisenhower Matrix-based project management with AI-powered task creation and natural language planning.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Matrix View</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">AI Tasks</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Planning</span>
+                            </div>
+                            <a href="project-planner.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">Productivity</span>
+                            <span class="text-gray-500 text-sm">Advanced</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Knowledge Workflow</h3>
+                        <p class="text-gray-600 mb-4">Comprehensive knowledge management system with workflows, templates, and AI-powered insights.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Workflows</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Templates</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">AI Insights</span>
+                            </div>
+                            <a href="knowledge-workflow.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">Productivity</span>
+                            <span class="text-gray-500 text-sm">Advanced</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Todoist Sorter</h3>
+                        <p class="text-gray-600 mb-4">Smart task organization and prioritization tool with AI-powered categorization and workflow optimization.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Task Sorting</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">AI Categorization</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Workflow</span>
+                            </div>
+                            <a href="todoist-sorter.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">Productivity</span>
+                            <span class="text-gray-500 text-sm">Intermediate</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Routine Management</h3>
+                        <p class="text-gray-600 mb-4">Build and track daily routines with habit formation insights and progress visualization.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Routines</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Habits</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Progress</span>
+                            </div>
+                            <a href="routine-management.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">Productivity</span>
+                            <span class="text-gray-500 text-sm">Intermediate</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Inventory Management</h3>
+                        <p class="text-gray-600 mb-4">Track and manage inventory with barcode scanning, alerts, and comprehensive reporting.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Inventory</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Barcodes</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Alerts</span>
+                            </div>
+                            <a href="inventory-management.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-blue-100 text-blue-800 text-xs font-medium px-3 py-1 rounded-full">Productivity</span>
+                            <span class="text-gray-500 text-sm">Basic</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Upkeep</h3>
+                        <p class="text-gray-600 mb-4">Maintenance tracking and scheduling system for equipment, vehicles, and property management.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Maintenance</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Scheduling</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Tracking</span>
+                            </div>
+                            <a href="upkeep.html" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Health & Fitness Apps -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">💪 Health & Fitness</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Comprehensive tracking and management for your physical well-being</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">Health</span>
+                            <span class="text-gray-500 text-sm">Advanced</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Workout Tracker</h3>
+                        <p class="text-gray-600 mb-4">Comprehensive fitness tracking with exercise libraries, progress charts, and workout planning.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Workouts</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Progress</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Planning</span>
+                            </div>
+                            <a href="workout-tracker.html" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">Health</span>
+                            <span class="text-gray-500 text-sm">Intermediate</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Marathon Training</h3>
+                        <p class="text-gray-600 mb-4">Structured training plans, progress tracking, and race preparation for marathon runners.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Training</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Progress</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Planning</span>
+                            </div>
+                            <a href="marathon-training.html" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">Health</span>
+                            <span class="text-gray-500 text-sm">Intermediate</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Food Diary</h3>
+                        <p class="text-gray-600 mb-4">Nutrition tracking with meal planning, calorie counting, and dietary goal management.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Nutrition</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Meals</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Goals</span>
+                            </div>
+                            <a href="food-diary.html" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">Health</span>
+                            <span class="text-gray-500 text-sm">Basic</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Weight Tracker</h3>
+                        <p class="text-gray-600 mb-4">Simple weight monitoring with trend analysis and goal setting for health management.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Weight</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Trends</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Goals</span>
+                            </div>
+                            <a href="weight-tracker.html" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">Health</span>
+                            <span class="text-gray-500 text-sm">Basic</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Hydration Tracker</h3>
+                        <p class="text-gray-600 mb-4">Daily water intake monitoring with reminders and hydration goal tracking.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Hydration</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Reminders</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Goals</span>
+                            </div>
+                            <a href="hydration-tracker.html" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-green-100 text-green-800 text-xs font-medium px-3 py-1 rounded-full">Health</span>
+                            <span class="text-gray-500 text-sm">Basic</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Stretch Tracker</h3>
+                        <p class="text-gray-600 mb-4">Pre and post-run stretching routines with timer functionality and exercise tracking.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Stretching</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Timer</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Routines</span>
+                            </div>
+                            <a href="stretch-tracker.html" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Knowledge Management Apps -->
+    <section class="py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">🧠 Knowledge & Learning</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Tools to capture, organize, and leverage your knowledge effectively</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-purple-100 text-purple-800 text-xs font-medium px-3 py-1 rounded-full">Knowledge</span>
+                            <span class="text-gray-500 text-sm">Advanced</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Second Brain</h3>
+                        <p class="text-gray-600 mb-4">AI-powered knowledge management with note-taking, organization, and intelligent insights.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Notes</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">AI</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Organization</span>
+                            </div>
+                            <a href="second-brain.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-purple-100 text-purple-800 text-xs font-medium px-3 py-1 rounded-full">Knowledge</span>
+                            <span class="text-gray-500 text-sm">Advanced</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Artifacts</h3>
+                        <p class="text-gray-600 mb-4">Digital asset management system for organizing and categorizing your creative work and resources.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Assets</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Organization</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Categorization</span>
+                            </div>
+                            <a href="artifacts.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-purple-100 text-purple-800 text-xs font-medium px-3 py-1 rounded-full">Knowledge</span>
+                            <span class="text-gray-500 text-sm">Intermediate</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Bookmarks Manager</h3>
+                        <p class="text-gray-600 mb-4">Organized bookmark collection with tagging, search, and categorization for efficient web resource management.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Bookmarks</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Tags</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Search</span>
+                            </div>
+                            <a href="bookmarks-manager.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-purple-100 text-purple-800 text-xs font-medium px-3 py-1 rounded-full">Knowledge</span>
+                            <span class="text-gray-500 text-sm">Coming Soon</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Manhattan Event Discovery</h3>
+                        <p class="text-gray-600 mb-4">AI-powered weekend planner that aggregates events from multiple NYC platforms using Perplexity API and Firebase for intelligent event discovery.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">AI Discovery</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Event Aggregation</span>
+                                <span class="bg-gray-700 text-white text-xs px-2 py-1 rounded">NYC</span>
+                            </div>
+                            <a href="/blogs/solving-manhattan-event-discovery-ai-powered-weekend-planner.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-purple-100 text-purple-800 text-xs font-medium px-3 py-1 rounded-full">Knowledge</span>
+                            <span class="text-gray-500 text-sm">Advanced</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Data Vectorizer</h3>
+                        <p class="text-gray-600 mb-4">AI-powered tool to transform JSON data into optimized vectors for MongoDB, with intelligent field analysis and integration code generation.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">AI Analysis</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Vectorization</span>
+                                <span class="bg-gray-700 text-white text-xs px-2 py-1 rounded">MongoDB</span>
+                            </div>
+                            <a href="data-vectorizer.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-purple-100 text-purple-800 text-xs font-medium px-3 py-1 rounded-full">Knowledge</span>
+                            <span class="text-gray-500 text-sm">Coming Soon</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Manhattan Event Discovery</h3>
+                        <p class="text-gray-600 mb-4">AI-powered weekend planner that aggregates events from multiple NYC platforms using Perplexity API and Firebase for intelligent event discovery.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">AI Discovery</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Event Aggregation</span>
+                                <span class="bg-gray-700 text-white text-xs px-2 py-1 rounded">NYC</span>
+                            </div>
+                            <a href="/blogs/solving-manhattan-event-discovery-ai-powered-weekend-planner.html" class="bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors">Learn More</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Personal Organization Apps -->
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-gray-900 mb-4">🎯 Personal Organization</h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">Apps to streamline your personal life and relationships</p>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-orange-100 text-orange-800 text-xs font-medium px-3 py-1 rounded-full">Personal</span>
+                            <span class="text-gray-500 text-sm">Intermediate</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Friend CRM</h3>
+                        <p class="text-gray-600 mb-4">Relationship management system for maintaining and strengthening friendships with contact tracking.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Relationships</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Contacts</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Reminders</span>
+                            </div>
+                            <a href="friend-crm.html" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-orange-100 text-orange-800 text-xs font-medium px-3 py-1 rounded-full">Personal</span>
+                            <span class="text-gray-500 text-sm">Basic</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Goal Tracker</h3>
+                        <p class="text-gray-600 mb-4">Personal goal setting and progress tracking with milestone management and motivation tools.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Goals</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Progress</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Milestones</span>
+                            </div>
+                            <a href="goal-tracker.html" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-orange-100 text-orange-800 text-xs font-medium px-3 py-1 rounded-full">Personal</span>
+                            <span class="text-gray-500 text-sm">Basic</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Sprint Tracker</h3>
+                        <p class="text-gray-600 mb-4">Agile sprint planning and tracking for personal projects and goal achievement.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Sprints</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Planning</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Tracking</span>
+                            </div>
+                            <a href="sprint-tracker.html" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="app-card bg-white rounded-xl shadow-md overflow-hidden border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="category-badge bg-orange-100 text-orange-800 text-xs font-medium px-3 py-1 rounded-full">Personal</span>
+                            <span class="text-gray-500 text-sm">Basic</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Pills Management</h3>
+                        <p class="text-gray-600 mb-4">Medication tracking and reminder system for managing prescriptions and health schedules.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex space-x-2">
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Medication</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Reminders</span>
+                                <span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded">Scheduling</span>
+                            </div>
+                            <a href="pills-management.html" class="bg-orange-600 text-white px-4 py-2 rounded-lg hover:bg-orange-700 transition-colors">Launch</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 gradient-bg text-white">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h2 class="text-3xl font-bold mb-6">Ready to Transform Your Productivity?</h2>
+            <p class="text-xl text-blue-100 mb-8">Explore these apps and discover how they can enhance your daily life and workflow.</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="/" class="bg-white text-blue-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition-colors">Back to Home</a>
+                <a href="/contact.html" class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg font-semibold hover:bg-white hover:text-blue-600 transition-colors">Get in Touch</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Chris Cruz</h3>
+                    <p class="text-gray-400">Building the future of productivity and human-AI collaboration.</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Quick Links</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="/" class="hover:text-white transition-colors">Home</a></li>
+                        <li><a href="/blogs/" class="hover:text-white transition-colors">Blog</a></li>
+                        <li><a href="/contact.html" class="hover:text-white transition-colors">Contact</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold mb-4">Connect</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="https://linkedin.com/in/christophercruzguzman" target="_blank" class="hover:text-white transition-colors">LinkedIn</a></li>
+                        <li><a href="https://twitter.com/chriscruzai" target="_blank" class="hover:text-white transition-colors">Twitter</a></li>
+                        <li><a href="mailto:chris.cruz.ai.nyc@gmail.com" class="hover:text-white transition-colors">Email</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Chris Cruz. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
