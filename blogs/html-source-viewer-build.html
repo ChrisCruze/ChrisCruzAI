@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Building the HTML Source Code Viewer in a Weekend | ChrisCruz.ai</title>
+    <meta name="description" content="A behind-the-scenes look at how I designed and shipped the HTML Source Code Viewer & Copier app in a weekend using Tailwind CSS and a CORS-friendly fetch pipeline.">
+    <meta name="keywords" content="HTML source viewer, front-end tools, Tailwind CSS, AllOrigins proxy, clipboard API, Chris Cruz, productivity systems">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="Building the HTML Source Code Viewer in a Weekend">
+    <meta property="og:description" content="How I designed the HTML Source Code Viewer & Copier app for fast competitive research and markup auditing.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://chriscruz.ai/blogs/html-source-viewer-build.html">
+    <meta property="og:image" content="https://chriscruz.ai/images/html-source-viewer-build.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Building the HTML Source Code Viewer in a Weekend">
+    <meta name="twitter:description" content="How I designed the HTML Source Code Viewer & Copier app for fast competitive research and markup auditing.">
+    <meta name="article:published_time" content="2025-02-18T00:00:00Z">
+    <meta name="article:author" content="Christopher Manuel Cruz-Guzman">
+    <meta name="article:section" content="Productivity Systems">
+    <meta name="article:tag" content="front-end tooling, productivity systems, clipboard workflows">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #6366f1, #c026d3, #fb7185);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .blog-content {
+            background-color: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(12px);
+        }
+        .callout-box {
+            background: linear-gradient(135deg, rgba(79, 70, 229, 0.14), rgba(236, 72, 153, 0.12));
+            border: 1px solid rgba(79, 70, 229, 0.35);
+        }
+        .note-box {
+            background: linear-gradient(135deg, rgba(45, 212, 191, 0.12), rgba(59, 130, 246, 0.12));
+            border: 1px solid rgba(45, 212, 191, 0.3);
+        }
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #6366f1, #c026d3);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="../brand-hub.html" class="text-xl font-bold tracking-tighter">ChrisCruz<span class="text-indigo-400">.ai</span></a>
+            <nav class="hidden md:flex space-x-8">
+                <a href="../brand-hub.html" class="hover:text-indigo-400 transition-colors">Empire</a>
+                <a href="../manifesto.html" class="hover:text-indigo-400 transition-colors">Manifesto</a>
+                <a href="../brand-story.html" class="hover:text-indigo-400 transition-colors">Story</a>
+                <a href="../contact.html" class="hover:text-indigo-400 transition-colors">Contact</a>
+            </nav>
+            <span class="text-xs font-semibold py-1 px-3 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Productivity Systems</span>
+        </div>
+    </header>
+
+    <main class="pt-24">
+        <!-- Article Header -->
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-4xl">
+                <div class="text-center mb-8">
+                    <div class="flex items-center justify-center space-x-2 mb-4">
+                        <span class="bg-gradient-to-r from-indigo-600 to-pink-600 text-white text-xs font-semibold py-1 px-3 rounded-full">Productivity Systems</span>
+                        <span class="text-gray-500 text-sm">February 18, 2025</span>
+                        <span class="text-gray-500 text-sm">•</span>
+                        <span class="text-gray-500 text-sm">7 min read</span>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-6">
+                        Building the <span class="gradient-text">HTML Source Code Viewer</span> in a Weekend
+                    </h1>
+                    <p class="text-xl text-gray-400 max-w-3xl mx-auto leading-relaxed">
+                        I needed a lightweight way to inspect raw markup while sprinting through competitive research. Instead of juggling browser dev tools, I built my own HTML Source Code Viewer & Copier: a single-purpose tool that respects speed, clarity, and copy-ready output.
+                    </p>
+                </div>
+                <div class="flex items-center justify-center space-x-4 text-sm text-gray-500">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-gradient-to-r from-indigo-600 to-pink-600 rounded-full flex items-center justify-center text-white font-bold">CC</div>
+                        <span>Christopher Manuel Cruz-Guzman</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Article Content -->
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-4xl">
+                <article class="blog-content p-8 md:p-10 rounded-2xl space-y-10">
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        Good tools remove friction from creative flow. During my research sprints for Cruz AI clients, I’m constantly reverse-engineering funnels and studying landing page markup. Chrome’s developer tools are powerful, but they’re also heavy when I just need the source and a clean copy button. So I scoped a focused web app: paste a URL, fetch the HTML via a CORS-friendly proxy, display it with legible typography, and make copying painless.
+                    </p>
+
+                    <div class="callout-box p-6 rounded-xl">
+                        <h2 class="text-2xl font-bold text-white mb-4">Success Criteria</h2>
+                        <ul class="space-y-3 text-gray-100 text-base">
+                            <li>• Fetch most public webpages without server-side code.</li>
+                            <li>• Provide instant visual feedback (loading states, errors, success).</li>
+                            <li>• Keep the markup scrollable, readable, and copy-ready.</li>
+                            <li>• Ship quickly enough to fold into the Featured Applications gallery.</li>
+                        </ul>
+                    </div>
+
+                    <h2 class="text-3xl font-bold text-indigo-300">Designing a focused interface</h2>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        I started with Tailwind CSS, the same utility framework powering the rest of the app gallery. The layout is intentionally compact: a centered card, one call-to-action, and no competing controls. A slim, uppercase feature grid underneath reinforces the value props without distracting from the input field.
+                    </p>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        Input validation happens before the fetch call even fires. If the URL fails <code class="bg-gray-900/60 px-2 py-1 rounded">new URL()</code>, the app nudges the user to correct it. That micro-guardrail saves API calls and clarifies what went wrong.
+                    </p>
+
+                    <div class="note-box p-6 rounded-xl">
+                        <h3 class="text-lg font-semibold text-teal-200 mb-3">UI quality-of-life touches</h3>
+                        <ul class="space-y-2 text-gray-100 text-sm">
+                            <li>• Disabled button + spinner swap to signal progress.</li>
+                            <li>• Soft shadows and rounded corners to mirror other Cruz AI utilities.</li>
+                            <li>• Scrollbar theming so long documents still feel polished.</li>
+                        </ul>
+                    </div>
+
+                    <h2 class="text-3xl font-bold text-indigo-300">Engineering the fetch pipeline</h2>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        Browsers block cross-origin requests to arbitrary domains, so the secret weapon here is <strong>AllOrigins</strong>, a free proxy that adds permissive CORS headers. The fetch flow is straightforward:
+                    </p>
+                    <ol class="list-decimal list-inside space-y-3 text-gray-200 text-base">
+                        <li>Normalize the user input into a safe URL string.</li>
+                        <li>Request <code class="bg-gray-900/60 px-2 py-1 rounded">https://api.allorigins.win/raw?url=&lt;encoded target&gt;</code>.</li>
+                        <li>Stream the response text into the `<code>&lt;pre&gt;</code>` container.</li>
+                        <li>Flip the UI state based on success or failure.</li>
+                    </ol>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        Error handling needed to stay human. Instead of surfacing raw network errors, the message clarifies whether the site might be blocking requests or if the proxy can’t reach it. That transparency is critical when analysts are on deadline.
+                    </p>
+
+                    <h2 class="text-3xl font-bold text-indigo-300">Clipboard UX without surprises</h2>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        Clipboard access varies wildly across browsers and embedded contexts. I opted for a reliable fallback: inject a hidden `<code>&lt;textarea&gt;</code>`, use <code class="bg-gray-900/60 px-2 py-1 rounded">document.execCommand('copy')</code>, and clean up immediately. It’s not glamorous, but it works even when more modern Clipboard APIs are restricted.
+                    </p>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        A two-second state swap (“Copied!” → “Copy Code”) reassures the user that the action succeeded. That small touch makes repeated copying comfortable, especially when the markup spans hundreds of lines.
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white/5 border border-indigo-500/40 rounded-xl p-5">
+                            <div class="timeline-dot mb-3"></div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Friday Evening</h3>
+                            <p class="text-sm text-gray-300">Scoped the MVP, sketched the UI, and wired the Tailwind container.</p>
+                        </div>
+                        <div class="bg-white/5 border border-indigo-500/40 rounded-xl p-5">
+                            <div class="timeline-dot mb-3"></div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Saturday Sprint</h3>
+                            <p class="text-sm text-gray-300">Implemented fetch logic, error states, and clipboard fallback.</p>
+                        </div>
+                        <div class="bg-white/5 border border-indigo-500/40 rounded-xl p-5">
+                            <div class="timeline-dot mb-3"></div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Sunday Polish</h3>
+                            <p class="text-sm text-gray-300">Refined copy, added the feature grid, and integrated with the app gallery.</p>
+                        </div>
+                    </div>
+
+                    <h2 class="text-3xl font-bold text-indigo-300">Limitations & next experiments</h2>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        Public proxies are a gift, but they’re not bulletproof. Some sites deploy aggressive bot protection or require cookies. When that happens, the viewer surfaces a descriptive error so analysts know to grab the source via alternate means. Long term, I’ll add a serverless edge worker that signs requests with my own API key to guarantee higher throughput.
+                    </p>
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        I also want to explore lightweight formatting—think syntax highlighting toggles or the option to prettify minified markup. For now, the focus is speed. The raw HTML arrives exactly as the server serves it, which is perfect for audits.
+                    </p>
+
+                    <div class="callout-box p-6 rounded-xl">
+                        <h3 class="text-lg font-semibold text-white mb-3">Try it yourself</h3>
+                        <p class="text-gray-100 text-sm mb-4">Need to inspect a landing page or verify what a CMS is really shipping? Launch the tool, paste the URL, and copy the markup in seconds.</p>
+                        <a href="../Apps/html-source-code-viewer.html" class="inline-flex items-center px-4 py-2 bg-white text-gray-900 font-semibold rounded-lg hover:bg-gray-100 transition-colors">Launch the HTML Source Code Viewer →</a>
+                    </div>
+                </article>
+            </div>
+        </section>
+
+        <!-- Newsletter CTA -->
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-2xl text-center">
+                <h2 class="text-3xl font-bold mb-4">Stay in the Build Loop</h2>
+                <p class="text-lg text-gray-400 mb-8">Get weekly notes on the systems, automations, and experiments powering Cruz AI.</p>
+                <div class="blog-content p-8 rounded-2xl">
+                    <form class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="text" placeholder="First Name" class="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-indigo-500" required>
+                            <input type="email" placeholder="Email" class="w-full px-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:outline-none focus:border-indigo-500" required>
+                        </div>
+                        <button type="submit" class="w-full py-3 rounded-lg bg-indigo-600 hover:bg-indigo-700 transition-colors font-semibold">Join the Newsletter</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+</body>
+</html>
