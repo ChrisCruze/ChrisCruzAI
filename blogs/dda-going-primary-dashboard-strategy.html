@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDA Going Primary Dashboard Strategy | ChrisCruz.ai</title>
+    <meta name="description" content="Operational intelligence playbook for launching the DDA Going Primary dashboards across data consistency, event reconciliation, and latency control with December 1 readiness.">
+    <meta name="keywords" content="DDA Going Primary, dashboard strategy, operational intelligence, data consistency, reconciliation, latency monitoring, Tableau, API readiness">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="DDA Going Primary Dashboard Strategy">
+    <meta property="og:description" content="Executive blueprint for the three mission-critical dashboards powering DDA Going Primary.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://chriscruz.ai/blogs/dda-going-primary-dashboard-strategy.html">
+    <meta property="og:image" content="https://chriscruz.ai/images/dashboard-strategy.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DDA Going Primary Dashboard Strategy">
+    <meta name="twitter:description" content="Operational intelligence playbook for launch-ready dashboards.">
+    <meta name="article:published_time" content="2025-09-15T00:00:00Z">
+    <meta name="article:author" content="Christopher Manuel Cruz-Guzman">
+    <meta name="article:section" content="Operational Intelligence">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050608;
+            color: #f4f4f5;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #38bdf8, #818cf8, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .blog-content {
+            background-color: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            backdrop-filter: blur(12px);
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.18), rgba(129, 140, 248, 0.18));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+        }
+        .challenge-card {
+            background: rgba(239, 68, 68, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.35);
+        }
+        .framework-box {
+            background: rgba(59, 130, 246, 0.12);
+            border: 1px solid rgba(96, 165, 250, 0.35);
+        }
+        .example-box {
+            background: rgba(236, 72, 153, 0.12);
+            border: 1px solid rgba(244, 114, 182, 0.35);
+        }
+        .reflection-box {
+            background: rgba(45, 212, 191, 0.12);
+            border: 1px solid rgba(45, 212, 191, 0.35);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 12px 16px;
+            text-align: left;
+        }
+        th {
+            background: rgba(15, 23, 42, 0.75);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.75rem;
+        }
+        tr:nth-child(even) td {
+            background: rgba(15, 23, 42, 0.35);
+        }
+        a.cross-link {
+            color: #38bdf8;
+            font-weight: 600;
+        }
+        a.cross-link:hover {
+            color: #bae6fd;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="../brand-hub.html" class="text-xl font-bold tracking-tighter">ChrisCruz<span class="text-sky-300">.ai</span></a>
+            <nav class="hidden md:flex space-x-8 text-sm text-slate-300">
+                <a href="../brand-hub.html" class="hover:text-white transition">Empire</a>
+                <a href="../manifesto.html" class="hover:text-white transition">Manifesto</a>
+                <a href="../projects" class="hover:text-white transition">Projects</a>
+                <a href="../contact.html" class="hover:text-white transition">Contact</a>
+            </nav>
+            <span class="text-xs font-semibold py-1 px-3 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 uppercase tracking-[0.3em]">Blog</span>
+        </div>
+    </header>
+
+    <main class="pt-24">
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-4xl">
+                <div class="text-center mb-10">
+                    <div class="flex items-center justify-center space-x-2 text-sm text-slate-400 mb-4">
+                        <span class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white text-xs font-semibold py-1 px-3 rounded-full uppercase tracking-[0.3em]">Operational Intelligence</span>
+                        <span>September 15, 2025</span>
+                        <span>•</span>
+                        <span>10 min read</span>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-6">
+                        DDA Going Primary Dashboard Strategy:
+                        <span class="gradient-text">The Real-Time Command Center</span>
+                    </h1>
+                    <p class="text-xl text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                        Dashboards aren't just tools—they are the nerve center of DDA Going Primary, protecting data integrity, surfacing latency risks, and aligning executives on the sprint to production readiness by December 1.
+                    </p>
+                </div>
+
+                <div class="flex items-center justify-center space-x-4 text-sm text-slate-400">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-gradient-to-r from-sky-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-bold">CC</div>
+                        <span>Christopher Manuel Cruz-Guzman</span>
+                    </div>
+                    <a href="../blogs/system-thinking-empire-building.html" class="cross-link">System Thinking Companion Play</a>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-10 px-6">
+            <div class="container mx-auto max-w-4xl">
+                <article class="blog-content p-10 md:p-14 rounded-3xl space-y-12">
+
+                    <section class="highlight-box rounded-3xl p-8">
+                        <h2 class="text-2xl font-semibold text-sky-100 mb-4">Executive Summary</h2>
+                        <p class="text-slate-100 leading-relaxed mb-4">
+                            Three mission-critical dashboards—Data Consistency, Event Store Reconciliation, and Latency—anchor the DDA Going Primary launch. They synchronize fidelity between SOR, ODS, and external interfaces while driving executive alignment and customer-centric agility. Production readiness hinges on resolving Transaction History (TH) API gaps, accelerating QA across dual clusters, and securing cross-system integration before December 1.
+                        </p>
+                        <p class="text-slate-200 leading-relaxed">
+                            Our objective: turn fragmented telemetry into a unified command center that pairs real-time visibility with actionable alerts, ensuring every overdraft, decline, or fraud signal is captured, reconciled, and resolved before it hits the customer experience.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Key Insights</h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="framework-box rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-slate-100 mb-3">Strategic Anchors</h3>
+                                <ul class="space-y-2 text-slate-200 leading-relaxed">
+                                    <li>• Dashboards operate as the program's nerve center, mandating data integrity and executive focus.</li>
+                                    <li>• Latency, data quality, and reconciliation visibility form the foundation for launch readiness.</li>
+                                    <li>• Cross-system integration keeps SOR, ODS, and external interfaces in fidelity.</li>
+                                </ul>
+                            </div>
+                            <div class="framework-box rounded-2xl p-6">
+                                <h3 class="text-lg font-semibold text-slate-100 mb-3">Operational Realities</h3>
+                                <ul class="space-y-2 text-slate-200 leading-relaxed">
+                                    <li>• Production readiness by December 1 demands urgent resolution of TH API issues and QA across both clusters.</li>
+                                    <li>• Executive prioritization is the lever for resourcing, dependency management, and capacity planning.</li>
+                                    <li>• TH API publishing failures (Sep 25–Oct 1) remain the gating blocker for end-to-end latency assurance.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Detailed Breakdown</h2>
+
+                        <div class="space-y-10">
+                            <div class="framework-box rounded-2xl p-6">
+                                <h3 class="text-2xl font-semibold text-slate-100 mb-4">Dashboard 1 — Data Consistency</h3>
+                                <p class="text-slate-200 leading-relaxed mb-4">
+                                    Provides comprehensive, real-time visibility into data quality, system performance, and operational health across the DDA infrastructure.
+                                </p>
+                                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-slate-100 mb-2">Key Metrics</h4>
+                                        <ul class="space-y-2 text-slate-200">
+                                            <li>• Data Quality: 99% accuracy</li>
+                                            <li>• System Performance: 1-second SLA</li>
+                                            <li>• Operational Health: 99.99% uptime</li>
+                                            <li>• Predictive insights: overdraft trends, declined transactions, fraud patterns</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-slate-100 mb-2">Data Plumbing</h4>
+                                        <ul class="space-y-2 text-slate-200">
+                                            <li>• ODS integrations with GATCHT3, ESDD, FAP, Transaction History API</li>
+                                            <li>• Tableau visuals with 14 days of detail and 2 years of trend data</li>
+                                            <li>• Real-time threshold alerts, weekly summaries, monthly executive digests</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="text-slate-300 text-sm">Deep dive: <a href="../notes/data-consistency-dashboard-note.html" class="cross-link">Atomic note — Data Consistency Signal Stack</a></p>
+                            </div>
+
+                            <div class="framework-box rounded-2xl p-6">
+                                <h3 class="text-2xl font-semibold text-slate-100 mb-4">Dashboard 2 — Event Store Reconciliation</h3>
+                                <p class="text-slate-200 leading-relaxed mb-4">
+                                    Ensures producer and consumer parity by tracking total vs. reconciled events and latency impact across Cards, DDA, and shared metrics.
+                                </p>
+                                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-slate-100 mb-2">Visibility Threads</h4>
+                                        <ul class="space-y-2 text-slate-200">
+                                            <li>• Mismatch detection for published vs. consumed events</li>
+                                            <li>• Latency impact translation to operational outcomes</li>
+                                            <li>• Continuous validation across Cards, DDA, Event metrics</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-slate-100 mb-2">Execution Moves</h4>
+                                        <ul class="space-y-2 text-slate-200">
+                                            <li>• Align on reconciliation logic, thresholds, and business impact metrics</li>
+                                            <li>• Develop matching engine for counts and timestamps</li>
+                                            <li>• Automate alerting for mismatches and latency breaches</li>
+                                            <li>• Validate results with stakeholders before promotion</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="text-slate-300 text-sm">Deep dive: <a href="../notes/event-store-reconciliation-dashboard-note.html" class="cross-link">Atomic note — Reconciliation Control Plane</a></p>
+                            </div>
+
+                            <div class="framework-box rounded-2xl p-6">
+                                <h3 class="text-2xl font-semibold text-slate-100 mb-4">Dashboard 3 — Latency</h3>
+                                <p class="text-slate-200 leading-relaxed mb-4">
+                                    Provides real-time insight into transaction processing speeds and API responsiveness, with heightened focus on TH API remediation.
+                                </p>
+                                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-slate-100 mb-2">Targets & Signals</h4>
+                                        <ul class="space-y-2 text-slate-200">
+                                            <li>• Sub-500ms response for high-priority APIs</li>
+                                            <li>• 1-second SLA enforcement across services</li>
+                                            <li>• Real-time alerting on spikes or degradation</li>
+                                            <li>• Dual-cluster coverage post-TH API fixes</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-semibold text-slate-100 mb-2">Critical Actions</h4>
+                                        <ul class="space-y-2 text-slate-200">
+                                            <li>• Prioritize Transaction History API instrumentation</li>
+                                            <li>• Resolve two remaining TH API fields with SOR (card number, date)</li>
+                                            <li>• Aggregate metrics into ODS; validate via JMeter load tests</li>
+                                            <li>• Launch post-resolution with enhanced logging</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <p class="text-slate-300 text-sm">Deep dive: <a href="../notes/latency-dashboard-note.html" class="cross-link">Atomic note — Latency Readiness Tracker</a></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Implementation Guide</h2>
+                        <div class="framework-box rounded-3xl p-8 space-y-8">
+                            <div>
+                                <h3 class="text-xl font-semibold text-slate-100 mb-3">Phase 1 — Foundation (Weeks 1–2)</h3>
+                                <ul class="space-y-2 text-slate-200 leading-relaxed">
+                                    <li>• Partner with business teams to finalize KPIs, visualization requirements, and reconciliation thresholds.</li>
+                                    <li>• Pipe ODS integrations (GATCHT3, ESDD, FAP, TH API) and secure data access for Cards, DDA, and event metrics.</li>
+                                    <li>• Align on reconciliation logic and articulate business impact models for latency scenarios.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-slate-100 mb-3">Phase 2 — Build & Model (Weeks 3–4)</h3>
+                                <ul class="space-y-2 text-slate-200 leading-relaxed">
+                                    <li>• Construct Tableau dashboards with 14-day detail and 2-year trends; develop matching engine for event reconciliation.</li>
+                                    <li>• Instrument latency emitters, aggregate metrics into ODS, and design visuals for SLA breaches.</li>
+                                    <li>• Translate latency delays into operational impact narratives to feed executive reporting.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-semibold text-slate-100 mb-3">Phase 3 — Launch & Scale (Weeks 5–6)</h3>
+                                <ul class="space-y-2 text-slate-200 leading-relaxed">
+                                    <li>• Configure threshold alerts, weekly summaries, and monthly digests across dashboards.</li>
+                                    <li>• Execute API, integration, and error-handling QA, plus JMeter load tests on both clusters.</li>
+                                    <li>• Resolve TH API field gaps, deploy with monitoring, and document lessons in Ankita's epic.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="challenge-card rounded-3xl p-8">
+                        <h2 class="text-2xl font-semibold text-rose-100 mb-4">Urgent Priorities</h2>
+                        <ul class="space-y-3 text-rose-50 leading-relaxed">
+                            <li>☑ Resolve the two outstanding Transaction History API field issues.</li>
+                            <li>☑ Expedite QA and deployment for old/new cluster dashboards.</li>
+                            <li>☑ Open the delivery epic and define efforts with Ankita.</li>
+                            <li>☑ Initiate capacity planning with the Ontario team.</li>
+                            <li>☑ Schedule Vince API transition immediately after new-cluster readiness.</li>
+                        </ul>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Stakeholder Alignment</h2>
+                        <p class="text-slate-200 leading-relaxed mb-4">Sustained executive visibility keeps urgency high and unlocks resources:</p>
+                        <ul class="space-y-2 text-slate-200">
+                            <li>• Maintain regular collaboration cadences with business stakeholders.</li>
+                            <li>• Confirm KPI definitions, visualizations, and alert thresholds jointly.</li>
+                            <li>• Secure shared access to dashboards for executive sponsors and review metrics together.</li>
+                        </ul>
+                    </section>
+
+                    <section class="example-box rounded-3xl p-8">
+                        <h2 class="text-2xl font-semibold text-pink-100 mb-3">Scenario Spotlight</h2>
+                        <p class="text-slate-100 leading-relaxed mb-3">
+                            When TH API publishing failures (Sep 25–Oct 1) caused latency blind spots, teams lost the ability to verify overdraft declines in real time. The fix sequence—field remediation, emitter instrumentation, and dual-cluster JMeter validation—became the blueprint for every subsequent API transition, including the upcoming Vince cutover.
+                        </p>
+                        <p class="text-slate-200 text-sm">
+                            Cross-link: explore automation parallels in <a href="ai-powered-virtual-assistant-management-framework-v2.html" class="cross-link">AI-Powered Virtual Assistant Management Framework</a> for alert routing patterns.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Testing & Validation</h2>
+                        <div class="framework-box rounded-3xl p-8">
+                            <h3 class="text-xl font-semibold text-slate-100 mb-3">Tooling</h3>
+                            <ul class="space-y-2 text-slate-200 mb-6">
+                                <li>• JMeter for load testing across latency scenarios.</li>
+                                <li>• Comprehensive QA suites covering latency, data consistency, and ingestion integrity.</li>
+                            </ul>
+                            <h3 class="text-xl font-semibold text-slate-100 mb-3">Coverage</h3>
+                            <ul class="space-y-2 text-slate-200">
+                                <li>• Retry logic and event gap validation.</li>
+                                <li>• Performance behavior under sustained load.</li>
+                                <li>• Error-handling resilience during reconciliation.</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Platform Capabilities</h2>
+                        <div class="overflow-x-auto">
+                            <table class="text-sm text-slate-200">
+                                <thead>
+                                    <tr>
+                                        <th>Feature</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><strong>Visualization</strong></td>
+                                        <td>Tableau dashboards across data consistency, reconciliation, and latency.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Data Retention</strong></td>
+                                        <td>14-day granular views plus 2-year trend archives.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Alerting</strong></td>
+                                        <td>Real-time thresholds supplemented by weekly and monthly summaries.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Data Sources</strong></td>
+                                        <td>GATCHT3, ESDD, FAP, TH API, ODS, Cards, and Event metrics.</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Future Roadmap</strong></td>
+                                        <td>Machine learning anomaly detection for fraud and pattern detection.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Dependencies</h2>
+                        <div class="overflow-x-auto">
+                            <table class="text-sm text-slate-200">
+                                <thead>
+                                    <tr>
+                                        <th>Dependency</th>
+                                        <th>Owner</th>
+                                        <th>Status / Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>TH API Field Fixes</td>
+                                        <td>SOR Team</td>
+                                        <td>2 of 4 fields still pending</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Tableau Resourcing</td>
+                                        <td>Antoine</td>
+                                        <td>Prioritization meeting required</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Old Cluster Epic</td>
+                                        <td>PM (Ankita)</td>
+                                        <td>Scope definition and story sizing in progress</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Ontario Capacity Discussion</td>
+                                        <td>DevOps Lead</td>
+                                        <td>Pending scheduling</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Vince API Cutover</td>
+                                        <td>Platform Team</td>
+                                        <td>Scheduled after new cluster readiness</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Milestones</h2>
+                        <p class="text-slate-200 leading-relaxed mb-4">Target: Production readiness by December 1.</p>
+                        <ul class="space-y-3 text-slate-200">
+                            <li><strong>Weeks 1–2:</strong> Finalize KPIs, complete data plumbing, and close TH API fixes.</li>
+                            <li><strong>Weeks 3–4:</strong> QA dashboards in old and new clusters; validate reconciliation outputs.</li>
+                            <li><strong>Weeks 5–6:</strong> Activate in production, confirm monitoring, and transition to Vince API.</li>
+                        </ul>
+                    </section>
+
+                    <section class="reflection-box rounded-3xl p-8">
+                        <h2 class="text-2xl font-semibold text-emerald-100 mb-4">Reflection Questions</h2>
+                        <ol class="list-decimal list-inside space-y-3 text-slate-900 font-medium">
+                            <li>Where do latency blind spots still exist once TH API is remediated?</li>
+                            <li>Which reconciliation mismatches translate into the highest customer impact?</li>
+                            <li>How can executive reviews shift from reactive updates to proactive resource allocation?</li>
+                            <li>What automation opportunities emerge after machine learning anomaly detection is introduced?</li>
+                        </ol>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Atomic Notes</h2>
+                        <p class="text-slate-200 leading-relaxed mb-4">Capture and share the core mechanics instantly with these atomic references:</p>
+                        <div class="grid md:grid-cols-3 gap-6">
+                            <a href="../notes/data-consistency-dashboard-note.html" class="framework-box rounded-2xl p-6 hover:scale-[1.01] transition-transform">
+                                <h3 class="text-lg font-semibold text-slate-100 mb-2">Data Consistency Signal Stack</h3>
+                                <p class="text-slate-200 text-sm leading-relaxed">Mission, metrics, and ODS integrations for safeguarding 99% accuracy.</p>
+                            </a>
+                            <a href="../notes/event-store-reconciliation-dashboard-note.html" class="framework-box rounded-2xl p-6 hover:scale-[1.01] transition-transform">
+                                <h3 class="text-lg font-semibold text-slate-100 mb-2">Reconciliation Control Plane</h3>
+                                <p class="text-slate-200 text-sm leading-relaxed">Gap detection sequence across Cards, DDA, and shared event metrics.</p>
+                            </a>
+                            <a href="../notes/latency-dashboard-note.html" class="framework-box rounded-2xl p-6 hover:scale-[1.01] transition-transform">
+                                <h3 class="text-lg font-semibold text-slate-100 mb-2">Latency Readiness Tracker</h3>
+                                <p class="text-slate-200 text-sm leading-relaxed">Sub-500ms SLA plan with TH API remediation and JMeter validation.</p>
+                            </a>
+                        </div>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">Reflection & Next Moves</h2>
+                        <p class="text-slate-200 leading-relaxed mb-4">
+                            The dashboards under DDA Going Primary are more than visualization—they are our operational mandate for preemptive issue resolution, real-time alerting, audit coverage, and executive confidence.
+                        </p>
+                        <p class="text-slate-200 leading-relaxed">
+                            Keep this playbook close, revisit the atomic notes during stand-ups, and treat the December 1 deadline as non-negotiable. The empire depends on it.
+                        </p>
+                    </section>
+
+                    <section>
+                        <h2 class="text-3xl font-bold text-sky-200 mb-6">References & Footnotes</h2>
+                        <ol class="list-decimal list-inside space-y-2 text-slate-200 leading-relaxed">
+                            <li>Dashboards are the central monitoring framework for DDA Going Primary.</li>
+                            <li>Latency, data quality, and reconciliation are the foundational health signals.</li>
+                            <li>TH API publishing failures (Sep 25–Oct 1) currently block latency dashboard readiness.</li>
+                            <li>Full fidelity requires harmonization between GATCHT3, FAP, ESDD, and TH API inside ODS.</li>
+                            <li>CEO and executive sponsors have mandated readiness before customer rollout.</li>
+                        </ol>
+                    </section>
+
+                </article>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

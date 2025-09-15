@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atomic Notes | ChrisCruz.ai</title>
+    <meta name="description" content="Quick-reference atomic notes supporting the DDA Going Primary dashboard strategy, including data consistency, reconciliation, and latency instrumentation insights.">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+            color: #f5f5f5;
+        }
+        .note-card {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(94, 234, 212, 0.5);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.35);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <header class="fixed top-0 left-0 right-0 z-40 bg-black/40 backdrop-blur-md">
+        <div class="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="../index.html" class="text-lg font-semibold tracking-tight text-slate-200 hover:text-teal-300 transition-colors">ChrisCruz<span class="text-teal-300">.ai</span></a>
+            <nav class="hidden md:flex items-center space-x-6 text-sm text-slate-400">
+                <a href="../blogs/index.html" class="hover:text-slate-100 transition">Blog</a>
+                <a href="../projects" class="hover:text-slate-100 transition">Projects</a>
+                <a href="../contact.html" class="hover:text-slate-100 transition">Contact</a>
+            </nav>
+            <span class="text-xs font-semibold uppercase tracking-widest text-teal-300">Atomic Notes</span>
+        </div>
+    </header>
+
+    <main class="pt-24 pb-24 px-6">
+        <section class="max-w-3xl mx-auto text-center mb-16">
+            <p class="text-sm uppercase tracking-[0.35em] text-teal-300 mb-4">Reference Stack</p>
+            <h1 class="text-4xl md:text-5xl font-black tracking-tight mb-6">DDA Dashboard Strategy <span class="text-teal-300">Atomic Notes</span></h1>
+            <p class="text-lg text-slate-300 leading-relaxed">
+                Bite-sized reference sheets extracted from the DDA Going Primary dashboard strategy. Each atomic note distills a core dashboard into mission, metrics, integrations, and immediate actions so operators can move fast.
+            </p>
+        </section>
+
+        <section class="max-w-4xl mx-auto grid gap-8">
+            <article class="note-card rounded-2xl p-8">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold uppercase tracking-[0.3em] text-teal-300">Atomic Note</span>
+                    <span class="text-xs text-slate-400">Updated: Sep 15, 2025</span>
+                </div>
+                <h2 class="text-2xl font-semibold text-slate-100 mb-4">Data Consistency Dashboard Signal Stack</h2>
+                <p class="text-slate-300 mb-6 leading-relaxed">
+                    Guarantees 99%+ data accuracy, 1-second SLA adherence, and 99.99% uptime by harmonizing GATCHT3, ESDD, FAP, and Transaction History API streams inside the ODS.
+                </p>
+                <a href="data-consistency-dashboard-note.html" class="inline-flex items-center text-teal-300 hover:text-teal-200 font-semibold">Open note →</a>
+            </article>
+
+            <article class="note-card rounded-2xl p-8">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold uppercase tracking-[0.3em] text-teal-300">Atomic Note</span>
+                    <span class="text-xs text-slate-400">Updated: Sep 15, 2025</span>
+                </div>
+                <h2 class="text-2xl font-semibold text-slate-100 mb-4">Event Store Reconciliation Control Plane</h2>
+                <p class="text-slate-300 mb-6 leading-relaxed">
+                    Tracks producer-consumer gaps across DDA, Cards, and shared event metrics, translating latency breaches into tangible customer and operational impacts.
+                </p>
+                <a href="event-store-reconciliation-dashboard-note.html" class="inline-flex items-center text-teal-300 hover:text-teal-200 font-semibold">Open note →</a>
+            </article>
+
+            <article class="note-card rounded-2xl p-8">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold uppercase tracking-[0.3em] text-teal-300">Atomic Note</span>
+                    <span class="text-xs text-slate-400">Updated: Sep 15, 2025</span>
+                </div>
+                <h2 class="text-2xl font-semibold text-slate-100 mb-4">Latency Dashboard Readiness Tracker</h2>
+                <p class="text-slate-300 mb-6 leading-relaxed">
+                    Focuses on sub-500ms API response times, TH API field remediation, and JMeter validation across both clusters before go-live.
+                </p>
+                <a href="latency-dashboard-note.html" class="inline-flex items-center text-teal-300 hover:text-teal-200 font-semibold">Open note →</a>
+            </article>
+        </section>
+
+        <section class="max-w-3xl mx-auto mt-16 text-center">
+            <p class="text-sm text-slate-400 mb-4">Need the full context?</p>
+            <a href="../blogs/dda-going-primary-dashboard-strategy.html" class="inline-flex items-center text-teal-300 hover:text-teal-200 font-semibold">Read the complete dashboard strategy →</a>
+        </section>
+    </main>
+</body>
+</html>
