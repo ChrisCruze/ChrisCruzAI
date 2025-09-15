@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atomic Note: Latency Dashboard Readiness Tracker</title>
+    <meta name="description" content="Atomic note covering SLA targets, blockers, and validation actions for the DDA latency dashboard.">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta name="article:published_time" content="2025-09-15T00:00:00Z">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #f8fafc;
+        }
+        .note-surface {
+            background: rgba(8, 47, 73, 0.78);
+            border: 1px solid rgba(45, 212, 191, 0.35);
+        }
+        .alert-card {
+            background: rgba(13, 148, 136, 0.15);
+            border: 1px solid rgba(20, 184, 166, 0.3);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <header class="fixed top-0 left-0 right-0 z-40 bg-black/50 backdrop-blur-md">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="../index.html" class="text-sm font-semibold tracking-tight text-slate-200 hover:text-teal-300 transition">ChrisCruz<span class="text-teal-300">.ai</span></a>
+            <nav class="hidden md:flex items-center space-x-6 text-xs text-slate-400 uppercase tracking-widest">
+                <a href="../blogs/dda-going-primary-dashboard-strategy.html" class="hover:text-white transition">Strategy</a>
+                <a href="index.html" class="hover:text-white transition">Atomic Index</a>
+            </nav>
+            <span class="text-[10px] font-semibold uppercase tracking-[0.4em] text-teal-300">Atomic Note</span>
+        </div>
+    </header>
+
+    <main class="pt-24 pb-20 px-6">
+        <article class="max-w-3xl mx-auto note-surface rounded-3xl p-8 md:p-12">
+            <header class="mb-10">
+                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-teal-300 mb-3">Latency</p>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-4">Latency Dashboard Readiness Tracker</h1>
+                <p class="text-slate-300 text-sm uppercase tracking-[0.3em]">Updated September 15, 2025</p>
+            </header>
+
+            <section class="mb-10">
+                <h2 class="text-lg font-semibold text-teal-200 mb-3">SLA & Alert Objectives</h2>
+                <ul class="space-y-2 text-slate-100 leading-relaxed">
+                    <li>• High-priority APIs: &lt; 500ms response target</li>
+                    <li>• Global SLA: 1-second ceiling</li>
+                    <li>• Real-time alerting for spikes and degradation</li>
+                    <li>• Dual-cluster coverage to ensure failover readiness</li>
+                </ul>
+            </section>
+
+            <section class="mb-10 grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-teal-200 mb-3">Instrumentation Actions</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-slate-100">
+                        <li>Prioritize Transaction History API and other critical endpoints.</li>
+                        <li>Instrument emitters for accurate latency telemetry.</li>
+                        <li>Aggregate metrics into ODS for unified visibility.</li>
+                        <li>Build visuals highlighting SLA breaches and spikes.</li>
+                        <li>Resolve two remaining TH API fields (card number &amp; date) with SOR team.</li>
+                        <li>Load test both clusters with JMeter and validate logging.</li>
+                        <li>Launch and monitor post-remediation.</li>
+                    </ol>
+                </div>
+                <div class="alert-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-teal-100 mb-3">Blockers &amp; Follow-ups</h3>
+                    <ul class="space-y-2 text-slate-900 font-medium">
+                        <li>• Transaction History API publishing failures (Sep 25 – Oct 1).</li>
+                        <li>• Coordinate Vince API transition post new-cluster readiness.</li>
+                        <li>• Align QA schedule for old/new clusters before release.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="mb-10">
+                <h3 class="text-lg font-semibold text-teal-200 mb-3">Cross-Team Signals</h3>
+                <ul class="space-y-2 text-slate-100 leading-relaxed">
+                    <li>• Feed latency analytics back into the <a href="data-consistency-dashboard-note.html" class="text-teal-300 hover:text-teal-100 underline">Data Consistency dashboard</a> to contextualize SLA breaches with data quality.</li>
+                    <li>• Share validation insights with Ontario capacity planning to right-size infrastructure.</li>
+                    <li>• Document success criteria in Ankita's epic for executive visibility.</li>
+                </ul>
+            </section>
+
+            <footer class="border-t border-slate-700 pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <a href="../blogs/dda-going-primary-dashboard-strategy.html" class="text-sm text-teal-300 hover:text-teal-100 flex items-center">⬅ Back to strategy overview</a>
+                <div class="text-xs text-slate-300 uppercase tracking-[0.25em]">Part of the DDA Going Primary dashboard playbook</div>
+            </footer>
+        </article>
+    </main>
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atomic Note: Event Store Reconciliation Control Plane</title>
+    <meta name="description" content="Atomic note detailing reconciliation logic, metrics, and action steps for the DDA event store reconciliation dashboard.">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta name="article:published_time" content="2025-09-15T00:00:00Z">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #040506;
+            color: #f1f5f9;
+        }
+        .note-surface {
+            background: rgba(15, 23, 42, 0.78);
+            border: 1px solid rgba(129, 140, 248, 0.35);
+        }
+        .summary-card {
+            background: rgba(99, 102, 241, 0.14);
+            border: 1px solid rgba(129, 140, 248, 0.25);
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <header class="fixed top-0 left-0 right-0 z-40 bg-black/45 backdrop-blur-md">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="../index.html" class="text-sm font-semibold tracking-tight text-slate-200 hover:text-indigo-300 transition">ChrisCruz<span class="text-indigo-300">.ai</span></a>
+            <nav class="hidden md:flex items-center space-x-6 text-xs text-slate-400 uppercase tracking-widest">
+                <a href="../blogs/dda-going-primary-dashboard-strategy.html" class="hover:text-white transition">Strategy</a>
+                <a href="index.html" class="hover:text-white transition">Atomic Index</a>
+            </nav>
+            <span class="text-[10px] font-semibold uppercase tracking-[0.4em] text-indigo-300">Atomic Note</span>
+        </div>
+    </header>
+
+    <main class="pt-24 pb-20 px-6">
+        <article class="max-w-3xl mx-auto note-surface rounded-3xl p-8 md:p-12">
+            <header class="mb-10">
+                <p class="text-xs font-semibold uppercase tracking-[0.35em] text-indigo-300 mb-3">Reconciliation</p>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-4">Event Store Reconciliation Control Plane</h1>
+                <p class="text-slate-400 text-sm uppercase tracking-[0.3em]">Updated September 15, 2025</p>
+            </header>
+
+            <section class="summary-card rounded-2xl p-6 mb-10">
+                <h2 class="text-lg font-semibold text-indigo-100 mb-3">Purpose</h2>
+                <p class="text-slate-100 leading-relaxed">
+                    Identify, prioritize, and resolve mismatches between published and consumed events so producer-consumer latency never erodes customer trust or operational accuracy across DDA, Cards, and shared event pipelines.
+                </p>
+            </section>
+
+            <section class="mb-10 grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-indigo-200 mb-3">Monitored Dimensions</h3>
+                    <ul class="space-y-2 text-slate-200">
+                        <li>• Total vs. reconciled events</li>
+                        <li>• Producer → consumer latency bands</li>
+                        <li>• Gap impact on downstream operations</li>
+                        <li>• Integrity of Cards, DDA, and Event metrics</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-indigo-200 mb-3">Data Connectivity</h3>
+                    <ul class="space-y-2 text-slate-200">
+                        <li>• Direct taps into DDA event store</li>
+                        <li>• Cards platform stream access</li>
+                        <li>• Shared Event metrics repository</li>
+                        <li>• Integration with ODS for cross-system fidelity</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="mb-10">
+                <h3 class="text-lg font-semibold text-indigo-200 mb-3">Actionable Sequence</h3>
+                <ol class="list-decimal list-inside space-y-2 text-slate-200">
+                    <li>Define reconciliation logic, thresholds, and business impact translations.</li>
+                    <li>Connect DDA, Cards, and shared event metric data sources.</li>
+                    <li>Develop a matching engine comparing event counts and timestamps.</li>
+                    <li>Model operational impact when latency breaches targets.</li>
+                    <li>Automate alerting and visuals for mismatches and latency exceptions.</li>
+                    <li>Validate across environments with partner stakeholders before promotion.</li>
+                </ol>
+            </section>
+
+            <section class="mb-10">
+                <h3 class="text-lg font-semibold text-indigo-200 mb-3">Field Notes</h3>
+                <ul class="space-y-2 text-slate-200 leading-relaxed">
+                    <li>• Pair latency breach alerts with <a href="latency-dashboard-note.html" class="text-indigo-300 hover:text-indigo-100 underline">Latency Dashboard</a> SLA monitors for proactive triage.</li>
+                    <li>• Document mismatch patterns to inform reconciliation automation stories in Ankita's epic.</li>
+                    <li>• Tie root-cause findings back to data quality dashboards for consistent storytelling.</li>
+                </ul>
+            </section>
+
+            <footer class="border-t border-slate-700 pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <a href="../blogs/dda-going-primary-dashboard-strategy.html" class="text-sm text-indigo-300 hover:text-indigo-100 flex items-center">⬅ Back to strategy overview</a>
+                <div class="text-xs text-slate-400 uppercase tracking-[0.25em]">Part of the DDA Going Primary dashboard playbook</div>
+            </footer>
+        </article>
+    </main>
+</body>
+</html>
