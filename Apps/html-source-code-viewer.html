@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Source Code Viewer & Copier</title>
+    <meta name="description" content="Fetch, inspect, and copy any page's HTML source without leaving your browser. Built by Chris Cruz for fast research and prototyping.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple scrollbar styling for a more modern look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-4">
+
+    <div class="max-w-5xl mx-auto">
+        <div class="flex items-center justify-between mb-6">
+            <a href="/Apps/index.html" class="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-700 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                Back to App Gallery
+            </a>
+            <span class="text-xs font-medium tracking-wide text-gray-500 uppercase">Version 1.0</span>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+            <header class="mb-8 text-center">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900">HTML Source Code Viewer</h1>
+                <p class="text-gray-500 mt-3 max-w-2xl mx-auto">
+                    Enter any URL to fetch, inspect, and copy the raw HTML markup instantly. Perfect for builders doing competitive research, QA, or quickly grabbing embeds without digging through dev tools.
+                </p>
+            </header>
+
+            <!-- URL Input Section -->
+            <div class="flex flex-col sm:flex-row gap-3 mb-4">
+                <input type="url" id="urlInput" placeholder="https://example.com" class="flex-grow w-full px-4 py-3 text-gray-700 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 transition duration-200" autocomplete="url">
+                <button id="fetchBtn" class="w-full sm:w-auto px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-200 shadow-sm flex items-center justify-center">
+                    <svg id="fetch-icon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 21h7a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v11m0 5l-2.293-2.293a1 1 0 010-1.414l7-7a1 1 0 011.414 0l7 7a1 1 0 010 1.414L15 21m-5-5V5" />
+                    </svg>
+                    <svg id="loading-spinner" class="animate-spin h-5 w-5 mr-2 hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span id="fetchBtnText">Fetch HTML</span>
+                </button>
+            </div>
+
+            <!-- Message Area -->
+            <div id="messageArea" class="text-center py-2 text-sm text-gray-600 min-h-[24px]"></div>
+
+            <!-- Result Display Section -->
+            <div id="resultContainer" class="hidden relative">
+                <button id="copyBtn" class="absolute top-3 right-3 bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-opacity duration-200 opacity-80 hover:opacity-100">
+                    Copy Code
+                </button>
+                <pre class="bg-gray-900 text-white p-4 rounded-lg overflow-auto max-h-[60vh] text-sm leading-relaxed"><code id="htmlOutput"></code></pre>
+            </div>
+
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                    <h2 class="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-2">Fast Research</h2>
+                    <p class="text-sm text-gray-600">Pull down competitor landing pages, newsletter templates, or embed codes in seconds without opening a developer console.</p>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                    <h2 class="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-2">Clipboard Ready</h2>
+                    <p class="text-sm text-gray-600">One click copies the entire markup with a fallback that works even in sandboxed iframe environments.</p>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                    <h2 class="text-sm font-semibold text-gray-900 tracking-wide uppercase mb-2">CORS Friendly</h2>
+                    <p class="text-sm text-gray-600">Uses the AllOrigins proxy so you can fetch most public pages while staying safely in the browser.</p>
+                </div>
+            </section>
+
+            <footer class="mt-10 text-center text-xs text-gray-400">
+                <p>Built by Chris Cruz • <a href="https://chriscruz.ai" class="text-indigo-500 hover:text-indigo-400" target="_blank" rel="noopener">chriscruz.ai</a></p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        const urlInput = document.getElementById('urlInput');
+        const fetchBtn = document.getElementById('fetchBtn');
+        const fetchBtnText = document.getElementById('fetchBtnText');
+        const fetchIcon = document.getElementById('fetch-icon');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const messageArea = document.getElementById('messageArea');
+        const resultContainer = document.getElementById('resultContainer');
+        const htmlOutput = document.getElementById('htmlOutput');
+        const copyBtn = document.getElementById('copyBtn');
+
+        // --- Event Listeners ---
+
+        fetchBtn.addEventListener('click', fetchHtmlSource);
+        urlInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                fetchHtmlSource();
+            }
+        });
+
+        copyBtn.addEventListener('click', () => {
+            const tempTextArea = document.createElement('textarea');
+            tempTextArea.value = htmlOutput.innerText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+
+            try {
+                document.execCommand('copy');
+                showMessage('Copied to clipboard!', 'success');
+                copyBtn.textContent = 'Copied!';
+                setTimeout(() => {
+                    copyBtn.textContent = 'Copy Code';
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy text: ', err);
+                showMessage('Failed to copy. Please try again.', 'error');
+            }
+
+            document.body.removeChild(tempTextArea);
+        });
+
+        // --- Core Functions ---
+
+        async function fetchHtmlSource() {
+            const url = urlInput.value.trim();
+            if (!isValidUrl(url)) {
+                showMessage('Please enter a valid URL (e.g., https://example.com)', 'error');
+                return;
+            }
+
+            setLoading(true);
+            resultContainer.classList.add('hidden');
+            showMessage('Fetching source code...', 'loading');
+
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+
+            try {
+                const response = await fetch(proxyUrl);
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const htmlText = await response.text();
+
+                htmlOutput.textContent = htmlText;
+                resultContainer.classList.remove('hidden');
+                showMessage('Source code fetched successfully!', 'success');
+            } catch (error) {
+                console.error('Fetch error:', error);
+                showMessage(`Failed to fetch source. The site may be down or blocking requests. Error: ${error.message}`, 'error');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // --- Helper Functions ---
+
+        function setLoading(isLoading) {
+            if (isLoading) {
+                fetchBtn.disabled = true;
+                fetchBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                fetchIcon.classList.add('hidden');
+                loadingSpinner.classList.remove('hidden');
+                fetchBtnText.textContent = 'Fetching...';
+            } else {
+                fetchBtn.disabled = false;
+                fetchBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                fetchIcon.classList.remove('hidden');
+                loadingSpinner.classList.add('hidden');
+                fetchBtnText.textContent = 'Fetch HTML';
+            }
+        }
+
+        function showMessage(msg, type = 'info') {
+            messageArea.textContent = msg;
+            messageArea.classList.remove('text-red-500', 'text-green-600', 'text-gray-600');
+            switch (type) {
+                case 'error':
+                    messageArea.classList.add('text-red-500');
+                    break;
+                case 'success':
+                    messageArea.classList.add('text-green-600');
+                    break;
+                case 'loading':
+                default:
+                    messageArea.classList.add('text-gray-600');
+                    break;
+            }
+        }
+
+        function isValidUrl(string) {
+            try {
+                new URL(string);
+                return true;
+            } catch (_) {
+                return false;
+            }
+        }
+    </script>
+
+</body>
+</html>
