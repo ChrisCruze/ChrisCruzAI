@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Designing the Debit Card Transaction Processing ETL Demo | ChrisCruz.ai</title>
+    <meta name="description" content="Behind-the-scenes breakdown of the Debit Card Transaction Processing ETL demo app. Learn how authorization, memo, and merchant data join together to create an enriched customer experience.">
+    <meta name="keywords" content="debit card ETL, authorization systems, merchant enrichment, fintech education, Chris Cruz">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="Designing the Debit Card Transaction Processing ETL Demo">
+    <meta property="og:description" content="How I built an educational sandbox that walks through debit card authorization, memo settlement, and merchant enrichment flows.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://chriscruz.ai/blogs/debit-card-transaction-processing-demo.html">
+    <meta property="og:image" content="https://chriscruz.ai/images/debit-card-etl-demo.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Designing the Debit Card Transaction Processing ETL Demo">
+    <meta name="twitter:description" content="How I built an educational sandbox that unifies debit card authorization, memo settlement, and merchant enrichment data.">
+    <meta name="article:published_time" content="2025-03-05T00:00:00Z">
+    <meta name="article:author" content="Christopher Manuel Cruz-Guzman">
+    <meta name="article:section" content="Fintech Education">
+    <meta name="article:tag" content="fintech, data engineering, merchant enrichment, ETL">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #05070d;
+            color: #f8fafc;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #38bdf8, #6366f1, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .blog-content {
+            background-color: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            backdrop-filter: blur(18px);
+        }
+        .callout-box {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.16), rgba(99, 102, 241, 0.18));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+        }
+        .note-box {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(14, 165, 233, 0.15));
+            border: 1px solid rgba(16, 185, 129, 0.35);
+        }
+        .timeline-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #22d3ee, #6366f1);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="../brand-hub.html" class="text-xl font-bold tracking-tighter">ChrisCruz<span class="text-sky-400">.ai</span></a>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium text-slate-200">
+                <a href="../brand-hub.html" class="hover:text-sky-300 transition">Empire</a>
+                <a href="../manifesto.html" class="hover:text-sky-300 transition">Manifesto</a>
+                <a href="../projects" class="hover:text-sky-300 transition">Projects</a>
+                <a href="../contact.html" class="hover:text-sky-300 transition">Contact</a>
+            </nav>
+            <span class="text-xs font-semibold py-1 px-3 rounded-full bg-sky-400/15 text-sky-200 border border-sky-400/30">Fintech Education</span>
+        </div>
+    </header>
+
+    <main class="pt-24">
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-4xl">
+                <div class="text-center mb-8">
+                    <div class="flex items-center justify-center space-x-3 mb-4 text-xs text-slate-300">
+                        <span class="uppercase tracking-[0.3em] text-sky-300">Debit Systems</span>
+                        <span>•</span>
+                        <span>March 5, 2025</span>
+                        <span>•</span>
+                        <span>8 min read</span>
+                    </div>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tighter mb-6">
+                        Designing the <span class="gradient-text">Debit Card Transaction Processing ETL Demo</span>
+                    </h1>
+                    <p class="text-lg text-slate-300 max-w-3xl mx-auto leading-relaxed">
+                        The PRD was clear: demonstrate how real banking teams stitch authorization, memo, and merchant data together to build customer-friendly transaction experiences. This post captures how I translated that brief into an interactive teaching tool that anyone can explore in minutes.
+                    </p>
+                </div>
+                <div class="flex items-center justify-center space-x-4 text-sm text-slate-400">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-10 h-10 bg-gradient-to-r from-sky-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold">CC</div>
+                        <span>Christopher Manuel Cruz-Guzman</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-4xl">
+                <article class="blog-content p-8 md:p-10 rounded-3xl space-y-10">
+                    <p class="text-lg text-slate-200 leading-relaxed">
+                        Debit card transactions look simple in your mobile app, but the reality underneath spans multiple systems with different clocks and owners. The goal for this demo was to make that invisible choreography visible. I wanted a walkthrough that product managers, analysts, and junior engineers could experience together—no mainframe access required.
+                    </p>
+
+                    <div class="callout-box p-6 rounded-2xl text-slate-100">
+                        <h2 class="text-2xl font-bold text-white mb-4">Success Criteria from the PRD</h2>
+                        <ul class="space-y-3 text-base">
+                            <li>• Join authorization and memo feeds into a unified transaction event schema.</li>
+                            <li>• Enrich each event with merchant directory attributes when available.</li>
+                            <li>• Surface latency and enrichment metrics for stakeholders.</li>
+                            <li>• Deliver an API payload and customer UI contrast that sells the value of the enrichment step.</li>
+                        </ul>
+                    </div>
+
+                    <h2 class="text-3xl font-bold text-sky-300">A guided flyover of the data sources</h2>
+                    <p class="text-lg text-slate-200 leading-relaxed">
+                        The app opens with three simple counters: authorization feed, memo feed, merchant directory. Those numbers prime viewers to think about the data they have—and the data they might be missing. Each card references the actual JavaScript dataset that powers the demo, so workshop facilitators can swap in their own records for private trainings.
+                    </p>
+                    <div class="note-box p-6 rounded-2xl text-slate-100">
+                        <h3 class="text-lg font-semibold text-emerald-200 mb-3">Sample records included</h3>
+                        <ul class="space-y-2 text-sm">
+                            <li>• <strong>Auth:</strong> Network reference IDs, amounts, raw POS descriptors.</li>
+                            <li>• <strong>Memo:</strong> Posting dates, settlement channels, reconciliation timestamps.</li>
+                            <li>• <strong>Merchant:</strong> Names, categories, addresses, friendly logos for immediate recognition.</li>
+                        </ul>
+                    </div>
+
+                    <h2 class="text-3xl font-bold text-sky-300">Turning two partial truths into one source of truth</h2>
+                    <p class="text-lg text-slate-200 leading-relaxed">
+                        Authorization systems speak in milliseconds. Memo systems prefer batch windows. The UI highlights that separation by presenting both tables side-by-side, then animating the unified event objects underneath. Each row lists timestamps for the three lifecycle stages plus live latency calculations so teams can talk about performance instead of guesswork.
+                    </p>
+                    <p class="text-lg text-slate-200 leading-relaxed">
+                        One of the four sample transactions intentionally fails enrichment. That “pending” badge is there on purpose—it gives analysts the perfect opening to discuss directory coverage, fallback logic, and when to trigger customer messaging.
+                    </p>
+
+                    <h2 class="text-3xl font-bold text-sky-300">Metrics that resonate with operations and product</h2>
+                    <p class="text-lg text-slate-200 leading-relaxed">
+                        I surfaced the three KPIs most teams debate: average auth → memo latency, average memo → enriched latency, and throughput. They’re calculated on the fly inside the browser so the numbers update instantly if you extend the dataset. Showing the math demystifies how Ops teams justify staffing and infrastructure investments.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="bg-white/5 border border-sky-400/30 rounded-2xl p-5">
+                            <div class="timeline-dot mb-3"></div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Latency instrumentation</h3>
+                            <p class="text-sm text-slate-300">Every unified event stores both latency deltas for dashboards and alerts.</p>
+                        </div>
+                        <div class="bg-white/5 border border-violet-400/30 rounded-2xl p-5">
+                            <div class="timeline-dot mb-3"></div>
+                            <h3 class="text-lg font-semibold text-white mb-2">Schema clarity</h3>
+                            <p class="text-sm text-slate-300">I documented the event schema in the UI so product + engineering stay aligned.</p>
+                        </div>
+                        <div class="bg-white/5 border border-emerald-400/30 rounded-2xl p-5">
+                            <div class="timeline-dot mb-3"></div>
+                            <h3 class="text-lg font-semibold text-white mb-2">API-first mindset</h3>
+                            <p class="text-sm text-slate-300">A copy-ready JSON payload demonstrates what downstream consumers receive.</p>
+                        </div>
+                    </div>
+
+                    <h2 class="text-3xl font-bold text-sky-300">Why the customer view matters</h2>
+                    <p class="text-lg text-slate-200 leading-relaxed">
+                        Most cardholders never see memo lines. They see merchant names, logos, phone numbers, and friendly categories. The dual-card comparison at the bottom of the app drives that point home. Pick a transaction from the dropdown, and you’ll watch the raw descriptor transform into a clean, enriched UI instantly.</p>
+                    <p class="text-lg text-slate-200 leading-relaxed">
+                        This section has become my favorite boardroom tool. Show the unenriched card first, pause, then switch to the enriched version. Stakeholders feel the delta immediately—and that usually unlocks the budget conversation.
+                    </p>
+
+                    <div class="callout-box p-6 rounded-2xl text-slate-100">
+                        <h3 class="text-xl font-semibold text-white mb-3">Run the live demo</h3>
+                        <p class="text-sm text-slate-200 leading-relaxed">Dive into the full experience, inspect the schema, and copy the API payload for your own experiments.</p>
+                        <a href="/Apps/debit-card-transaction-etl-demo.html" class="inline-flex items-center mt-4 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-600 transition text-white text-sm font-semibold">Launch the Debit Card ETL Demo →</a>
+                    </div>
+
+                    <h2 class="text-3xl font-bold text-sky-300">What you can repurpose</h2>
+                    <ul class="list-disc list-inside space-y-3 text-lg text-slate-200">
+                        <li>Copy the dataset structure to prototype your own joins before touching production environments.</li>
+                        <li>Reuse the efficiency dashboard to teach operations teams how latency KPIs roll up.</li>
+                        <li>Embed the customer-view comparison inside onboarding decks for partner banks.</li>
+                    </ul>
+
+                    <p class="text-lg text-slate-200 leading-relaxed">
+                        Building this demo forced me to zoom out of my usual AI workflows and reconnect with the classic payment fundamentals. If you ship products in fintech, you owe it to your stakeholders—and your customers—to make these flows legible. Start with this sandbox, tweak the datasets, and keep iterating.
+                    </p>
+                </article>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-800 py-8 px-6">
+        <div class="container mx-auto text-center text-slate-500 text-sm">
+            <p class="font-semibold tracking-tight">ChrisCruz<span class="text-sky-400">.ai</span></p>
+            <p>&copy; 2025. Debit card education lab. All rights reserved.</p>
+        </div>
+    </footer>
+
+</body>
+</html>

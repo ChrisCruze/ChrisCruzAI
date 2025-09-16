@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debit Card Transaction Processing ETL Demo | Chris Cruz</title>
+    <meta name="description" content="Interactive education app that demonstrates how debit card authorization, memo, and merchant datasets combine into enriched customer-ready events.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .gradient-border {
+            position: relative;
+        }
+        .gradient-border::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.6), rgba(236, 72, 153, 0.6));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+        }
+        .stage-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 9999px;
+        }
+        .table-container {
+            background: linear-gradient(145deg, rgba(15, 23, 42, 0.9), rgba(30, 41, 59, 0.9));
+        }
+        pre::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        pre::-webkit-scrollbar-thumb {
+            background-color: rgba(148, 163, 184, 0.6);
+            border-radius: 9999px;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100">
+    <nav class="bg-slate-950/80 backdrop-blur border-b border-slate-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="/" class="text-lg font-semibold tracking-tight text-white">ChrisCruz<span class="text-sky-400">.ai</span></a>
+                <div class="flex items-center space-x-6 text-sm font-medium">
+                    <a href="/Apps/index.html" class="text-slate-300 hover:text-white transition">Apps</a>
+                    <a href="/blogs/" class="text-slate-300 hover:text-white transition">Blog</a>
+                    <a href="/contact.html" class="text-slate-300 hover:text-white transition">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <main class="pb-24">
+        <section class="relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-sky-500/20 via-indigo-500/10 to-purple-500/20"></div>
+            <div class="relative max-w-6xl mx-auto px-6 py-20">
+                <div class="grid lg:grid-cols-[1.1fr,0.9fr] gap-10 items-center">
+                    <div>
+                        <p class="uppercase tracking-[0.25em] text-xs text-sky-300/80 mb-4">Education Demo</p>
+                        <h1 class="text-4xl md:text-5xl font-extrabold text-white mb-6">
+                            Debit Card Transaction Processing ETL Flow
+                        </h1>
+                        <p class="text-lg text-slate-200 leading-relaxed mb-8">
+                            Explore how authorization pings, memo records, and merchant data blend into a single enriched transaction event. This guided sandbox walks through the exact data joins, enrichments, and latency metrics modern banking teams rely on.
+                        </p>
+                        <div class="flex flex-wrap gap-3 text-sm">
+                            <span class="px-3 py-1 rounded-full bg-sky-400/15 text-sky-200 border border-sky-500/30">Authorization → Memo Joining</span>
+                            <span class="px-3 py-1 rounded-full bg-purple-400/15 text-purple-200 border border-purple-500/30">Merchant Enrichment</span>
+                            <span class="px-3 py-1 rounded-full bg-emerald-400/15 text-emerald-200 border border-emerald-500/30">Latency Metrics</span>
+                        </div>
+                    </div>
+                    <div class="bg-slate-900/60 border border-slate-700 rounded-3xl p-6 shadow-2xl">
+                        <h2 class="text-xl font-semibold text-white mb-4">What you'll learn</h2>
+                        <ul class="space-y-3 text-sm text-slate-300">
+                            <li class="flex items-start gap-3"><span class="mt-1 text-sky-300">•</span> The schema that ties authorization IDs to memo settlements.</li>
+                            <li class="flex items-start gap-3"><span class="mt-1 text-sky-300">•</span> How merchant attributes unlock customer-friendly receipts.</li>
+                            <li class="flex items-start gap-3"><span class="mt-1 text-sky-300">•</span> Efficiency KPIs: latency windows, enrichment coverage, and throughput.</li>
+                            <li class="flex items-start gap-3"><span class="mt-1 text-sky-300">•</span> What the API payload and mobile UI look like before and after enrichment.</li>
+                        </ul>
+                        <a href="#ui-demo" class="mt-6 inline-flex items-center justify-center w-full px-4 py-3 bg-sky-500 hover:bg-sky-600 transition rounded-xl text-sm font-semibold text-white">Jump to the customer view ↓</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 py-16">
+            <div class="grid gap-6 md:grid-cols-3">
+                <div class="gradient-border rounded-2xl bg-slate-900/80 border border-slate-800 p-6">
+                    <p class="text-sm uppercase tracking-wide text-slate-400">Authorization Feed</p>
+                    <div class="mt-3 text-3xl font-bold text-white" id="authCount">--</div>
+                    <p class="text-sm text-slate-400 mt-3">Immediate approve / decline signals that kick off the pipeline.</p>
+                </div>
+                <div class="gradient-border rounded-2xl bg-slate-900/80 border border-slate-800 p-6">
+                    <p class="text-sm uppercase tracking-wide text-slate-400">Memo Transactions</p>
+                    <div class="mt-3 text-3xl font-bold text-white" id="memoCount">--</div>
+                    <p class="text-sm text-slate-400 mt-3">Settlement records that land minutes or hours after the auth swipe.</p>
+                </div>
+                <div class="gradient-border rounded-2xl bg-slate-900/80 border border-slate-800 p-6">
+                    <p class="text-sm uppercase tracking-wide text-slate-400">Merchant Directory</p>
+                    <div class="mt-3 text-3xl font-bold text-white" id="merchantCount">--</div>
+                    <p class="text-sm text-slate-400 mt-3">Logos, contact info, and NAICS categories that enrich the final event.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 py-16">
+            <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">Lifecycle Timeline</h2>
+                    <p class="text-slate-300 mt-3 max-w-2xl">Each transaction walks through three checkpoints. Hover the timeline cards to inspect timestamps and latency deltas.</p>
+                </div>
+                <div class="bg-slate-900/80 border border-slate-800 rounded-xl px-5 py-4 text-sm text-slate-300">
+                    <p><span class="text-white font-semibold" id="enrichmentRate">--</span> enrichment coverage • <span class="text-white font-semibold" id="pendingCount">--</span> still awaiting merchant match</p>
+                </div>
+            </div>
+            <div id="timelineContainer" class="grid gap-6 md:grid-cols-2"></div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 py-16">
+            <div class="grid gap-8 lg:grid-cols-3">
+                <div class="lg:col-span-1">
+                    <h2 class="text-3xl font-bold text-white mb-4">Raw Feeds & Unified Event</h2>
+                    <p class="text-slate-300 mb-6">Study how identifiers and timestamps align across the three datasets. The unified event appears once memo settlement is reconciled against its original authorization.</p>
+                    <div class="space-y-4 text-sm text-slate-300">
+                        <div class="flex items-start gap-3"><span class="stage-dot bg-sky-400/80 mt-1"></span><p><strong>Authorization:</strong> transaction fingerprint captured the moment the card is swiped.</p></div>
+                        <div class="flex items-start gap-3"><span class="stage-dot bg-indigo-400/80 mt-1"></span><p><strong>Memo:</strong> pending ledger entry that confirms amount and settlement info.</p></div>
+                        <div class="flex items-start gap-3"><span class="stage-dot bg-emerald-400/80 mt-1"></span><p><strong>Enrichment:</strong> merchant intelligence fused into a customer-friendly event.</p></div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 space-y-10">
+                    <div class="table-container rounded-2xl border border-slate-800 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">Authorization Stream</h3>
+                            <span class="text-xs text-slate-400">First signal</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left text-sm">
+                                <thead class="uppercase tracking-wide text-slate-400 text-xs bg-slate-900/40">
+                                    <tr>
+                                        <th class="px-6 py-3">Transaction ID</th>
+                                        <th class="px-6 py-3">Account</th>
+                                        <th class="px-6 py-3">Amount</th>
+                                        <th class="px-6 py-3">Status</th>
+                                        <th class="px-6 py-3">Timestamp</th>
+                                        <th class="px-6 py-3">Raw Description</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="authTableBody" class="divide-y divide-slate-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="table-container rounded-2xl border border-slate-800 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">Memo Settlements</h3>
+                            <span class="text-xs text-slate-400">Reconciliation layer</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left text-sm">
+                                <thead class="uppercase tracking-wide text-slate-400 text-xs bg-slate-900/40">
+                                    <tr>
+                                        <th class="px-6 py-3">Transaction ID</th>
+                                        <th class="px-6 py-3">Posting Date</th>
+                                        <th class="px-6 py-3">Amount</th>
+                                        <th class="px-6 py-3">Status</th>
+                                        <th class="px-6 py-3">Memo Timestamp</th>
+                                        <th class="px-6 py-3">Merchant Ref</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="memoTableBody" class="divide-y divide-slate-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="table-container rounded-2xl border border-slate-800 overflow-hidden">
+                        <div class="px-6 py-4 border-b border-slate-800 bg-slate-900/60 flex items-center justify-between">
+                            <h3 class="text-lg font-semibold text-white">Unified Event Objects</h3>
+                            <span class="text-xs text-slate-400">Customer-ready</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full text-left text-sm">
+                                <thead class="uppercase tracking-wide text-slate-400 text-xs bg-slate-900/40">
+                                    <tr>
+                                        <th class="px-6 py-3">Transaction ID</th>
+                                        <th class="px-6 py-3">Lifecycle</th>
+                                        <th class="px-6 py-3">Merchant</th>
+                                        <th class="px-6 py-3">Auth → Memo</th>
+                                        <th class="px-6 py-3">Memo → Enriched</th>
+                                        <th class="px-6 py-3">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="eventsTableBody" class="divide-y divide-slate-800"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 py-16">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 mb-10">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">Efficiency Dashboard</h2>
+                    <p class="text-slate-300 mt-3 max-w-2xl">Track the throughput, latency, and enrichment success metrics that ETL leads report back to stakeholders.</p>
+                </div>
+                <div class="text-sm text-slate-400">
+                    <span class="text-slate-200 font-semibold">Schema v1.0</span> • Transaction event spec defined below
+                </div>
+            </div>
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6">
+                    <p class="text-sm text-slate-400">Average Auth → Memo</p>
+                    <div class="text-2xl font-semibold text-white mt-2" id="avgAuthMemo">--</div>
+                    <p class="text-xs text-slate-500 mt-3">Measures switch authorization latency.</p>
+                </div>
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6">
+                    <p class="text-sm text-slate-400">Average Memo → Enriched</p>
+                    <div class="text-2xl font-semibold text-white mt-2" id="avgMemoEnriched">--</div>
+                    <p class="text-xs text-slate-500 mt-3">How quickly merchant details land after memo.</p>
+                </div>
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6">
+                    <p class="text-sm text-slate-400">Processing Throughput</p>
+                    <div class="text-2xl font-semibold text-white mt-2" id="throughput">--</div>
+                    <p class="text-xs text-slate-500 mt-3">Transactions per minute across the observed window.</p>
+                </div>
+                <div class="bg-slate-900/70 border border-slate-800 rounded-2xl p-6">
+                    <p class="text-sm text-slate-400">Total Enriched</p>
+                    <div class="text-2xl font-semibold text-white mt-2" id="enrichedCount">--</div>
+                    <p class="text-xs text-slate-500 mt-3">Merchant-matched events delivered downstream.</p>
+                </div>
+            </div>
+            <div class="mt-12 grid gap-8 lg:grid-cols-[0.8fr,1.2fr]">
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-3">Event Schema</h3>
+                    <ul class="text-sm text-slate-300 space-y-2">
+                        <li><span class="text-slate-200 font-medium">Core:</span> transaction_id, account_number_masked, amount, currency, lifecycle_status</li>
+                        <li><span class="text-slate-200 font-medium">Auth:</span> auth_status, auth_timestamp, pos_entry_mode, network_reference_id</li>
+                        <li><span class="text-slate-200 font-medium">Memo:</span> memo_status, memo_timestamp, posting_date, settlement_channel</li>
+                        <li><span class="text-slate-200 font-medium">Merchant:</span> merchant_name, category, logo_url, phone, address, merchant_reference_id</li>
+                        <li><span class="text-slate-200 font-medium">Latency:</span> auth_to_memo_ms, memo_to_enriched_ms</li>
+                    </ul>
+                </div>
+                <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-3">Operational Notes</h3>
+                    <ol class="list-decimal list-inside space-y-2 text-sm text-slate-300">
+                        <li>Memo events update the existing authorization record in-place using <code class="text-emerald-300">transaction_id</code> + <code class="text-emerald-300">network_reference_id</code>.</li>
+                        <li>Merchant enrichment uses a resilient lookup that falls back to the raw descriptor when no directory match is found.</li>
+                        <li>Latency metrics are persisted per event and can feed dashboarding tools or alerting thresholds.</li>
+                        <li>API clients receive the newest schema version via the version header (<code class="text-indigo-300">X-Event-Schema: v1.0</code>).</li>
+                    </ol>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 py-16">
+            <div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 lg:p-12">
+                <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-8 mb-10">
+                    <div>
+                        <h2 class="text-3xl font-bold text-white">API Playground</h2>
+                        <p class="text-slate-300 mt-3 max-w-2xl">Sample response from <code class="text-emerald-300">GET /api/transactions</code>. Use it to prototype downstream experiences or QA field mappings.</p>
+                    </div>
+                    <button id="copyApiButton" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl border border-slate-700 text-sm font-semibold text-slate-200 hover:bg-slate-800 transition">
+                        <span>Copy JSON</span>
+                    </button>
+                </div>
+                <pre id="apiPayload" class="text-sm bg-slate-950/70 border border-slate-800 rounded-2xl p-6 overflow-x-auto text-emerald-200"></pre>
+            </div>
+        </section>
+
+        <section id="ui-demo" class="max-w-6xl mx-auto px-6 py-16">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-10">
+                <div>
+                    <h2 class="text-3xl font-bold text-white">Customer View Comparison</h2>
+                    <p class="text-slate-300 mt-3 max-w-2xl">Choose a transaction to compare the raw, unenriched state with the enriched experience your mobile banking app can deliver.</p>
+                </div>
+                <div>
+                    <label for="transactionSelect" class="text-sm text-slate-400 block mb-2">Select transaction</label>
+                    <select id="transactionSelect" class="bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-sky-500">
+                    </select>
+                </div>
+            </div>
+            <div class="grid gap-8 lg:grid-cols-2">
+                <div class="bg-slate-900/60 border border-slate-800 rounded-3xl p-8 relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-slate-600 via-slate-500 to-slate-400"></div>
+                    <span class="inline-flex items-center px-3 py-1 text-xs uppercase tracking-wide rounded-full bg-slate-800 text-slate-300 mb-6">Unenriched</span>
+                    <h3 id="rawMerchant" class="text-2xl font-semibold text-white mb-4">--</h3>
+                    <p id="rawDescription" class="text-sm text-slate-400 mb-6">--</p>
+                    <div class="space-y-4 text-sm text-slate-300">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span>Amount</span>
+                            <span id="rawAmount" class="font-semibold text-white">--</span>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span>Posted</span>
+                            <span id="rawStatus" class="font-semibold text-white">--</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span>Contact</span>
+                            <span class="text-slate-500">Not available</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-slate-900/60 border border-emerald-500/30 rounded-3xl p-8 relative overflow-hidden">
+                    <div class="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-400 via-sky-400 to-indigo-400"></div>
+                    <span class="inline-flex items-center px-3 py-1 text-xs uppercase tracking-wide rounded-full bg-emerald-400/20 text-emerald-200 border border-emerald-500/30 mb-6">Enriched</span>
+                    <div class="flex items-center gap-4 mb-4">
+                        <div id="merchantLogo" class="w-12 h-12 rounded-full bg-emerald-400/20 border border-emerald-500/40 flex items-center justify-center text-emerald-200 font-semibold">--</div>
+                        <div>
+                            <h3 id="enrichedMerchant" class="text-2xl font-semibold text-white">--</h3>
+                            <p id="merchantCategory" class="text-sm text-emerald-200/80">--</p>
+                        </div>
+                    </div>
+                    <p id="cleanDescription" class="text-sm text-slate-300 mb-6">--</p>
+                    <div class="space-y-4 text-sm text-slate-200">
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span>Amount</span>
+                            <span id="enrichedAmount" class="font-semibold text-white">--</span>
+                        </div>
+                        <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                            <span>Status</span>
+                            <span id="enrichedStatus" class="font-semibold text-white">--</span>
+                        </div>
+                        <div>
+                            <p id="merchantAddress" class="leading-relaxed">--</p>
+                            <p id="merchantPhone" class="mt-1 text-emerald-200/80">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="max-w-6xl mx-auto px-6 py-16">
+            <div class="bg-slate-900/50 border border-slate-800 rounded-3xl p-10">
+                <h2 class="text-2xl font-semibold text-white mb-6">Try this in your workshop</h2>
+                <div class="grid gap-6 md:grid-cols-3 text-sm text-slate-300">
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
+                        <h3 class="font-semibold text-slate-100 mb-3">Data Practitioners</h3>
+                        <p>Duplicate the schema and plug in your own auth + memo feeds to test join logic before production.</p>
+                    </div>
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
+                        <h3 class="font-semibold text-slate-100 mb-3">Product Managers</h3>
+                        <p>Use the customer view comparison to align stakeholders on why enrichment matters.</p>
+                    </div>
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6">
+                        <h3 class="font-semibold text-slate-100 mb-3">Engineers</h3>
+                        <p>Leverage the API payload sample as a contract for building mock services and integration tests.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-slate-800 py-10">
+        <div class="max-w-6xl mx-auto px-6 text-sm text-slate-500 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            <p>&copy; 2025 ChrisCruz.ai. Educational simulation for fintech teams.</p>
+            <div class="flex items-center gap-4">
+                <a href="/brand-hub.html" class="hover:text-slate-300 transition">Brand Hub</a>
+                <a href="/projects" class="hover:text-slate-300 transition">Projects</a>
+                <a href="/contact.html" class="hover:text-slate-300 transition">Contact</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const authTransactions = [
+            {
+                transactionId: 'TXN-1001',
+                account: '•••• 1234',
+                amount: 5.75,
+                status: 'Approved',
+                timestamp: '2025-03-12T14:32:15Z',
+                merchantRef: 'M-9001',
+                rawDescription: 'POS 12345 03/12 STARBUCKS STORE 102 NEW YORK NY'
+            },
+            {
+                transactionId: 'TXN-1002',
+                account: '•••• 1234',
+                amount: 42.18,
+                status: 'Approved',
+                timestamp: '2025-03-12T15:08:48Z',
+                merchantRef: 'M-9002',
+                rawDescription: 'ECOM 77821 AMAZON MARKETPLACE 888-280-4331 WA'
+            },
+            {
+                transactionId: 'TXN-1003',
+                account: '•••• 5589',
+                amount: 18.25,
+                status: 'Approved',
+                timestamp: '2025-03-12T16:22:07Z',
+                merchantRef: 'M-9003',
+                rawDescription: 'POS 45902 03/12 SWEETGREEN 5TH AVE NEW YORK NY'
+            },
+            {
+                transactionId: 'TXN-1004',
+                account: '•••• 5589',
+                amount: 120.00,
+                status: 'Approved',
+                timestamp: '2025-03-12T17:02:54Z',
+                merchantRef: 'M-9020',
+                rawDescription: 'ECOM 20991 03/12 URBAN BIKE SHOP BROOKLYN NY'
+            }
+        ];
+
+        const memoTransactions = [
+            {
+                transactionId: 'TXN-1001',
+                memoTimestamp: '2025-03-12T14:44:02Z',
+                postingDate: '2025-03-13',
+                amount: 5.75,
+                status: 'Pending',
+                settlementChannel: 'Visa',
+                merchantRef: 'M-9001',
+                enrichedTimestamp: '2025-03-12T14:46:11Z'
+            },
+            {
+                transactionId: 'TXN-1002',
+                memoTimestamp: '2025-03-12T15:24:38Z',
+                postingDate: '2025-03-13',
+                amount: 42.18,
+                status: 'Pending',
+                settlementChannel: 'ACH Pull',
+                merchantRef: 'M-9002',
+                enrichedTimestamp: '2025-03-12T15:28:45Z'
+            },
+            {
+                transactionId: 'TXN-1003',
+                memoTimestamp: '2025-03-12T16:38:51Z',
+                postingDate: '2025-03-14',
+                amount: 18.25,
+                status: 'Pending',
+                settlementChannel: 'Visa',
+                merchantRef: 'M-9003',
+                enrichedTimestamp: '2025-03-12T16:41:09Z'
+            },
+            {
+                transactionId: 'TXN-1004',
+                memoTimestamp: '2025-03-12T17:21:33Z',
+                postingDate: '2025-03-14',
+                amount: 120.00,
+                status: 'Pending',
+                settlementChannel: 'Visa',
+                merchantRef: 'M-9020',
+                enrichedTimestamp: null
+            }
+        ];
+
+        const merchantDirectory = [
+            {
+                merchantId: 'M-9001',
+                name: 'Starbucks Midtown',
+                category: 'Coffee Shop',
+                logo: '☕',
+                phone: '(212) 555-0102',
+                address: '1411 Broadway, New York, NY 10018'
+            },
+            {
+                merchantId: 'M-9002',
+                name: 'Amazon Marketplace',
+                category: 'Online Marketplace',
+                logo: '🛒',
+                phone: '(888) 280-4331',
+                address: '410 Terry Ave N, Seattle, WA 98109'
+            },
+            {
+                merchantId: 'M-9003',
+                name: 'Sweetgreen Flatiron',
+                category: 'Fast Casual Dining',
+                logo: '🥗',
+                phone: '(212) 555-0144',
+                address: '1164 Broadway, New York, NY 10001'
+            }
+        ];
+
+        const formatCurrency = (value) => `$${value.toFixed(2)}`;
+        const formatDateTime = (isoString) => {
+            if (!isoString) return '—';
+            const date = new Date(isoString);
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+                timeZone: 'UTC'
+            }) + ' UTC';
+        };
+        const formatDuration = (ms) => {
+            if (!ms || ms <= 0) return '—';
+            const totalSeconds = Math.round(ms / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            if (minutes === 0) return `${seconds}s`;
+            return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
+        };
+
+        const unifiedEvents = authTransactions.map(auth => {
+            const memo = memoTransactions.find(entry => entry.transactionId === auth.transactionId);
+            const merchant = memo ? merchantDirectory.find(item => item.merchantId === memo.merchantRef) : null;
+            const authTimestamp = new Date(auth.timestamp);
+            const memoTimestamp = memo ? new Date(memo.memoTimestamp) : null;
+            const enrichedTimestamp = memo?.enrichedTimestamp ? new Date(memo.enrichedTimestamp) : null;
+
+            return {
+                transactionId: auth.transactionId,
+                account: auth.account,
+                amount: auth.amount,
+                authStatus: auth.status,
+                authTimestamp: authTimestamp,
+                memoTimestamp,
+                memoStatus: memo?.status || 'Awaiting memo',
+                postingDate: memo?.postingDate || null,
+                settlementChannel: memo?.settlementChannel || null,
+                merchantRef: memo?.merchantRef || auth.merchantRef,
+                merchant,
+                rawDescription: auth.rawDescription,
+                enrichedTimestamp,
+                authToMemoMs: memoTimestamp ? memoTimestamp - authTimestamp : null,
+                memoToEnrichedMs: memoTimestamp && enrichedTimestamp ? enrichedTimestamp - memoTimestamp : null,
+                status: merchant ? 'Enriched' : memo ? 'Memo received' : 'Awaiting memo'
+            };
+        });
+
+        document.getElementById('authCount').textContent = authTransactions.length;
+        document.getElementById('memoCount').textContent = memoTransactions.length;
+        document.getElementById('merchantCount').textContent = merchantDirectory.length;
+
+        const enrichedEvents = unifiedEvents.filter(event => event.merchant);
+        const enrichmentCoverage = (enrichedEvents.length / unifiedEvents.length) * 100;
+        document.getElementById('enrichmentRate').textContent = `${enrichmentCoverage.toFixed(0)}%`;
+        const pending = unifiedEvents.length - enrichedEvents.length;
+        document.getElementById('pendingCount').textContent = `${pending} pending`;
+        document.getElementById('enrichedCount').textContent = enrichedEvents.length;
+
+        const authToMemoLatencies = unifiedEvents.filter(event => event.authToMemoMs).map(event => event.authToMemoMs);
+        const memoToEnrichedLatencies = unifiedEvents.filter(event => event.memoToEnrichedMs).map(event => event.memoToEnrichedMs);
+
+        const avg = (arr) => arr.length ? arr.reduce((sum, value) => sum + value, 0) / arr.length : null;
+        const averageAuthToMemo = avg(authToMemoLatencies);
+        const averageMemoToEnriched = avg(memoToEnrichedLatencies);
+
+        document.getElementById('avgAuthMemo').textContent = averageAuthToMemo ? formatDuration(averageAuthToMemo) : 'Awaiting data';
+        document.getElementById('avgMemoEnriched').textContent = averageMemoToEnriched ? formatDuration(averageMemoToEnriched) : 'Awaiting data';
+
+        const earliestAuth = Math.min(...unifiedEvents.map(event => event.authTimestamp.getTime()));
+        const latestEvent = Math.max(...unifiedEvents.map(event => (event.enrichedTimestamp || event.memoTimestamp || event.authTimestamp).getTime()));
+        const windowMinutes = (latestEvent - earliestAuth) / 60000;
+        const throughput = windowMinutes > 0 ? unifiedEvents.length / windowMinutes : unifiedEvents.length;
+        document.getElementById('throughput').textContent = `${throughput.toFixed(2)} tx/min`;
+
+        const authTableBody = document.getElementById('authTableBody');
+        authTransactions.forEach(auth => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-900/50';
+            row.innerHTML = `
+                <td class="px-6 py-4 font-medium text-white">${auth.transactionId}</td>
+                <td class="px-6 py-4">${auth.account}</td>
+                <td class="px-6 py-4">${formatCurrency(auth.amount)}</td>
+                <td class="px-6 py-4">${auth.status}</td>
+                <td class="px-6 py-4">${formatDateTime(auth.timestamp)}</td>
+                <td class="px-6 py-4 text-slate-400">${auth.rawDescription}</td>
+            `;
+            authTableBody.appendChild(row);
+        });
+
+        const memoTableBody = document.getElementById('memoTableBody');
+        memoTransactions.forEach(memo => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-900/50';
+            row.innerHTML = `
+                <td class="px-6 py-4 font-medium text-white">${memo.transactionId}</td>
+                <td class="px-6 py-4">${memo.postingDate}</td>
+                <td class="px-6 py-4">${formatCurrency(memo.amount)}</td>
+                <td class="px-6 py-4">${memo.status}</td>
+                <td class="px-6 py-4">${formatDateTime(memo.memoTimestamp)}</td>
+                <td class="px-6 py-4">${memo.merchantRef}</td>
+            `;
+            memoTableBody.appendChild(row);
+        });
+
+        const eventsTableBody = document.getElementById('eventsTableBody');
+        unifiedEvents.forEach(event => {
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-900/50';
+            row.innerHTML = `
+                <td class="px-6 py-4 font-medium text-white">${event.transactionId}</td>
+                <td class="px-6 py-4 text-slate-300">
+                    <div class="space-y-1">
+                        <div><span class="text-slate-400 text-xs uppercase">Auth</span> ${formatDateTime(event.authTimestamp.toISOString())}</div>
+                        <div><span class="text-slate-400 text-xs uppercase">Memo</span> ${formatDateTime(event.memoTimestamp?.toISOString())}</div>
+                        <div><span class="text-slate-400 text-xs uppercase">Enriched</span> ${formatDateTime(event.enrichedTimestamp?.toISOString())}</div>
+                    </div>
+                </td>
+                <td class="px-6 py-4">${event.merchant ? event.merchant.name : '<span class="text-slate-500">— Unmatched —</span>'}</td>
+                <td class="px-6 py-4">${formatDuration(event.authToMemoMs)}</td>
+                <td class="px-6 py-4">${formatDuration(event.memoToEnrichedMs)}</td>
+                <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${event.merchant ? 'bg-emerald-500/20 text-emerald-200 border border-emerald-500/30' : 'bg-amber-500/20 text-amber-200 border border-amber-500/40'}">${event.status}</span>
+                </td>
+            `;
+            eventsTableBody.appendChild(row);
+        });
+
+        const timelineContainer = document.getElementById('timelineContainer');
+        unifiedEvents.forEach(event => {
+            const steps = [
+                {
+                    label: 'Authorization',
+                    timestamp: event.authTimestamp,
+                    complete: true,
+                    description: 'Card swipe approved'
+                },
+                {
+                    label: 'Memo',
+                    timestamp: event.memoTimestamp,
+                    complete: Boolean(event.memoTimestamp),
+                    description: event.memoTimestamp ? 'Settlement memo posted' : 'Waiting for memo'
+                },
+                {
+                    label: 'Enriched',
+                    timestamp: event.enrichedTimestamp,
+                    complete: Boolean(event.merchant),
+                    description: event.merchant ? 'Merchant data attached' : 'Merchant match pending'
+                }
+            ];
+
+            const card = document.createElement('div');
+            card.className = 'bg-slate-900/60 border border-slate-800 rounded-3xl p-6 transition hover:border-sky-500/40 hover:shadow-lg hover:shadow-sky-500/10';
+            card.innerHTML = `
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-xs text-slate-400">${event.account}</p>
+                        <h3 class="text-xl font-semibold text-white">${event.transactionId}</h3>
+                    </div>
+                    <div class="text-lg font-semibold text-emerald-300">${formatCurrency(event.amount)}</div>
+                </div>
+                <div class="space-y-4">
+                    ${steps.map(step => `
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1">
+                                <svg class="w-5 h-5 ${step.complete ? 'text-emerald-400' : 'text-slate-600'}" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    ${step.complete ? '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />' : '<path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6l4 2" />'}
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-white">${step.label}</p>
+                                <p class="text-xs text-slate-400">${step.timestamp ? formatDateTime(step.timestamp.toISOString()) : 'Pending'}</p>
+                                <p class="text-xs text-slate-500 mt-1">${step.description}</p>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            timelineContainer.appendChild(card);
+        });
+
+        const apiPayloadElement = document.getElementById('apiPayload');
+        const apiPayload = unifiedEvents.map(event => ({
+            transaction_id: event.transactionId,
+            account_number_masked: event.account,
+            amount: event.amount,
+            currency: 'USD',
+            lifecycle_status: event.status,
+            auth: {
+                status: event.authStatus,
+                timestamp: event.authTimestamp.toISOString()
+            },
+            memo: event.memoTimestamp ? {
+                status: event.memoStatus,
+                timestamp: event.memoTimestamp.toISOString(),
+                posting_date: event.postingDate,
+                settlement_channel: event.settlementChannel
+            } : null,
+            merchant: event.merchant ? {
+                name: event.merchant.name,
+                category: event.merchant.category,
+                phone: event.merchant.phone,
+                address: event.merchant.address,
+                merchant_reference_id: event.merchantRef
+            } : null,
+            latency: {
+                auth_to_memo_ms: event.authToMemoMs,
+                memo_to_enriched_ms: event.memoToEnrichedMs
+            }
+        }));
+        apiPayloadElement.textContent = JSON.stringify(apiPayload, null, 2);
+
+        document.getElementById('copyApiButton').addEventListener('click', () => {
+            if (!navigator.clipboard) {
+                document.getElementById('copyApiButton').innerHTML = '<span>Copy not supported</span>';
+                setTimeout(() => {
+                    document.getElementById('copyApiButton').innerHTML = '<span>Copy JSON</span>';
+                }, 1500);
+                return;
+            }
+
+            navigator.clipboard.writeText(apiPayloadElement.textContent)
+                .then(() => {
+                    const original = document.getElementById('copyApiButton').innerHTML;
+                    document.getElementById('copyApiButton').innerHTML = '<span>Copied!</span>';
+                    setTimeout(() => {
+                        document.getElementById('copyApiButton').innerHTML = original;
+                    }, 1500);
+                })
+                .catch(() => {
+                    document.getElementById('copyApiButton').innerHTML = '<span>Copy not supported</span>';
+                    setTimeout(() => {
+                        document.getElementById('copyApiButton').innerHTML = '<span>Copy JSON</span>';
+                    }, 1500);
+                });
+        });
+
+        const transactionSelect = document.getElementById('transactionSelect');
+        unifiedEvents.forEach(event => {
+            const option = document.createElement('option');
+            option.value = event.transactionId;
+            option.textContent = `${event.transactionId} • ${formatCurrency(event.amount)}`;
+            transactionSelect.appendChild(option);
+        });
+
+        const renderCustomerView = (transactionId) => {
+            const event = unifiedEvents.find(item => item.transactionId === transactionId) || unifiedEvents[0];
+            if (!event) return;
+
+            document.getElementById('rawMerchant').textContent = event.rawDescription.split(' ').slice(-4).join(' ') || 'Pending Merchant';
+            document.getElementById('rawDescription').textContent = event.rawDescription;
+            document.getElementById('rawAmount').textContent = formatCurrency(event.amount);
+            document.getElementById('rawStatus').textContent = event.memoTimestamp ? 'Pending settlement' : 'Authorization hold';
+
+            if (event.merchant) {
+                document.getElementById('merchantLogo').textContent = event.merchant.logo;
+                document.getElementById('enrichedMerchant').textContent = event.merchant.name;
+                document.getElementById('merchantCategory').textContent = event.merchant.category;
+                document.getElementById('cleanDescription').textContent = `${event.merchant.name} • ${event.merchant.category}`;
+                document.getElementById('enrichedAmount').textContent = formatCurrency(event.amount);
+                document.getElementById('enrichedStatus').textContent = 'Enriched & ready';
+                document.getElementById('merchantAddress').textContent = event.merchant.address;
+                document.getElementById('merchantPhone').textContent = event.merchant.phone;
+            } else {
+                document.getElementById('merchantLogo').textContent = '⌛';
+                document.getElementById('enrichedMerchant').textContent = 'Awaiting merchant match';
+                document.getElementById('merchantCategory').textContent = '—';
+                document.getElementById('cleanDescription').textContent = 'We are still matching this merchant. Expect an update shortly.';
+                document.getElementById('enrichedAmount').textContent = formatCurrency(event.amount);
+                document.getElementById('enrichedStatus').textContent = 'Pending enrichment';
+                document.getElementById('merchantAddress').textContent = 'Address will populate once the merchant directory returns a match.';
+                document.getElementById('merchantPhone').textContent = '';
+            }
+        };
+
+        transactionSelect.addEventListener('change', (event) => {
+            renderCustomerView(event.target.value);
+        });
+
+        if (unifiedEvents.length) {
+            renderCustomerView(unifiedEvents[0].transactionId);
+        }
+    </script>
+</body>
+</html>
