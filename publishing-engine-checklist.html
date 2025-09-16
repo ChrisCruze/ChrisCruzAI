@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Publishing Engine Checklist - VA-in-the-Loop System</title>
+    <meta name="description" content="Step-by-step publishing checklist for virtual assistants running the VA-in-the-loop system."/>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        body { background: var(--gray-50); }
+        .page-container { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+        .back-link { display: inline-block; margin-bottom: 1.5rem; color: var(--gray-500); font-weight: 500; }
+        .page-header { margin-bottom: 2.5rem; }
+        .page-header h1 { font-size: 2.25rem; margin-bottom: 0.75rem; }
+        .page-header p { max-width: 720px; }
+        .checklist-section { margin-bottom: 2rem; }
+        .checklist-card { background: var(--white); border-radius: var(--radius-xl); border: 1px solid var(--gray-200); box-shadow: var(--shadow-md); padding: 1.75rem; margin-bottom: 1.5rem; }
+        .phase-label { display: inline-block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; background: var(--gray-100); color: var(--gray-600); padding: 0.25rem 0.75rem; border-radius: 999px; margin-bottom: 0.75rem; }
+        .checklist-card h3 { margin-bottom: 1rem; }
+        .checklist-items { list-style: none; padding-left: 0; }
+        .checklist-items li { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.85rem; }
+        .checklist-items input[type="checkbox"] { margin-top: 0.2rem; accent-color: var(--primary); }
+        .pro-tip { background: var(--gray-900); color: var(--white); padding: 1.25rem 1.5rem; border-radius: var(--radius-lg); margin-top: 1rem; font-size: 0.95rem; }
+        .cta { margin-top: 3rem; text-align: center; }
+        .cta a { font-weight: 600; }
+        @media (max-width: 640px) {
+            .page-container { padding: 2rem 1rem 3rem; }
+            .page-header h1 { font-size: 1.9rem; }
+            .checklist-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <a class="back-link" href="blogs/building-va-in-the-loop-system.html">← Back to the VA-in-the-Loop Playbook</a>
+        <header class="page-header">
+            <h1>Publishing Engine Checklist</h1>
+            <p>This checklist keeps every article moving from draft to distribution without surprises. Duplicate it in Airtable, assign a VA owner, and run the loop every time a new story is ready.</p>
+        </header>
+
+        <section class="checklist-section">
+            <div class="checklist-card">
+                <span class="phase-label">Phase 1</span>
+                <h3>Plan & Draft Confirmation</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Pull the draft card from Airtable and confirm target publish date, channel mix, and reviewers.</label></li>
+                    <li><label><input type="checkbox">Review the outline for message-market fit, calling out updates needed before refinement.</label></li>
+                    <li><label><input type="checkbox">Capture the approved voice and tone guidelines inside the draft so agents work from a single source.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 2</span>
+                <h3>SEO & Editorial Polish</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Run the content through a GPT or Gemini editor for grammar, clarity, and call-to-action reinforcement.</label></li>
+                    <li><label><input type="checkbox">Generate the keyword plan, schema block, and meta description; capture them in the Airtable record.</label></li>
+                    <li><label><input type="checkbox">Update headings, internal links, and pull quotes to match the latest keyword and positioning decisions.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 3</span>
+                <h3>Media & Accessibility</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Refresh the hero image and supporting visuals, exporting both hi-res and lightweight versions.</label></li>
+                    <li><label><input type="checkbox">Write human-first alt text and captions so accessibility stays on-brand.</label></li>
+                    <li><label><input type="checkbox">Embed any embeds, charts, or downloads and verify they load on mobile preview.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 4</span>
+                <h3>Publish & QA</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Publish to the primary platform (Medium, site, or CMS) and confirm formatting on desktop and mobile.</label></li>
+                    <li><label><input type="checkbox">Push the Markdown or HTML update to GitHub with a changelog note for future audits.</label></li>
+                    <li><label><input type="checkbox">Complete the final QA sweep: working links, correct UTMs, CTA placement, and conversion pixels.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 5</span>
+                <h3>Promotion & Measurement</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Draft 3–5 social posts (Twitter/X, LinkedIn, newsletter blurb) and queue them in Buffer.</label></li>
+                    <li><label><input type="checkbox">Log the publish date, hero asset, and campaign tags in Airtable for analytics tracking.</label></li>
+                    <li><label><input type="checkbox">Set the review reminder to capture early performance metrics and feedback in the weekly report.</label></li>
+                </ul>
+                <div class="pro-tip">Pro tip: Capture Loom walkthroughs of every major publish to build a training library for future assistants.</div>
+            </div>
+        </section>
+
+        <div class="cta">
+            <p>Need the companion loops? <a href="offerup-loop-checklist.html">OfferUp marketplace checklist</a> · <a href="otter-loop-checklist.html">Otter.AI media checklist</a></p>
+        </div>
+    </div>
+</body>
+</html>

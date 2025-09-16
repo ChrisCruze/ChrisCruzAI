@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otter.AI Media Intelligence Checklist - VA-in-the-Loop System</title>
+    <meta name="description" content="Otter.AI workflow checklist for capturing, cleaning, and converting transcripts inside the VA-in-the-loop system."/>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        body { background: var(--gray-50); }
+        .page-container { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+        .back-link { display: inline-block; margin-bottom: 1.5rem; color: var(--gray-500); font-weight: 500; }
+        .page-header { margin-bottom: 2.5rem; }
+        .page-header h1 { font-size: 2.25rem; margin-bottom: 0.75rem; }
+        .page-header p { max-width: 760px; }
+        .checklist-card { background: var(--white); border-radius: var(--radius-xl); border: 1px solid var(--gray-200); box-shadow: var(--shadow-md); padding: 1.75rem; margin-bottom: 1.5rem; }
+        .phase-label { display: inline-block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; background: var(--gray-100); color: var(--gray-600); padding: 0.25rem 0.75rem; border-radius: 999px; margin-bottom: 0.75rem; }
+        .checklist-items { list-style: none; padding-left: 0; }
+        .checklist-items li { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.85rem; }
+        .checklist-items input[type="checkbox"] { margin-top: 0.2rem; accent-color: var(--primary); }
+        .highlight { background: #1f2933; color: var(--white); padding: 1.25rem 1.5rem; border-radius: var(--radius-lg); margin-top: 1rem; font-size: 0.95rem; }
+        .cta { margin-top: 3rem; text-align: center; }
+        .cta a { font-weight: 600; }
+        @media (max-width: 640px) {
+            .page-container { padding: 2rem 1rem 3rem; }
+            .page-header h1 { font-size: 1.9rem; }
+            .checklist-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <a class="back-link" href="blogs/building-va-in-the-loop-system.html">← Back to the VA-in-the-Loop Playbook</a>
+        <header class="page-header">
+            <h1>Otter.AI Media Intelligence Checklist</h1>
+            <p>Make every meeting, podcast, or livestream produce assets. This checklist turns Otter.AI transcripts into summaries, quotes, and campaign-ready deliverables.</p>
+        </header>
+
+        <section class="checklist-section">
+            <div class="checklist-card">
+                <span class="phase-label">Phase 1</span>
+                <h3>Pre-Meeting Setup</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Create an Otter.AI calendar entry or import the agenda so the assistant joins automatically.</label></li>
+                    <li><label><input type="checkbox">Confirm recording permissions with attendees and drop the Otter.AI shared link in the meeting invite.</label></li>
+                    <li><label><input type="checkbox">Assign tags for topic, project, and owner in Airtable so the transcript routes correctly after capture.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 2</span>
+                <h3>Capture & Sync</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Join the session via Otter.AI and verify live transcription quality within the first two minutes.</label></li>
+                    <li><label><input type="checkbox">Bookmark key moments in real time (questions, decisions, quotes) to speed up the post-call review.</label></li>
+                    <li><label><input type="checkbox">Export raw audio to the "Source Audio" Google Drive folder when video clips or reels will be produced.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 3</span>
+                <h3>Transcript Cleanup</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Within 12 hours, correct speaker labels, jargon, and timestamps inside Otter.AI.</label></li>
+                    <li><label><input type="checkbox">Highlight action items, blockers, and quotable insights using Otter.AI comments.</label></li>
+                    <li><label><input type="checkbox">Export the cleaned transcript to Google Docs or Markdown for archival.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 4</span>
+                <h3>Conversion & Publishing</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Send the transcript through a GPT summary agent to produce executive notes, newsletter bullets, and FAQ drafts.</label></li>
+                    <li><label><input type="checkbox">Publish the summary, highlights, and transcript link to Notion/Coda with backlinks to related projects.</label></li>
+                    <li><label><input type="checkbox">Create derivative tasks in Airtable for social posts, blog outlines, or sales enablement based on the highlights.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 5</span>
+                <h3>Follow-Up & Metrics</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Notify stakeholders in Slack with the summary link and top three takeaways.</label></li>
+                    <li><label><input type="checkbox">Log distribution performance (opens, clicks, reuse) inside Airtable after two weeks.</label></li>
+                    <li><label><input type="checkbox">Archive transcript assets with consistent naming conventions so future assistants can locate them fast.</label></li>
+                </ul>
+                <div class="highlight">Reminder: flag any sensitive topics in the summary handoff so human review happens before external reuse.</div>
+            </div>
+        </section>
+
+        <div class="cta">
+            <p>Need the other loops? Grab the <a href="publishing-engine-checklist.html">publishing checklist</a> and the <a href="offerup-loop-checklist.html">OfferUp checklist</a>.</p>
+        </div>
+    </div>
+</body>
+</html>

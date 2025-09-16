@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OfferUp Marketplace Checklist - VA-in-the-Loop System</title>
+    <meta name="description" content="Detailed OfferUp listing checklist for virtual assistants working inside the VA-in-the-loop system."/>
+    <link rel="stylesheet" href="styles/main.css">
+    <style>
+        body { background: var(--gray-50); }
+        .page-container { max-width: 960px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+        .back-link { display: inline-block; margin-bottom: 1.5rem; color: var(--gray-500); font-weight: 500; }
+        .page-header { margin-bottom: 2.5rem; }
+        .page-header h1 { font-size: 2.25rem; margin-bottom: 0.75rem; }
+        .page-header p { max-width: 760px; }
+        .checklist-card { background: var(--white); border-radius: var(--radius-xl); border: 1px solid var(--gray-200); box-shadow: var(--shadow-md); padding: 1.75rem; margin-bottom: 1.5rem; }
+        .phase-label { display: inline-block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.08em; background: var(--gray-100); color: var(--gray-600); padding: 0.25rem 0.75rem; border-radius: 999px; margin-bottom: 0.75rem; }
+        .checklist-items { list-style: none; padding-left: 0; }
+        .checklist-items li { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.85rem; }
+        .checklist-items input[type="checkbox"] { margin-top: 0.2rem; accent-color: var(--primary); }
+        .callout { background: #fff7ed; border-left: 4px solid var(--accent); padding: 1.25rem 1.5rem; border-radius: var(--radius-lg); margin-top: 1rem; color: #7c2d12; }
+        .cta { margin-top: 3rem; text-align: center; }
+        .cta a { font-weight: 600; }
+        @media (max-width: 640px) {
+            .page-container { padding: 2rem 1rem 3rem; }
+            .page-header h1 { font-size: 1.9rem; }
+            .checklist-card { padding: 1.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <a class="back-link" href="blogs/building-va-in-the-loop-system.html">← Back to the VA-in-the-Loop Playbook</a>
+        <header class="page-header">
+            <h1>OfferUp Marketplace Checklist</h1>
+            <p>Use this flow every time a new item hits the resale backlog. It keeps OfferUp listings accurate, persuasive, and safe while giving founders a clean audit trail in Airtable.</p>
+        </header>
+
+        <section class="checklist-section">
+            <div class="checklist-card">
+                <span class="phase-label">Phase 1</span>
+                <h3>Inventory Prep</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Pull the next priority item from Airtable and confirm condition, accessories, and replacement value.</label></li>
+                    <li><label><input type="checkbox">Clean the product, remove stickers, and note any cosmetic blemishes that must be disclosed.</label></li>
+                    <li><label><input type="checkbox">Collect receipts, serial numbers, and box dimensions for shipping estimates.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 2</span>
+                <h3>Photo Capture & Editing</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Shoot 6–8 images (front, back, details, scale, packaging) on a neutral background in natural light.</label></li>
+                    <li><label><input type="checkbox">Upload the raw set to the shared Google Drive folder with the Airtable item ID.</label></li>
+                    <li><label><input type="checkbox">Polish the top shots in Gemini Image or Lightroom—remove distractions, level, and crop square for OfferUp.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 3</span>
+                <h3>Listing Build</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Research comparable OfferUp listings to validate price and find keywords buyers search for.</label></li>
+                    <li><label><input type="checkbox">Draft the title, condition notes, and description in the Google Doc template; send to GPT for tone and formatting suggestions.</label></li>
+                    <li><label><input type="checkbox">Capture shipping, pickup radius, and payment options in Airtable so the founder can approve quickly.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 4</span>
+                <h3>Publish & Cross-Post</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Upload optimized photos and copy to OfferUp, confirm category, condition, and price before hitting publish.</label></li>
+                    <li><label><input type="checkbox">Add shipping details or meet-up preferences, double-check safety guidelines, and save the live link back to Airtable.</label></li>
+                    <li><label><input type="checkbox">Cross-post to secondary marketplaces flagged in Airtable (Facebook Marketplace, Craigslist, eBay) when applicable.</label></li>
+                </ul>
+            </div>
+
+            <div class="checklist-card">
+                <span class="phase-label">Phase 5</span>
+                <h3>Buyer Management & Closeout</h3>
+                <ul class="checklist-items">
+                    <li><label><input type="checkbox">Monitor OfferUp messages twice daily, logging buyer intent and follow-up tasks directly in Airtable.</label></li>
+                    <li><label><input type="checkbox">Use the approved response bank to answer FAQs, confirm pickup logistics, and flag any safety concerns to the founder.</label></li>
+                    <li><label><input type="checkbox">Mark the item as sold, archive screenshots of the final conversation, and record sale price plus payment method.</label></li>
+                </ul>
+                <div class="callout"><strong>Safety Reminder:</strong> Always coordinate public meetup locations and ensure a second team member is aware of the hand-off plan.</div>
+            </div>
+        </section>
+
+        <div class="cta">
+            <p>Round out the VA loops with the <a href="publishing-engine-checklist.html">publishing checklist</a> and the <a href="otter-loop-checklist.html">Otter.AI media checklist</a>.</p>
+        </div>
+    </div>
+</body>
+</html>
