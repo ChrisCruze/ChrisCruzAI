@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDA API Migration: V2 to V3 | ChrisCruz.ai</title>
+    <meta name="description" content="Why DDA aggregators must migrate from API v2 to v3 now: resolve stability risks, unlock new capabilities, and align with firmwide standards.">
+    <meta name="keywords" content="DDA API migration, API v2 vs v3, Cassandra stability, ULID, aggregator upgrade">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="DDA API Migration: V2 to V3">
+    <meta property="og:description" content="Eliminate stability risk, align with digital channels, and unlock new capabilities by upgrading from API v2 to v3.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://chriscruz.ai/blogs/dda-api-migration-v2-to-v3.html">
+    <meta property="og:image" content="https://chriscruz.ai/images/dda-api-migration.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="DDA API Migration: V2 to V3">
+    <meta name="twitter:description" content="The critical reasons to accelerate your migration from API v2 to v3 and what changes to expect.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .section-icon {
+            width: 48px;
+            height: 48px;
+        }
+        .comparison-grid {
+            grid-template-columns: 1fr auto 1fr;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900">
+    <div class="bg-white border-b border-gray-200">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+            <a href="../index.html" class="text-sm font-semibold text-blue-600 hover:text-blue-800">← Back to Home</a>
+            <a href="../blogs/index.html" class="text-sm font-semibold text-gray-600 hover:text-gray-900">All Posts</a>
+        </div>
+    </div>
+    <div class="bg-gray-50 text-gray-800 p-4 sm:p-8">
+        <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-6 sm:p-10">
+
+            <!-- Header Section -->
+            <header class="text-center border-b-2 border-blue-100 pb-6 mb-8">
+                <p class="text-sm uppercase tracking-[0.3em] text-blue-500 mb-3">API Modernization</p>
+                <h1 class="text-3xl sm:text-4xl font-bold text-blue-800">DDA API Migration: V2 to V3</h1>
+                <p class="text-lg text-gray-600 mt-2">An Urgent Priority for Aggregators to Enhance Stability &amp; Performance</p>
+                <div class="mt-4 text-sm text-gray-500 flex flex-col sm:flex-row items-center justify-center gap-2">
+                    <span>March 12, 2025</span>
+                    <span class="hidden sm:inline">•</span>
+                    <span>7 min read</span>
+                </div>
+            </header>
+
+            <!-- Main Content Grid -->
+            <main class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+                <!-- "Why Migrate?" Section -->
+                <section class="bg-red-50 border border-red-200 rounded-xl p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-red-100 p-3 rounded-full mr-4">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-red-800">Urgent: Why Migrate Now?</h2>
+                    </div>
+                    <div class="space-y-4 text-gray-700">
+                        <div>
+                            <h3 class="font-semibold text-red-700">Critical Stability Vulnerability</h3>
+                            <p>API <span class="font-bold">v2</span> has a major flaw: when the Cassandra database slows, v2 API threads hang while fetching enrichment data. This leads to <span class="font-semibold text-red-600">500 errors</span> and significant customer impact, even for aggregators who don't use the data.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-red-700">V3 Is the Standard</h3>
+                            <p><span class="font-bold text-blue-600">API v3 resolves this vulnerability.</span> All other digital channels have already migrated. V2 is a frozen legacy version and will not receive future updates or fixes.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- "Benefits of V3" Section -->
+                <section class="bg-green-50 border border-green-200 rounded-xl p-6">
+                    <div class="flex items-center mb-4">
+                        <div class="bg-green-100 p-3 rounded-full mr-4">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-green-800">Benefits of Upgrading to V3</h2>
+                    </div>
+                    <ul class="space-y-3 list-inside text-gray-700">
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span>
+                            <div><strong class="font-semibold">Eliminate Risk:</strong> Immediately fix the critical thread-hanging vulnerability causing 500 errors.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span>
+                            <div><strong class="font-semibold">Align with Digital Channels:</strong> Achieve parity with the current, supported API version used across the firm.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span>
+                            <div><strong class="font-semibold">Enhanced Capabilities:</strong> Support for Unique Location ID (ULID), standardized transaction types, and improved field consistency.</div>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-green-500 mr-2">✔</span>
+                            <div><strong class="font-semibold">Smoother Integration:</strong> Cleaner, more consistent field names reduce future rework and simplify development.</div>
+                        </li>
+                    </ul>
+                </section>
+            </main>
+
+            <!-- "Key Changes" Section -->
+            <section class="mt-10">
+                <h2 class="text-3xl font-bold text-center text-blue-800 mb-6">Key API Changes: V2 vs. V3</h2>
+                <div class="bg-gray-50 border rounded-xl p-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                        <!-- Column 1 -->
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-lg text-blue-700">Field Name Updates</h4>
+                                <p class="text-sm text-gray-600">Names have been updated for clarity and consistency.</p>
+                                <div class="mt-2 p-3 bg-white rounded-lg border text-sm">
+                                    <p><span class="text-gray-500">v2:</span> <code class="bg-gray-100 p-1 rounded">postingSequenceNumber</code></p>
+                                    <p><span class="text-green-600 font-semibold">v3:</span> <code class="bg-green-100 p-1 rounded">monetarySequenceNumber</code></p>
+                                </div>
+                                <div class="mt-2 p-3 bg-white rounded-lg border text-sm">
+                                    <p><span class="text-gray-500">v2:</span> <code class="bg-gray-100 p-1 rounded">expenseCategoryCode</code></p>
+                                    <p><span class="text-green-600 font-semibold">v3:</span> <code class="bg-green-100 p-1 rounded">etuStdExpenseCategoryCode</code></p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg text-blue-700">New Mandatory Parameter</h4>
+                                <p class="text-sm text-gray-600">Required for GLB isolation.</p>
+                                <div class="mt-2 p-3 bg-white rounded-lg border text-sm">
+                                    <p><span class="text-green-600 font-semibold">v3:</span> <code class="bg-green-100 p-1 rounded">network-channel-group-code</code></p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Column 2 -->
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-lg text-blue-700">ENUM Value Changes</h4>
+                                <p class="text-sm text-gray-600">Expense categories have been standardized and consolidated.</p>
+                                <div class="mt-2 p-3 bg-white rounded-lg border text-sm">
+                                    <p><span class="text-gray-500">v2:</span> <code class="bg-gray-100 p-1 rounded">FUNE</code> (Fun &amp; Entertainment)</p>
+                                    <p><span class="text-green-600 font-semibold">v3:</span> <code class="bg-green-100 p-1 rounded">ENTT</code> (Entertainment)</p>
+                                </div>
+                                <div class="mt-2 p-3 bg-white rounded-lg border text-sm">
+                                    <p><span class="text-gray-500">v2:</span> <code class="bg-gray-100 p-1 rounded">TRSP</code> (Transportation)</p>
+                                    <p><span class="text-red-600 font-semibold">v3:</span> <span class="italic">Deleted (merged with Travel)</span></p>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg text-blue-700">New Fields &amp; Parameters</h4>
+                                <p class="text-sm text-gray-600">Added to support new features and filtering.</p>
+                                <ul class="list-disc list-inside mt-2 text-sm text-gray-700">
+                                    <li><code class="bg-green-100 p-1 rounded">etuStdTransactionGroupName</code></li>
+                                    <li><code class="bg-green-100 p-1 rounded">totalPendingTransactionCount</code></li>
+                                    <li><code class="bg-green-100 p-1 rounded">feeSequenceNumber</code></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Footer / Action Item -->
+            <footer class="text-center border-t-2 border-blue-100 pt-6 mt-10">
+                <h3 class="text-2xl font-bold text-blue-800">Path Forward</h3>
+                <p class="text-lg text-gray-600 mt-2">The v2 to v3 migration is a low-effort, high-impact initiative. Prioritize this change to mitigate critical stability risks and prepare for the strategic migration to v4, which will further reduce mainframe dependency.</p>
+            </footer>
+
+        </div>
+    </div>
+</body>
+</html>
