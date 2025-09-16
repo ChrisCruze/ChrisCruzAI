@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETD API Infographic: From Raw Data to Rich Experience | ChrisCruz.ai</title>
+    <meta name="description" content="Explore how the ETD API synchronizes out-of-order events, enriches data in real time, and delivers customer-ready transaction experiences.">
+    <meta name="keywords" content="ETD API, transaction enrichment, fintech architecture, data engineering, real-time systems">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="ETD API Infographic: From Raw Data to Rich Experience">
+    <meta property="og:description" content="A visual walkthrough of the ETD API architecture that turns raw financial data into a rich customer experience.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://chriscruz.ai/blogs/etd-api-infographic-from-raw-data-to-rich-experience.html">
+    <meta property="og:image" content="https://chriscruz.ai/images/etd-api-architecture.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ETD API Infographic: From Raw Data to Rich Experience">
+    <meta name="twitter:description" content="Inside the real-time data pipeline powering enriched debit card transactions.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+        .flow-arrow {
+            color: #ee9b00;
+        }
+        .sticky-header {
+            position: sticky;
+            top: 0;
+            z-index: 40;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+
+    <header class="sticky-header bg-white/80 backdrop-blur border-b border-gray-200">
+        <div class="container mx-auto px-4 md:px-8 py-4 flex items-center justify-between">
+            <a href="../brand-hub.html" class="text-lg font-bold tracking-tight text-[#005f73]">ChrisCruz<span class="text-[#0a9396]">.ai</span></a>
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-semibold text-gray-600">
+                <a href="../brand-hub.html" class="hover:text-[#0a9396] transition">Empire</a>
+                <a href="../manifesto.html" class="hover:text-[#0a9396] transition">Manifesto</a>
+                <a href="../projects" class="hover:text-[#0a9396] transition">Projects</a>
+                <a href="../contact.html" class="hover:text-[#0a9396] transition">Contact</a>
+            </nav>
+            <a href="index.html" class="text-xs font-semibold py-1 px-3 rounded-full bg-[#005f73]/10 text-[#005f73] border border-[#005f73]/30">Blog Index</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 md:px-8 py-10 md:py-16">
+        <header class="text-center mb-12">
+            <p class="uppercase tracking-[0.3em] text-xs text-[#ca6702] mb-4">Fintech Architecture • March 2025 • 7 min read</p>
+            <h1 class="text-4xl md:text-6xl font-black text-[#005f73] mb-3">The ETD API</h1>
+            <h2 class="text-2xl md:text-3xl font-bold text-[#0a9396]">From Raw Data to Rich Experience</h2>
+            <p class="max-w-3xl mx-auto mt-4 text-lg text-gray-600">A showcase of engineering excellence in real-time transaction processing.</p>
+        </header>
+
+        <div class="space-y-12">
+            <section id="challenge" class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-3xl font-bold text-[#bb3e03] text-center mb-6">The Challenge: When Events Don't Arrive Together</h3>
+                <p class="text-center text-gray-700 max-w-4xl mx-auto mb-8">In high-scale financial systems, transaction data arrives from different sources at different times. This timing mismatch is a critical architectural reality that must be solved to avoid delays or showing customers incomplete information.</p>
+                <div class="flex flex-col md:flex-row justify-center items-center space-y-8 md:space-y-0 md:space-x-8">
+                    <div class="text-center p-6 bg-[#005f73] text-white rounded-lg shadow-md w-64">
+                        <p class="text-5xl font-bold">FAP Event</p>
+                        <p class="text-xl mt-2">Arrives Instantly</p>
+                        <p class="font-mono text-2xl text-[#94d2bd]">&lt; 1 second</p>
+                    </div>
+                    <div class="text-4xl font-bold text-[#ca6702] hidden md:block">+</div>
+                    <div class="text-center p-6 bg-[#0a9396] text-white rounded-lg shadow-md w-64">
+                        <p class="text-5xl font-bold">CDP Event</p>
+                        <p class="text-xl mt-2">Arrives Later</p>
+                        <p class="font-mono text-2xl text-[#e9d8a6]">100-400ms</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="solution" class="space-y-8">
+                <h3 class="text-3xl font-bold text-[#005f73] text-center">Our Solution: A Three-Pillar Architecture</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+                        <h4 class="text-2xl font-bold text-[#0a9396] mb-4">Pillar 1: Intelligent Data Ingestion</h4>
+                        <p class="text-gray-600 mb-4 flex-grow">Orchestrates and correlates out-of-sync events from FAP and CDP streams using a smart temporal buffer.</p>
+                        <div class="text-center mt-auto">
+                            <p class="text-6xl font-black text-[#005f73]">99%</p>
+                            <p class="text-lg font-semibold text-gray-700">Event Join Rate</p>
+                            <div class="w-full bg-gray-200 rounded-full h-2.5 mt-2">
+                                <div class="bg-gradient-to-r from-[#0a9396] to-[#94d2bd] h-2.5 rounded-full" style="width: 99%"></div>
+                            </div>
+                            <p class="text-sm text-gray-500 mt-1">Exceeding 98% target</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+                        <h4 class="text-2xl font-bold text-[#0a9396] mb-4">Pillar 2: Composite Key Innovation</h4>
+                        <p class="text-gray-600 mb-4 flex-grow">Creates a unique 8-field "fingerprint" for every transaction, allowing for precise matching even in complex scenarios.</p>
+                        <div class="bg-gray-800 text-white p-3 rounded-md font-mono text-xs text-center break-all mb-4">
+                            [Bank]|[Account]|[Amount]|[Date]|[Ref]...
+                        </div>
+                        <div class="text-center mt-auto">
+                            <p class="text-6xl font-black text-[#005f73]">98.2%</p>
+                            <p class="text-lg font-semibold text-gray-700">Matching Accuracy</p>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-lg p-6 flex flex-col">
+                        <h4 class="text-2xl font-bold text-[#0a9396] mb-4">Pillar 3: Real-Time Enrichment</h4>
+                        <p class="text-gray-600 mb-4 flex-grow">Transforms raw, cryptic transaction data into a clear, customer-friendly story with merchant names, logos, categories, and locations.</p>
+                        <div class="text-center mt-auto">
+                            <p class="text-lg font-semibold text-gray-500">Before: <span class="font-mono bg-gray-200 p-1 rounded">SQ *COFFEE SHOP</span></p>
+                            <p class="text-xl font-bold text-[#005f73] mt-2">After: <span class="bg-green-100 p-1 rounded">☕ Starbucks #1234</span></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="how-it-works" class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-3xl font-bold text-[#005f73] text-center mb-6">How It Works: Intelligent Correlation Flow</h3>
+                <p class="text-center text-gray-700 max-w-4xl mx-auto mb-8">Our system uses a sophisticated state machine to manage the temporal complexity. A smart, optimized correlation window ensures data is joined efficiently without compromising user experience.</p>
+                <div class="flex flex-col md:flex-row items-center justify-between text-center space-y-4 md:space-y-0 md:space-x-2">
+                    <div class="p-3 bg-gray-100 rounded-lg flex-1 w-full md:w-auto">
+                        <p class="text-lg font-semibold">Receive Event</p>
+                    </div>
+                    <div class="text-3xl flow-arrow font-bold transform md:rotate-0 rotate-90">&rarr;</div>
+                    <div class="p-3 bg-gray-100 rounded-lg flex-1 w-full md:w-auto">
+                        <p class="text-lg font-semibold">Generate Key</p>
+                    </div>
+                    <div class="text-3xl flow-arrow font-bold transform md:rotate-0 rotate-90">&rarr;</div>
+                    <div class="p-3 bg-gray-100 rounded-lg flex-1 w-full md:w-auto">
+                        <p class="text-lg font-semibold">Smart Wait</p>
+                    </div>
+                    <div class="text-3xl flow-arrow font-bold transform md:rotate-0 rotate-90">&rarr;</div>
+                    <div class="p-3 bg-gray-100 rounded-lg flex-1 w-full md:w-auto">
+                        <p class="text-lg font-semibold">Join Data</p>
+                    </div>
+                    <div class="text-3xl flow-arrow font-bold transform md:rotate-0 rotate-90">&rarr;</div>
+                    <div class="p-3 bg-gray-100 rounded-lg flex-1 w-full md:w-auto">
+                        <p class="text-lg font-semibold">Enrich</p>
+                    </div>
+                    <div class="text-3xl flow-arrow font-bold transform md:rotate-0 rotate-90">&rarr;</div>
+                    <div class="p-3 bg-[#005f73] text-white rounded-lg flex-1 w-full md:w-auto">
+                        <p class="text-lg font-semibold">Serve via API</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="impact" class="space-y-8">
+                <h3 class="text-3xl font-bold text-[#005f73] text-center">The Impact: By The Numbers</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h4 class="text-2xl font-bold text-[#0a9396] mb-4">Performance Excellence</h4>
+                        <div class="space-y-4">
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <p class="text-5xl font-black text-[#005f73]">&lt;100ms</p>
+                                <p class="text-lg font-semibold text-gray-700">API Response Time</p>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <p class="text-5xl font-black text-[#005f73]">40M+</p>
+                                <p class="text-lg font-semibold text-gray-700">Daily Transaction Capability</p>
+                            </div>
+                            <div class="p-4 bg-gray-50 rounded-lg">
+                                <div class="chart-container h-64">
+                                    <canvas id="joinSuccessChart"></canvas>
+                                </div>
+                                <p class="text-center font-semibold text-gray-700 mt-2">Join Success Rate vs. Target</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h4 class="text-2xl font-bold text-[#0a9396] mb-4">Operational Efficiency</h4>
+                        <div class="space-y-4">
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <p class="text-5xl font-black text-[#005f73]">$50M+</p>
+                                <p class="text-lg font-semibold text-gray-700">Annual Savings</p>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <p class="text-5xl font-black text-[#005f73]">50%</p>
+                                <p class="text-lg font-semibold text-gray-700">Mainframe Traffic Reduction</p>
+                            </div>
+                            <div class="text-center p-4 bg-gray-50 rounded-lg">
+                                <p class="text-5xl font-black text-[#005f73]">150K+</p>
+                                <p class="text-lg font-semibold text-gray-700">Fewer Calls Monthly</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-lg p-6">
+                        <h4 class="text-2xl font-bold text-[#0a9396] mb-4">Customer Experience</h4>
+                        <ul class="space-y-4">
+                            <li class="flex items-start p-4 bg-gray-50 rounded-lg">
+                                <span class="text-3xl mr-4">📜</span>
+                                <div>
+                                    <h5 class="font-bold text-lg">Rich Details</h5>
+                                    <p class="text-gray-600">Clear merchant name, logo, category, and location for every transaction.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start p-4 bg-gray-50 rounded-lg">
+                                <span class="text-3xl mr-4">⚡</span>
+                                <div>
+                                    <h5 class="font-bold text-lg">Real-Time Availability</h5>
+                                    <p class="text-gray-600">Sub-second enrichment for the vast majority of customer transactions.</p>
+                                </div>
+                            </li>
+                            <li class="flex items-start p-4 bg-gray-50 rounded-lg">
+                                <span class="text-3xl mr-4">📱</span>
+                                <div>
+                                    <h5 class="font-bold text-lg">Better Mobile UX</h5>
+                                    <p class="text-gray-600">An enhanced, intuitive, and trustworthy transaction history.</p>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="teams" class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-3xl font-bold text-[#005f73] text-center mb-6">The Teams Behind the Magic</h3>
+                <p class="text-center text-gray-700 max-w-4xl mx-auto mb-8">This breakthrough was made possible by the seamless collaboration of three expert engineering teams, each mastering a critical layer of the architecture.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div class="p-6 bg-gray-50 rounded-lg">
+                        <p class="text-5xl mb-2">⚙️</p>
+                        <h4 class="text-2xl font-bold text-[#0a9396]">BLR Team</h4>
+                        <p class="text-lg font-semibold text-gray-600">The Data Orchestrators</p>
+                    </div>
+                    <div class="p-6 bg-gray-50 rounded-lg">
+                        <p class="text-5xl mb-2">💎</p>
+                        <h4 class="text-2xl font-bold text-[#0a9396]">COL Team</h4>
+                        <p class="text-lg font-semibold text-gray-600">The Enrichment Innovators</p>
+                    </div>
+                    <div class="p-6 bg-gray-50 rounded-lg">
+                        <p class="text-5xl mb-2">🏗️</p>
+                        <h4 class="text-2xl font-bold text-[#0a9396]">DEL Team</h4>
+                        <p class="text-lg font-semibold text-gray-600">The API Architects</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="sources" class="bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-2xl font-bold text-[#005f73] mb-4">Sources &amp; Further Reading</h3>
+                <p class="text-gray-600 mb-4">Dive deeper into the raw research, architecture notes, and collaborative brainstorming that informed this case study.</p>
+                <ul class="list-disc list-inside space-y-2 text-[#0a9396]">
+                    <li><a href="https://gemini.google.com/app/8e4094da7632337e" class="hover:underline" target="_blank" rel="noopener noreferrer">Gemini Design Narrative</a></li>
+                    <li><a href="https://docs.google.com/document/d/1WOd_3PW5Nfg0R01dTPkH4KRVppHSfycCEG749ASswjo/edit?tab=t.x4oyal1t080l" class="hover:underline" target="_blank" rel="noopener noreferrer">Event Timing Analysis Notes</a></li>
+                    <li><a href="https://notebooklm.google.com/notebook/28455809-0075-4d2c-9fb9-8bb450044e16" class="hover:underline" target="_blank" rel="noopener noreferrer">NotebookLM Architecture Companion</a></li>
+                </ul>
+            </section>
+        </div>
+
+        <footer class="text-center mt-16">
+            <h4 class="text-2xl font-bold text-[#005f73]">A Masterclass in Modern Financial Technology</h4>
+            <p class="text-gray-600 max-w-3xl mx-auto mt-2">The ETD API solves a fundamental challenge in distributed systems to deliver measurable business value and a vastly improved customer experience.</p>
+            <div class="mt-6">
+                <a href="index.html" class="text-[#0a9396] font-semibold hover:underline">← Back to Blog Index</a>
+            </div>
+        </footer>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const tooltipTitleCallback = function(tooltipItems) {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                } else {
+                    return label;
+                }
+            };
+
+            const joinSuccessCtx = document.getElementById('joinSuccessChart');
+            if(joinSuccessCtx) {
+                new Chart(joinSuccessCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Target Rate', 'Actual Success Rate'],
+                        datasets: [{
+                            label: 'Success Rate',
+                            data: [98, 99],
+                            backgroundColor: [
+                                '#94d2bd',
+                                '#0a9396'
+                            ],
+                            borderColor: [
+                                '#0a9396',
+                                '#005f73'
+                            ],
+                            borderWidth: 2
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: tooltipTitleCallback
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
