@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>End-to-End and API Testing for ETD - Chris Cruz</title>
+    <meta name="description" content="Comprehensive API and end-to-end testing strategy for the Enhanced Transaction Details (ETD) platform, covering validation, integration, performance, and compliance."/>
+    <meta name="keywords" content="ETD testing, API testing, end-to-end testing, banking QA, performance testing, merchant enrichment"/>
+    <meta name="author" content="Chris Cruz"/>
+    <meta property="og:title" content="End-to-End and API Testing for ETD"/>
+    <meta property="og:description" content="See how layered API validation, transaction enrichment checks, and mobile UX testing come together to ship a resilient ETD platform."/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:url" content="https://chriscruz.ai/blogs/end-to-end-and-api-testing-for-etd.html"/>
+    <meta property="og:image" content="https://chriscruz.ai/images/etd-testing-preview.jpg"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="End-to-End and API Testing for ETD"/>
+    <meta name="twitter:description" content="Layered QA strategy for Enhanced Transaction Details across APIs, integration, performance, and security."/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0b1221;
+            color: #e9edf5;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #60a5fa, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 1.25rem;
+        }
+        .card-gradient {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.25), rgba(109, 40, 217, 0.2));
+        }
+        .pill {
+            background: rgba(59, 130, 246, 0.18);
+            border: 1px solid rgba(96, 165, 250, 0.35);
+            border-radius: 9999px;
+        }
+        .grid-line {
+            position: relative;
+        }
+        .grid-line::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border: 1px dashed rgba(148, 163, 184, 0.25);
+            border-radius: 1.25rem;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-slate-950">
+    <div class="max-w-6xl mx-auto px-5 sm:px-10 py-10 sm:py-16">
+        <nav class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-12 text-sm font-semibold text-slate-300">
+            <a href="../index.html" class="inline-flex items-center gap-1 text-sky-300 hover:text-sky-200 transition-colors">
+                <span aria-hidden="true">←</span>
+                <span>Back to Home</span>
+            </a>
+            <a href="index.html" class="inline-flex items-center gap-1 text-slate-300 hover:text-slate-100 transition-colors">
+                <span>Browse All Articles</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        </nav>
+
+        <header class="text-center mb-16">
+            <p class="uppercase tracking-[0.35em] text-xs text-sky-300 mb-4">ETD Delivery Playbook</p>
+            <h1 class="text-4xl md:text-6xl font-black mb-4">
+                <span class="gradient-text">End-to-End &amp; API Testing</span>
+                <span class="block text-slate-100">for Enhanced Transaction Details</span>
+            </h1>
+            <p class="text-base md:text-lg text-slate-300 max-w-3xl mx-auto">
+                How we validate every layer of the Enhanced Transaction Details (ETD) platform — from request validation and merchant enrichment to mobile UX and compliance — to deliver a three-second, fully enriched customer experience.
+            </p>
+            <div class="mt-10 flex flex-wrap items-center justify-center gap-4 text-sm text-slate-300">
+                <span class="pill py-1.5 px-4">API-first Automation</span>
+                <span class="pill py-1.5 px-4">3s End-to-End SLA</span>
+                <span class="pill py-1.5 px-4">98.6% Composite Key Match</span>
+                <span class="pill py-1.5 px-4">PCI, SOX, GDPR Ready</span>
+            </div>
+        </header>
+
+        <section class="mb-20">
+            <div class="card p-8 md:p-10">
+                <h2 class="text-3xl font-bold text-slate-100 mb-6">API Testing Framework</h2>
+                <p class="text-slate-300 mb-8 text-lg">We lead with an API-first testing pyramid to catch defects before they ever reach the mobile experience. The focus: fast, stable feedback loops that validate business logic directly at the service layer.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="card card-gradient p-6 flex flex-col gap-4">
+                        <h3 class="text-xl font-semibold text-slate-100">Core Principles</h3>
+                        <ul class="space-y-3 text-slate-200 text-sm">
+                            <li class="flex gap-2"><span class="text-sky-300">⚡</span><span>Faster execution by bypassing brittle UI layers.</span></li>
+                            <li class="flex gap-2"><span class="text-sky-300">🧭</span><span>Reduced flakiness from cosmetic frontend changes.</span></li>
+                            <li class="flex gap-2"><span class="text-sky-300">🔍</span><span>Direct validation of core enrichment business rules.</span></li>
+                            <li class="flex gap-2"><span class="text-sky-300">🤖</span><span>CI/CD-ready automation at scale.</span></li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 flex flex-col gap-4">
+                        <h3 class="text-xl font-semibold text-slate-100">Parameter Validation</h3>
+                        <ul class="space-y-3 text-slate-300 text-sm">
+                            <li>Required controls: auth, channel, identifier, trace ID, transaction ID.</li>
+                            <li>New contract parameters: data segments &amp; unique Request IDs.</li>
+                            <li>Optional parameter coverage and graceful degradation paths.</li>
+                            <li>Malformed, invalid, and missing parameter edge cases.</li>
+                        </ul>
+                    </div>
+                    <div class="card p-6 flex flex-col gap-4">
+                        <h3 class="text-xl font-semibold text-slate-100">Transaction Types</h3>
+                        <ul class="space-y-3 text-slate-300 text-sm">
+                            <li>Pending POS enrichment with near-real-time merchant context.</li>
+                            <li>Posted POS validation for logos, addresses, and history.</li>
+                            <li>Non-POS safeguards to prevent over-enrichment.</li>
+                            <li>Debit-only checks to keep ACH and other flows untouched.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold text-slate-100 mb-4">Merchant Enrichment</h3>
+                        <ul class="space-y-3 text-slate-300 text-sm">
+                            <li>Single vs. multi-merchant payloads (up to four per transaction).</li>
+                            <li>Suppression logic keyed off merchant role codes.</li>
+                            <li>Null and missing data scenarios for resilience.</li>
+                            <li>Logo URL, address, and geo accuracy validation.</li>
+                        </ul>
+                    </div>
+                    <div class="card p-6">
+                        <h3 class="text-xl font-semibold text-slate-100 mb-4">Bucket Management</h3>
+                        <ul class="space-y-3 text-slate-300 text-sm">
+                            <li>Default bucket behavior with Bucket 1 fallbacks.</li>
+                            <li>Multi-bucket distribution across Buckets 2–4.</li>
+                            <li>Aggregator lookups when bucket IDs are omitted.</li>
+                            <li>Query path validation for upstream bucket assignments.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+            <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+                <div class="card p-8">
+                    <h2 class="text-3xl font-bold text-slate-100 mb-6">End-to-End Testing Strategy</h2>
+                    <p class="text-slate-300 mb-6">The critical flow we defend: card swipe to mobile display in under three seconds, with every enrichment element in sync across ETD, CDP, FCDP, and Cassandra.</p>
+                    <ol class="list-decimal list-inside space-y-3 text-slate-200 text-sm leading-relaxed">
+                        <li>Transaction initiation at merchant POS (e.g., Starbucks).</li>
+                        <li>Real-time authorization across payment networks.</li>
+                        <li>CDP processing for logging &amp; traceability.</li>
+                        <li>FCDP settlement with composite key generation.</li>
+                        <li>Data ingestion into ETD from FAP/CDP pipelines.</li>
+                        <li>Merchant enrichment lookups for logos and metadata.</li>
+                        <li>ETD API response validation for enriched payloads.</li>
+                        <li>Mobile app rendering with enriched transaction tiles.</li>
+                        <li>User interactions drilling into ETD detail views.</li>
+                    </ol>
+                    <div class="mt-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center text-sm">
+                        <div class="card-gradient rounded-2xl py-5 px-4">
+                            <div class="text-3xl font-black text-sky-300">&lt;3s</div>
+                            <div class="text-slate-300">End-to-end SLA</div>
+                        </div>
+                        <div class="card-gradient rounded-2xl py-5 px-4">
+                            <div class="text-3xl font-black text-sky-300">&lt;100ms</div>
+                            <div class="text-slate-300">API response</div>
+                        </div>
+                        <div class="card-gradient rounded-2xl py-5 px-4">
+                            <div class="text-3xl font-black text-sky-300">100%</div>
+                            <div class="text-slate-300">Data accuracy</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-8 grid-line">
+                    <h3 class="text-2xl font-semibold text-slate-100 mb-5">Cross-System Integration</h3>
+                    <ul class="space-y-4 text-slate-300 text-sm">
+                        <li><span class="text-sky-300 font-semibold">CDP ↔ FCDP:</span> Composite key matching at 98.6% and climbing.</li>
+                        <li><span class="text-sky-300 font-semibold">Cassandra ↔ ETD API:</span> Partition tuning for sub-100ms lookups.</li>
+                        <li><span class="text-sky-300 font-semibold">Merchant Enrichment ↔ Logo Service:</span> Consistent imagery &amp; metadata.</li>
+                        <li><span class="text-sky-300 font-semibold">Real-time ↔ Batch:</span> 92% reconciliation with automated variance reporting.</li>
+                    </ul>
+                    <div class="mt-8 p-6 rounded-2xl bg-white/5 border border-slate-700">
+                        <h4 class="text-lg font-semibold text-slate-100 mb-3">Data Consistency Checks</h4>
+                        <ul class="space-y-2 text-slate-300 text-sm">
+                            <li>Transaction parity across ETD, CDP, FCDP, and mobile.</li>
+                            <li>End-to-end timestamp precision and timezone alignment.</li>
+                            <li>Currency, amount, and FX rounding accuracy.</li>
+                            <li>Merchant data stability during system handoffs.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+            <div class="card p-8 md:p-10">
+                <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-10">
+                    <div class="lg:w-1/2">
+                        <h2 class="text-3xl font-bold text-slate-100 mb-4">Mobile App End-to-End Testing</h2>
+                        <p class="text-slate-300 text-base leading-relaxed">Every enriched transaction culminates in a user session. Our mobile QA ensures the ETD experience reinforces trust and clarity, whether on consumer or business cards.</p>
+                        <ul class="space-y-3 text-slate-300 text-sm mt-6">
+                            <li>Full ETD screen validation inside iOS &amp; Android builds.</li>
+                            <li>Click-through journeys from pending POS tiles to detail views.</li>
+                            <li>POS-only gating to avoid non-enriched click targets.</li>
+                            <li>Responsive logo rendering and high-DPI checks.</li>
+                            <li>Coverage across Sapphire, Freedom, and business portfolios.</li>
+                            <li>Device matrix for screen sizes and performance tiers.</li>
+                        </ul>
+                    </div>
+                    <div class="lg:w-1/2">
+                        <div class="card-gradient rounded-3xl p-8">
+                            <h3 class="text-2xl font-semibold text-slate-100 mb-4">User Journey Anchors</h3>
+                            <ol class="list-decimal list-inside space-y-3 text-slate-200 text-sm">
+                                <li>Transaction history feed surfaces enriched POS tiles.</li>
+                                <li>User taps to launch ETD details with merchant branding.</li>
+                                <li>Async enrichment gracefully refreshes without jank.</li>
+                                <li>Accessibility checks for contrast, VO, and tap targets.</li>
+                            </ol>
+                            <p class="mt-6 text-slate-300 text-sm">Mobile QA closes the feedback loop on upstream enrichment accuracy while measuring the perceived latency target: three seconds from swipe to screen.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+            <div class="grid gap-8 lg:grid-cols-2">
+                <div class="card p-8">
+                    <h2 class="text-3xl font-bold text-slate-100 mb-6">Error Handling &amp; Edge Cases</h2>
+                    <ul class="space-y-3 text-slate-300 text-sm">
+                        <li>Server-side 500 remediation during bucket lookup regressions.</li>
+                        <li>400-level contract policing for invalid parameter mixes.</li>
+                        <li>401 coverage for auth break-glass drills.</li>
+                        <li>404 fallbacks when transactions are missing or delayed.</li>
+                        <li>Timeout handling, retries, and circuit breaker validation.</li>
+                        <li>Missing transaction data and null merchant responses.</li>
+                        <li>Composite key uniqueness checks for weekend processing spikes.</li>
+                        <li>High-volume tests with &gt;5 merchants in payload.</li>
+                        <li>Async refresh verification where first call returns raw, second call returns enriched details.</li>
+                    </ul>
+                </div>
+                <div class="card p-8">
+                    <h2 class="text-3xl font-bold text-slate-100 mb-6">Performance &amp; Load Testing</h2>
+                    <ul class="space-y-3 text-slate-300 text-sm">
+                        <li>Peak traffic modeling at 15k transactions per minute.</li>
+                        <li>Stress envelopes at 150% load with graceful degradation.</li>
+                        <li>Two-hour burst testing for sustained throughput confidence.</li>
+                        <li>Recovery validation to baseline in under 30 seconds.</li>
+                        <li>Cassandra partition tuning for predictable read latency.</li>
+                        <li>&lt;100ms API response targets under realistic load.</li>
+                        <li>System-level SLA: &lt;3 seconds swipe-to-screen.</li>
+                        <li>Uptime objective: 99.99% availability.</li>
+                        <li>5% failure injection to harden resiliency playbooks.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-20">
+            <div class="card p-8">
+                <div class="grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
+                    <div>
+                        <h2 class="text-3xl font-bold text-slate-100 mb-6">Security &amp; Compliance</h2>
+                        <ul class="space-y-3 text-slate-300 text-sm">
+                            <li>Multi-factor authentication validation and secure session lifecycle.</li>
+                            <li>Data masking policies for PII across user roles.</li>
+                            <li>Strict HTTPS enforcement and certificate rotation drills.</li>
+                            <li>PCI DSS adherence for payment data protections.</li>
+                            <li>SOX-aligned access controls, change management, and audit trails.</li>
+                            <li>GDPR compliance for consent, minimization, and retention.</li>
+                            <li>OWASP API Security Top 10 coverage during pen testing.</li>
+                        </ul>
+                    </div>
+                    <div class="card-gradient rounded-3xl p-8">
+                        <h3 class="text-2xl font-semibold text-slate-100 mb-4">Compliance Posture</h3>
+                        <div class="space-y-4 text-slate-200 text-sm">
+                            <p>Security validation runs in lockstep with functional testing to ensure every release candidate meets regulatory expectations before promotion.</p>
+                            <p>We combine automated scanning with manual review to maintain zero critical vulnerabilities and high confidence in data stewardship.</p>
+                            <p>Testing environments mirror production, enabling realistic rehearsal for a 5–7 million user footprint.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <div class="card p-8 md:p-10">
+                <h2 class="text-3xl font-bold text-slate-100 mb-6">Testing Timeline &amp; Quality Gates</h2>
+                <div class="grid gap-8 lg:grid-cols-2">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-slate-100 mb-4">Key Windows</h3>
+                        <ul class="space-y-3 text-slate-300 text-sm">
+                            <li><span class="font-semibold text-sky-300">Internal Testing:</span> Jun 2 – Aug 19, 2025 (ETU/DEL2).</li>
+                            <li><span class="font-semibold text-sky-300">Performance Cycle:</span> Jul 15 – Aug 19, 2025.</li>
+                            <li><span class="font-semibold text-sky-300">QA Validation:</span> Aug 19 – Oct 14, 2025 (Digital Channels).</li>
+                            <li><span class="font-semibold text-sky-300">Friends &amp; Family:</span> Launch targeting Sep 23, 2025.</li>
+                            <li><span class="font-semibold text-sky-300">Mobile Release:</span> Aiming for October 2025 inclusion.</li>
+                        </ul>
+                        <div class="mt-6 p-6 rounded-2xl bg-white/5 border border-slate-800 text-sm text-slate-200">
+                            <p class="font-semibold text-sky-300 mb-2">Non-Negotiable Milestones</p>
+                            <p>Aug 19: QA must begin with conditioned data and UI builds ready. Sep 17: Data conditioning complete with QA UI deployment.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-slate-100 mb-4">Go / No-Go Criteria</h3>
+                        <ul class="space-y-3 text-slate-300 text-sm">
+                            <li>Composite key matching ≥ 98.2% (currently 98.6%).</li>
+                            <li>Transaction reconciliation ≥ 92% achieved across systems.</li>
+                            <li>API response times consistently &lt;100ms.</li>
+                            <li>End-to-end SLA of &lt;3 seconds maintained.</li>
+                            <li>Zero critical or blocking defects ahead of launch.</li>
+                        </ul>
+                        <p class="mt-6 text-slate-300 text-sm">By enforcing production-like data sets and replaying real transaction journeys, ETD earns customer trust long before GA launch.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-xs text-slate-500">
+            <p>© 2025 Chris Cruz. Built for the ETD delivery squad.</p>
+        </footer>
+    </div>
+</body>
+</html>
