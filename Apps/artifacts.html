@@ -187,6 +187,40 @@ const copyToClipboard = (text, showToast) => {
     document.body.removeChild(textArea);
 };
 
+const ARTIFACT_QUERY_PARAM = 'artifact';
+
+const getArtifactIdFromUrl = () => {
+    if (typeof window === 'undefined' || !window.location) return null;
+    try {
+        const url = new URL(window.location.href);
+        return url.searchParams.get(ARTIFACT_QUERY_PARAM);
+    } catch (error) {
+        console.error('Unable to parse artifact id from URL:', error);
+        return null;
+    }
+};
+
+const updateArtifactUrlParam = (artifactId, { replace = false } = {}) => {
+    if (typeof window === 'undefined' || !window.history || !window.location) return;
+    try {
+        const normalizedId = artifactId ? String(artifactId) : null;
+        const currentId = getArtifactIdFromUrl();
+        if (currentId === normalizedId) return;
+
+        const url = new URL(window.location.href);
+        if (normalizedId) {
+            url.searchParams.set(ARTIFACT_QUERY_PARAM, normalizedId);
+        } else {
+            url.searchParams.delete(ARTIFACT_QUERY_PARAM);
+        }
+        const newUrl = `${url.pathname}${url.search}${url.hash}`;
+        const method = replace ? 'replaceState' : 'pushState';
+        window.history[method]({ artifactId: normalizedId }, '', newUrl);
+    } catch (error) {
+        console.error('Failed to update artifact URL parameter:', error);
+    }
+};
+
 // --- UI Components ---
 const Toast = ({ message, visible }) => {
     return React.createElement('div', {
@@ -210,6 +244,14 @@ const App = () => {
     const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [toast, setToast] = useState({ message: '', visible: false });
+    const [pendingArtifactId, setPendingArtifactId] = useState(() => getArtifactIdFromUrl());
+    const [shouldProcessUrl, setShouldProcessUrl] = useState(true);
+
+    const updateUrlForArtifact = useCallback((artifactId, options = {}) => {
+        updateArtifactUrlParam(artifactId, options);
+        setPendingArtifactId(artifactId ? String(artifactId) : null);
+        setShouldProcessUrl(false);
+    }, [setPendingArtifactId, setShouldProcessUrl]);
 
     const showToast = (message) => {
         setToast({ message, visible: true });
@@ -234,6 +276,52 @@ const App = () => {
 
     useEffect(() => { fetchArtifacts(); }, [fetchArtifacts]);
 
+    useEffect(() => {
+        if (!shouldProcessUrl || isLoading) return;
+
+        const artifactIdFromUrl = pendingArtifactId;
+        if (!artifactIdFromUrl) {
+            setSelectedArtifact(null);
+            setActiveView('list');
+            setShouldProcessUrl(false);
+            return;
+        }
+
+        const artifactFromUrl = artifacts.find(a => a.id === artifactIdFromUrl);
+        if (artifactFromUrl) {
+            setSelectedArtifact(artifactFromUrl);
+            setActiveView('view');
+            setShouldProcessUrl(false);
+        } else {
+            setSelectedArtifact(null);
+            setActiveView('list');
+            updateUrlForArtifact(null, { replace: true });
+        }
+    }, [artifacts, pendingArtifactId, shouldProcessUrl, isLoading, updateUrlForArtifact]);
+
+    useEffect(() => {
+        const handlePopState = () => {
+            setPendingArtifactId(getArtifactIdFromUrl());
+            setShouldProcessUrl(true);
+        };
+
+        window.addEventListener('popstate', handlePopState);
+        return () => window.removeEventListener('popstate', handlePopState);
+    }, []);
+
+    useEffect(() => {
+        if (!selectedArtifact || String(selectedArtifact.id).startsWith('temp-')) return;
+
+        const updatedArtifact = artifacts.find(a => a.id === selectedArtifact.id);
+        if (updatedArtifact && updatedArtifact !== selectedArtifact) {
+            setSelectedArtifact(updatedArtifact);
+        } else if (!updatedArtifact && !isLoading) {
+            setSelectedArtifact(null);
+            setActiveView('list');
+            updateUrlForArtifact(null, { replace: true });
+        }
+    }, [artifacts, selectedArtifact, isLoading, updateUrlForArtifact]);
+
     const createArtifact = async (name, content) => {
         setIsSaving(true);
         setError(null);
@@ -248,6 +336,7 @@ const App = () => {
             setArtifacts(prev => [newRecord, ...prev.filter(a => a.id)]); // Remove temp artifact if it exists
             setSelectedArtifact(newRecord);
             setActiveView('view');
+            updateUrlForArtifact(newRecord.id);
         } catch (e) {
             console.error("Failed to create artifact:", e);
             setError(e.message);
@@ -270,6 +359,7 @@ const App = () => {
             setSelectedArtifact(updatedRecord);
             setArtifacts(prev => prev.map(a => a.id === recordId ? updatedRecord : a));
             setActiveView('view');
+            updateUrlForArtifact(recordId, { replace: true });
         } catch (e) {
             console.error("Failed to update artifact:", e);
             setError(e.message);
@@ -354,11 +444,13 @@ const App = () => {
         setEditedName(newArtifact.fields.Name);
         setEditedContent(newArtifact.fields.Content);
         setActiveView('edit');
+        updateUrlForArtifact(null);
     };
 
     const handleSelectArtifact = (artifact) => {
         setSelectedArtifact(artifact);
         setActiveView('view');
+        updateUrlForArtifact(artifact.id);
     };
 
     const handleEdit = () => {
@@ -381,6 +473,7 @@ const App = () => {
             setArtifacts(prev => prev.filter(a => a.id !== selectedArtifact.id));
             const lastArtifact = artifacts.find(a => a.id === lastSelectedId);
             setSelectedArtifact(lastArtifact || null);
+            updateUrlForArtifact(lastArtifact?.id || null);
         }
         setActiveView('view');
     };
@@ -431,7 +524,7 @@ const App = () => {
                 selectedArtifact && React.createElement('div', { className: "p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between" },
                     React.createElement('div', { className: "flex items-center" },
                        !isSidebarOpen && React.createElement('button', { onClick: () => setIsSidebarOpen(true), className: "p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 mr-2", title: "Open Sidebar" }, React.createElement(ChevronsRight, { className: "w-5 h-5" })),
-                       React.createElement('button', { onClick: () => { setSelectedArtifact(null); setActiveView('list'); }, className: "md:hidden p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 mr-2" }, React.createElement(List, { className: "w-5 h-5" }))
+                       React.createElement('button', { onClick: () => { setSelectedArtifact(null); setActiveView('list'); updateUrlForArtifact(null); }, className: "md:hidden p-2 rounded-md hover:bg-gray-200 dark:hover:bg-gray-700 mr-2" }, React.createElement(List, { className: "w-5 h-5" }))
                     ),
                     React.createElement('h2', { className: "text-lg font-semibold truncate flex-grow text-center" }, selectedArtifact.fields.Name)
                 ),
