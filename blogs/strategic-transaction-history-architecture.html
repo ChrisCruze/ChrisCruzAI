@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategic Architectural Decision for Transaction History Services | ChrisCruz.ai</title>
+    <meta name="description" content="Executive blueprint for adopting Option B for cross-product transaction history, covering context, decision logic, implementation guide, and next steps toward a unified CDA experience by Q1 2026.">
+    <meta name="keywords" content="Transaction history, architecture decision, Option B, cross-product API, CDA, AWS ingestion, MQ constraint, fintech strategy">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="Strategic Architectural Decision for Transaction History Services">
+    <meta property="og:description" content="Why Option B is the pragmatic path for transaction history resilience and how the team is executing toward Q1 2026 CDA delivery.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://chriscruz.ai/blogs/strategic-transaction-history-architecture.html">
+    <meta property="og:image" content="https://chriscruz.ai/images/api-strategy-decision.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Strategic Architectural Decision for Transaction History Services">
+    <meta name="twitter:description" content="Option B wins: the architectural playbook for resilient transaction history and CDA readiness.">
+    <meta name="article:published_time" content="2025-09-18T00:00:00Z">
+    <meta name="article:author" content="Christopher Manuel Cruz-Guzman">
+    <meta name="article:section" content="Fintech Architecture">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: dark;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, rgba(15, 118, 255, 0.25), transparent 60%), #050608;
+            color: #f8fafc;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #38bdf8, #0ea5e9, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .blog-surface {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            backdrop-filter: blur(14px);
+        }
+        .highlight-box {
+            background: linear-gradient(120deg, rgba(56, 189, 248, 0.18), rgba(129, 140, 248, 0.22));
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            border-radius: 18px;
+        }
+        .challenge-card {
+            background: rgba(248, 113, 113, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.35);
+            border-radius: 18px;
+        }
+        .framework-box {
+            background: rgba(14, 165, 233, 0.12);
+            border: 1px solid rgba(59, 130, 246, 0.35);
+            border-radius: 18px;
+        }
+        .example-box {
+            background: rgba(236, 72, 153, 0.12);
+            border: 1px solid rgba(244, 114, 182, 0.35);
+            border-radius: 18px;
+        }
+        .reflection-box {
+            background: rgba(45, 212, 191, 0.12);
+            border: 1px solid rgba(34, 197, 94, 0.35);
+            border-radius: 18px;
+        }
+        .atomic-list li {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 12px 0;
+        }
+        .atomic-list li:last-child {
+            border-bottom: none;
+        }
+        a.cross-link {
+            color: #38bdf8;
+            font-weight: 600;
+            text-decoration: none;
+        }
+        a.cross-link:hover {
+            color: #bae6fd;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        .flow-arrow {
+            content: '';
+            position: absolute;
+            width: 2px;
+            background-color: #90E0EF;
+            z-index: 0;
+        }
+        .flow-arrow.down {
+            height: 2rem;
+            left: 50%;
+            bottom: -2rem;
+            transform: translateX(-50%);
+        }
+        .flow-arrow.down::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #90E0EF;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-md border-b border-white/5">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="../brand-hub.html" class="text-xl font-bold tracking-tighter">ChrisCruz<span class="text-sky-300">.ai</span></a>
+            <nav class="hidden md:flex space-x-8 text-sm text-slate-300">
+                <a href="../brand-hub.html" class="hover:text-white transition">Empire</a>
+                <a href="../manifesto.html" class="hover:text-white transition">Manifesto</a>
+                <a href="../projects" class="hover:text-white transition">Projects</a>
+                <a href="../contact.html" class="hover:text-white transition">Contact</a>
+            </nav>
+            <span class="text-xs font-semibold py-1 px-3 rounded-full bg-sky-500/20 text-sky-300 border border-sky-500/30 uppercase tracking-[0.3em]">Blog</span>
+        </div>
+    </header>
+
+    <main class="pt-24">
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-4xl blog-surface rounded-3xl p-10 md:p-14">
+                <div class="flex flex-wrap items-center justify-center gap-3 text-sm text-slate-300 mb-6">
+                    <span class="bg-gradient-to-r from-sky-500 to-indigo-600 text-white text-xs font-semibold py-1 px-3 rounded-full uppercase tracking-[0.3em]">Fintech Architecture</span>
+                    <span>September 18, 2025</span>
+                    <span>•</span>
+                    <span>12 min read</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-center mb-6">
+                    Strategic Architectural Decision:
+                    <span class="gradient-text">Option B as the Resilient Bridge to CDA</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-300 text-center max-w-3xl mx-auto leading-relaxed">
+                    After testing three competing designs for cross-product transaction history, the team uncovered a mainframe MQ connection constraint that collapsed the favored Option C. This field report captures why Option B became the pragmatic path, how it supports a Q1 2026 Cross-DDA-Account (CDA) launch, and what it unlocks for a utilities-only API future.
+                </p>
+                <div class="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="highlight-box p-6">
+                        <h3 class="text-lg font-semibold text-slate-100 mb-2">Executive Sponsor</h3>
+                        <p class="text-slate-200">Jason — Director of Digital Experience Technology</p>
+                    </div>
+                    <div class="highlight-box p-6">
+                        <h3 class="text-lg font-semibold text-slate-100 mb-2">Technical Lead</h3>
+                        <p class="text-slate-200">Varun — Principal Engineer guiding architectural trade-offs</p>
+                    </div>
+                    <div class="highlight-box p-6">
+                        <h3 class="text-lg font-semibold text-slate-100 mb-2">Product Owner</h3>
+                        <p class="text-slate-200">Sidd — ETU Product Manager orchestrating CDA readiness</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="px-6 pb-16">
+            <div class="container mx-auto max-w-4xl space-y-8">
+                <div class="highlight-box p-8">
+                    <h2 class="text-2xl font-bold mb-4">Executive Summary</h2>
+                    <p class="text-slate-100 leading-relaxed mb-4">
+                        Option B — directing Digital Channels and Search to orchestrate both the DDA Transaction History API for list views and the Cross-Product API for search — is now the interim architecture. Option C, the intelligent router that originally won support, failed due to mainframe MQ connection limits that would have required ~40 new persistent connections. The team is mobilizing consumer alignment, AWS ingestion acceleration, and legacy API decommissioning to launch CDA search and transaction list experiences by Q1 2026 while preserving the long-term vision of a unified, utilities-only API hosted on AWS.
+                    </p>
+                    <p class="text-slate-300 text-sm">
+                        Cross-link to deeper systems thinking: <a href="../blogs/system-thinking-empire-building.html" class="cross-link">System Thinking: The Foundation of Every Great Empire</a>.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="highlight-box p-6">
+                        <h3 class="text-xl font-semibold mb-3">Key Insights</h3>
+                        <ul class="space-y-3 text-slate-100">
+                            <li>Option C (router + shared library) collapsed under the weight of mainframe MQ capacity limits, not performance latency.</li>
+                            <li>Option B keeps Q1 2026 CDA viability alive while nudging consumers toward the future cross-product API.</li>
+                            <li>AWS ingestion acceleration — compressing batch windows from ~2 hours to 10–15 minutes — is the mitigation lever for data consistency risk.</li>
+                            <li>Consumer teams must shoulder dual-service orchestration as planned technical debt, balanced by a clear decommissioning roadmap.</li>
+                        </ul>
+                    </div>
+                    <div class="challenge-card p-6">
+                        <h3 class="text-xl font-semibold mb-3">Constraints We Cannot Ignore</h3>
+                        <ul class="space-y-3 text-slate-100">
+                            <li>Mainframe MQ infrastructure is at capacity; no new direct connections will be approved.</li>
+                            <li>Batch-mode inconsistencies create a 2-hour window where list and search views disagree on posted vs. pending status.</li>
+                            <li>Performance SLAs demand <100ms list responses and <150ms search responses even when traffic doubles with CDA.</li>
+                            <li>Consumer bandwidth is the critical path; without Digital Channels and Search commitments, timelines slip immediately.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="framework-box p-8 space-y-6">
+                    <h2 class="text-2xl font-bold">Detailed Breakdown</h2>
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-slate-100">1. Strategic Context</h3>
+                        <p class="text-slate-200 leading-relaxed">
+                            CDA functionality is a top-tier commitment: by Q1 2026, customers must search and review transactions across DDA accounts in a unified experience. The urgency is powered by three drivers — customer experience parity, digital transformation mandates, and an explicit push to retire technical debt. Fragmented APIs (DDA v1–v4, Cross-Product for search) and unexpected list view usage by the Score Card team exposed resilience gaps, especially during SOR failovers. Legacy constraints now intersect with the digital transformation goal of building a cloud-native, API-first banking platform.
+                        </p>
+                        <p class="text-slate-300 text-sm">
+                            Related playbook: <a href="../blogs/dda-going-primary-dashboard-strategy.html" class="cross-link">DDA Going Primary Dashboard Strategy</a> for monitoring the readiness runway.
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-slate-100">2. Option Review</h3>
+                        <ul class="space-y-4 text-slate-100">
+                            <li><strong>Option A:</strong> Embed SOR failover directly into Cross-Product. <em>Status:</em> Dismissed as infeasible within Q1 2026 scope due to complexity and risk of bloating the target-state API.</li>
+                            <li><strong>Option B:</strong> Consumers call DDA Transaction History v4 for list views and Cross-Product for search. <em>Status:</em> Selected. Medium complexity, leverages existing SOR integration, protects delivery timeline, and keeps consumer-side ownership explicit.</li>
+                            <li><strong>Option C:</strong> Intelligent routing inside Cross-Product. <em>Status:</em> Invalidated. Network-hop latency (30–50ms) raised concerns; the refined shared-library variant — scoped only to batch processing and resiliency failovers — collapsed because it would force ~40 new persistent MQ connections on infrastructure that is already at capacity and not slated for further investment.</li>
+                        </ul>
+                        <p class="text-slate-300 text-sm">
+                            Architecture history fans can cross-reference <a href="../blogs/dda-api-migration-v2-to-v3.html" class="cross-link">DDA API Migration: V2 to V3</a> to see how incremental modernization succeeds.
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-slate-100">3. Post-Meeting Discovery</h3>
+                        <p class="text-slate-200 leading-relaxed">
+                            Hours after the technical review, the mainframe team confirmed that no additional MQ connections would be provisioned. Because each of the ~40 Cross-Product instances would need its own persistent MQ link when embedding the DDA library, the elegant Option C became untenable. The path snapped back to Option B, and the focus shifted to consumer enablement and resilience testing.
+                        </p>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="text-lg font-semibold text-slate-100">4. Customer Impact Window</h3>
+                        <p class="text-slate-200 leading-relaxed">
+                            During batch windows (currently ~2 hours), DDA list views read from the SOR and display posted statuses, while Cross-Product search relies on Cassandra/ODS and can show those same transactions as pending. Around 10% of customers who search after viewing their list could experience inconsistency, potentially fueling support contacts and eroding trust.
+                        </p>
+                        <p class="text-slate-200 leading-relaxed">
+                            The mitigation plan accelerates AWS data ingestion to shrink batch windows to 10–15 minutes per bank and sequences processing bank-by-bank to reduce simultaneous customer impact. This workstream, originally slated for early 2026, is pulled into late 2025 to align with CDA expectations.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="example-box p-8 space-y-6">
+                    <h2 class="text-2xl font-bold">Implementation Guide: Option B in Motion</h2>
+                    <ol class="list-decimal list-inside space-y-4 text-slate-100">
+                        <li><strong>Week 1–2:</strong> Run a quad alignment with Digital Channels, Search (Tanya's team), ETU Product, and Architecture to confirm bandwidth, acceptance criteria, and integration timelines. Document decision trees so new consumers default to the right API.</li>
+                        <li><strong>Month 1–3:</strong> Build the consumer orchestration layer, integrate the DDA shared logic for batch-specific scenarios, and execute performance tests covering failover and normal mode. Stand up monitoring that flags list/search divergence.</li>
+                        <li><strong>Month 4–12:</strong> Accelerate AWS ingestion improvements, migrate DDA data pipelines, and plan the retirement of DDA History v1 & v2 to liberate legacy MQ connections.</li>
+                        <li><strong>Beyond:</strong> March toward utilities-only resilience — APIs relying solely on internal utilities and local data stores — and prepare the DDA migration to AWS to eliminate future dependencies.</li>
+                    </ol>
+                    <p class="text-slate-300 text-sm">
+                        Cross-link the testing blueprint: <a href="../blogs/end-to-end-and-api-testing-for-etd.html" class="cross-link">End-to-End and API Testing for ETD</a> for validation patterns worth reusing.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="challenge-card p-6 space-y-4">
+                        <h3 class="text-xl font-semibold">Risk Radar</h3>
+                        <ul class="space-y-3 text-slate-100">
+                            <li><strong>Data Consistency:</strong> High probability during batch windows, mitigated by AWS acceleration and proactive customer messaging.</li>
+                            <li><strong>Timeline:</strong> Medium probability — slips occur if consumer teams cannot prioritize Option B changes.</li>
+                            <li><strong>Technical Debt:</strong> Moderate — dual-service orchestration adds complexity, requiring disciplined follow-through on the utilities-only roadmap.</li>
+                            <li><strong>Performance:</strong> Watch for SLA breaches as cross-account traffic scales; caching and query optimization remain on standby.</li>
+                        </ul>
+                    </div>
+                    <div class="highlight-box p-6 space-y-3">
+                        <h3 class="text-xl font-semibold">Alignment & Dependencies</h3>
+                        <p class="text-slate-200">Success rides on coordinated execution:</p>
+                        <ul class="space-y-2 text-slate-100">
+                            <li>Digital Channels orchestrate dual calls without degrading UX.</li>
+                            <li>Search Service Experience team ensures query performance meets <150ms SLA, resolves ownership of list functionality, and confirms development bandwidth.</li>
+                            <li>ETU team sequences AWS ingestion and API decommissioning with mainframe partners.</li>
+                            <li>Architecture governance tracks technical debt and future consolidation checkpoints.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="challenge-card p-8 space-y-4">
+                    <h2 class="text-2xl font-bold">Stakeholder Communication & Contingencies</h2>
+                    <p class="text-slate-100 leading-relaxed">Transparent communication keeps confidence high while Option B ships:</p>
+                    <ul class="list-disc list-inside space-y-3 text-slate-100">
+                        <li><strong>Executive Updates:</strong> Emphasize Option B as a pragmatic bridge, highlight AWS acceleration progress, and reinforce the utilities-only north star.</li>
+                        <li><strong>Product Alignment:</strong> Co-design customer messaging about temporary data mismatches, run joint testing sessions, and publish shared KPIs for data consistency, latency, and satisfaction.</li>
+                        <li><strong>Contingency Plan:</strong> If Digital Channels or Search cannot deliver dual-service orchestration in time, reopen Option A despite the heavy lift; institute monthly readiness checkpoints.</li>
+                        <li><strong>Performance Degradation Playbook:</strong> Keep cache tuning, query optimization, and capacity headroom reviews ready should Option B introduce latency spikes.</li>
+                    </ul>
+                </div>
+
+                <div class="framework-box p-8 space-y-4">
+                    <h2 class="text-2xl font-bold">Strategic Implications</h2>
+                    <ul class="list-disc list-inside space-y-3 text-slate-100">
+                        <li><strong>Infrastructure Awareness:</strong> Early validation of mainframe constraints is mandatory for every modernization initiative.</li>
+                        <li><strong>Cross-Team Coordination:</strong> Architectural wins demand synchronized delivery across Digital Channels, SSE, ETU, and mainframe partners.</li>
+                        <li><strong>Pragmatic Engineering:</strong> Option B proves that intentional technical debt can preserve strategic momentum when governed.</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box p-8 space-y-4">
+                    <h2 class="text-2xl font-bold">Resource Stack</h2>
+                    <p class="text-slate-200">Dive deeper into working documents, prototypes, and AI collaborations fueling this decision:</p>
+                    <ul class="space-y-3 text-slate-100">
+                        <li><a href="https://docs.google.com/document/d/10dHKk6mJ7AnRZ4fpWLAuN5EzutUIxhrGTcddMklDHwc/edit?tab=t.8qyz8p3z5y0f#heading=h.euztgofyf69i" class="cross-link" target="_blank" rel="noopener">Google Doc — Transaction History Architecture Decision Log</a></li>
+                        <li><a href="https://notebooklm.google.com/notebook/2d092ab9-d1ae-4afc-9557-e3b53e3c7017" class="cross-link" target="_blank" rel="noopener">NotebookLM — Research Synthesis Notebook</a></li>
+                        <li><a href="https://gemini.google.com/app/8524268fc2d7b580" class="cross-link" target="_blank" rel="noopener">Gemini — Scenario Modeling Workspace</a></li>
+                        <li><a href="https://claude.ai/chat/26646728-e28d-448e-83c6-9243de2968a9" class="cross-link" target="_blank" rel="noopener">Claude — Architecture Debate Transcript</a></li>
+                        <li><a href="https://chriscruz.nyc/Apps/artifacts.html?artifact=rece7uE9oYhy7Vo4t" class="cross-link" target="_blank" rel="noopener">Artifact — API Strategy Miro Board</a></li>
+                    </ul>
+                </div>
+
+                <div class="framework-box p-8 space-y-6" id="infographic">
+                    <header class="text-center mb-6">
+                        <h2 class="text-3xl font-bold text-sky-200">API Strategy Decision Infographic</h2>
+                        <p class="text-slate-300">Visualizing the path to a resilient transaction history service</p>
+                    </header>
+                    <section class="bg-slate-900/60 rounded-2xl shadow-lg p-6 md:p-8 border border-sky-500/40 mb-8">
+                        <h3 class="text-2xl font-semibold text-sky-100 mb-3">The Core Challenge</h3>
+                        <p class="text-slate-200 text-base">
+                            Engineer a resilient transaction history service that stays highly available through batch processing without overloading mainframe systems or sacrificing the performance SLAs that power dashboard and card experiences.
+                        </p>
+                    </section>
+                    <section class="space-y-8">
+                        <div>
+                            <h3 class="text-2xl font-semibold text-sky-100 text-center mb-4">The Path to a Decision</h3>
+                            <p class="text-center text-slate-300 max-w-3xl mx-auto mb-8">Three options were tested. The final selection was driven by infrastructure realities — specifically MQ connection ceilings — and performance guardrails.</p>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="bg-slate-900/60 rounded-2xl shadow-lg p-6 border-t-4 border-amber-400">
+                                    <h4 class="text-lg font-semibold text-sky-100 mb-2">Option C: "Smarter API"</h4>
+                                    <p class="text-slate-300 text-sm mb-4">Cross-Product would route simple queries to DDA Transaction History.</p>
+                                    <div class="bg-red-900/40 border border-red-500 text-red-200 rounded-lg px-4 py-3">
+                                        <p class="font-bold">❌ Rejected</p>
+                                        <p class="text-xs mt-1">Added 30–50ms latency and masked backend complexity without solving MQ limits.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900/60 rounded-2xl shadow-lg p-6 border-t-4 border-rose-500">
+                                    <h4 class="text-lg font-semibold text-sky-100 mb-2">Refined C: Library Approach</h4>
+                                    <p class="text-slate-300 text-sm mb-4">Embed DDA library to skip the network hop.</p>
+                                    <div class="bg-red-900/40 border border-red-500 text-red-200 rounded-lg px-4 py-3">
+                                        <p class="font-bold">❌ Deal-Breaker</p>
+                                        <p class="text-xs mt-1">Required ~40 new MQ connections — impossible under current mainframe capacity.</p>
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900/60 rounded-2xl shadow-lg p-6 border-t-4 border-emerald-400">
+                                    <h4 class="text-lg font-semibold text-sky-100 mb-2">Option B: The Way Forward</h4>
+                                    <p class="text-slate-300 text-sm mb-4">Consumers split responsibilities across DDA History v4 and Cross-Product.</p>
+                                    <div class="bg-emerald-900/40 border border-emerald-500 text-emerald-200 rounded-lg px-4 py-3">
+                                        <p class="font-bold">✅ Selected</p>
+                                        <p class="text-xs mt-1">Feasible within timeline once consumer teams commit to dual-service orchestration.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="bg-slate-900/60 rounded-2xl shadow-lg p-6 border border-sky-500/30">
+                                <h4 class="text-xl font-semibold text-center text-sky-100 mb-4">Final Decision Analysis</h4>
+                                <p class="text-center text-slate-300 mb-6">Option B remains the only path that satisfies resilience, timeline, and infrastructure realities.</p>
+                                <div class="chart-container h-64 md:h-72">
+                                    <canvas id="decisionChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-slate-900/60 rounded-2xl shadow-lg p-6 border border-amber-400/40">
+                                <h4 class="text-xl font-semibold text-center text-sky-100 mb-4">Key Blocker: Performance Impact</h4>
+                                <p class="text-center text-slate-300 mb-6">Additional latency from Option C threatened search responsiveness; the library approach solved speed but not MQ saturation.</p>
+                                <div class="chart-container h-64 md:h-72">
+                                    <canvas id="performanceChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    <section class="bg-slate-900/60 rounded-2xl shadow-lg p-6 md:p-8 border border-sky-500/40">
+                        <h3 class="text-2xl font-semibold text-sky-100 text-center mb-6">Action Plan & Strategic Outlook</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-xl font-semibold text-sky-200 mb-3">🎯 Immediate Priorities</h4>
+                                <ul class="space-y-3 text-slate-100 text-sm">
+                                    <li><strong>Engage Consumer Teams:</strong> Secure Q1 commitment from Digital Channels and Search for Option B delivery.</li>
+                                    <li><strong>Decommission Old APIs:</strong> Free mainframe capacity by sunsetting DDA History v1 &amp; v2.</li>
+                                    <li><strong>Clarify Onboarding:</strong> Publish a decision tree so new consumers adopt the correct API path.</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-xl font-semibold text-sky-200 mb-3">🚀 Strategic Outlook</h4>
+                                <ul class="space-y-3 text-slate-100 text-sm">
+                                    <li><strong>Protect Performance SLAs:</strong> Maintain sub-150ms responses as traffic scales.</li>
+                                    <li><strong>Manage Technical Debt:</strong> Treat Option B as a bridge to a unified Cross-Product API.</li>
+                                    <li><strong>Plan for AWS Migration:</strong> Target DDA migration to AWS to eliminate mainframe dependencies.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+
+                <div class="reflection-box p-8 space-y-4">
+                    <h2 class="text-2xl font-bold">Reflection Questions</h2>
+                    <ul class="list-disc list-inside space-y-3 text-slate-100">
+                        <li>What signals will tell us that consumer teams are overburdened and Option B needs added support?</li>
+                        <li>How do we communicate temporary data inconsistencies to customers without eroding trust?</li>
+                        <li>Which additional AWS investments could compress batch windows even further than the 10–15 minute target?</li>
+                        <li>What governance rituals ensure that the utilities-only target state stays front-and-center once CDA ships?</li>
+                        <li>Where can we safely experiment with new MQ alternatives ahead of the DDA migration to AWS?</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box p-8 space-y-4">
+                    <h2 class="text-2xl font-bold">Atomic Notes</h2>
+                    <ul class="atomic-list text-slate-100 text-sm">
+                        <li><strong>Timeline:</strong> CDA search + list parity due by Q1 2026; AWS ingestion acceleration pulled into late 2025.</li>
+                        <li><strong>Instances:</strong> ~40 Cross-Product service instances would each require an MQ connection under Option C.</li>
+                        <li><strong>Customer Touchpoint:</strong> ~10% of users viewing lists also hit search, magnifying inconsistency risk.</li>
+                        <li><strong>Performance:</strong> Targets remain &lt;100ms (list) and &lt;150ms (search); &lt;200ms for cross-account queries.</li>
+                        <li><strong>Governance:</strong> Architecture reviews must catalog Option B technical debt and schedule consolidation checkpoints.</li>
+                        <li><strong>Team Focus:</strong> Digital Channels, Search, ETU, and mainframe operations form the critical delivery pod.</li>
+                        <li><strong>Long Game:</strong> Utilities-only resilience is a 12-month evolution culminating in a unified AWS-hosted Cross-Product API.</li>
+                        <li><strong>Document Ledger:</strong> Classified as Strategic – Internal Use; next review in December 2025; distributed to executive leadership, engineering leadership, and product management.</li>
+                    </ul>
+                </div>
+
+                <div class="framework-box p-8 space-y-4">
+                    <h2 class="text-2xl font-bold">Success Metrics</h2>
+                    <ul class="list-disc list-inside space-y-3 text-slate-100">
+                        <li><strong>Delivery:</strong> Q1 2026 CDA launch achieved, milestone burndown reliable, and partner commitments honored.</li>
+                        <li><strong>Technical Performance:</strong> Response times remain within SLAs, batch-mode availability holds, and divergence alerts stay below threshold.</li>
+                        <li><strong>Customer Experience:</strong> Satisfaction scores improve, support tickets about inconsistent statuses decline, and cross-account search adoption rises.</li>
+                        <li><strong>Operational Excellence:</strong> Legacy API maintenance effort drops, mainframe connections free up as v1/v2 retire, and AWS ingestion milestones close on schedule.</li>
+                    </ul>
+                </div>
+
+                <div class="challenge-card p-8 space-y-4">
+                    <h2 class="text-2xl font-bold">Key Success Factors & Strategic Recommendations</h2>
+                    <ul class="list-disc list-inside space-y-3 text-slate-100">
+                        <li><strong>Cross-Functional Collaboration:</strong> Maintain weekly syncs across Digital Channels, SSE, ETU, and mainframe operations.</li>
+                        <li><strong>Technical Execution Excellence:</strong> Enforce rigorous performance, resiliency, and data integrity testing for every drop.</li>
+                        <li><strong>Strategic Patience:</strong> Keep the utilities-only target state visible so interim complexity is temporary.</li>
+                        <li><strong>Accelerate AWS Investment:</strong> Fund ingestion improvements aggressively to shrink the inconsistency window.</li>
+                        <li><strong>Strengthen Architecture Governance:</strong> Formalize quarterly reviews to measure debt retirement and consolidation readiness.</li>
+                        <li><strong>Invest in Coordination:</strong> Standardize playbooks for multi-team architectural changes to reduce future drag.</li>
+                        <li><strong>Monitor & Iterate:</strong> Pair telemetry with customer feedback loops to adjust quickly after launch.</li>
+                    </ul>
+                </div>
+
+                <div class="example-box p-8 space-y-4">
+                    <h2 class="text-2xl font-bold">Medium-Style Cross Links</h2>
+                    <p class="text-slate-200">Trace the broader transformation narrative:</p>
+                    <ul class="space-y-3 text-slate-100">
+                        <li><a href="../blogs/infographic-the-5-forces-shaping-everything.html" class="cross-link">Infographic: The 5 Forces Shaping Everything</a> — macro forces framing digital bets.</li>
+                        <li><a href="../blogs/smart-nudges-implementation-deep-dive.html" class="cross-link">Smart Nudges Implementation Deep Dive</a> — lessons on orchestrating AI workflows.</li>
+                        <li><a href="../projects" class="cross-link">Projects Portfolio</a> — current experiments across Cruz AI.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="border-t border-white/10 py-10 mt-10">
+        <div class="container mx-auto px-6 text-center text-slate-400 text-sm">
+            Infographic generated from the API Strategy Decision workshop | September 18, 2025
+        </div>
+    </footer>
+
+    <script>
+        function wrapLabels(label, maxWidth) {
+            const words = label.split(' ');
+            let lines = [];
+            let currentLine = words[0];
+
+            for (let i = 1; i < words.length; i++) {
+                if (currentLine.length + words[i].length + 1 < maxWidth) {
+                    currentLine += ' ' + words[i];
+                } else {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                }
+            }
+            lines.push(currentLine);
+            return lines;
+        }
+
+        const tooltipTitleCallback = function(tooltipItems) {
+            const item = tooltipItems[0];
+            const label = item.chart.data.labels[item.dataIndex];
+            if (Array.isArray(label)) {
+                return label.join(' ');
+            }
+            return label;
+        };
+
+        const decisionChartCtx = document.getElementById('decisionChart').getContext('2d');
+        new Chart(decisionChartCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Option B: The Way Forward'],
+                datasets: [{
+                    label: 'Final Decision',
+                    data: [100],
+                    backgroundColor: ['#38bdf8'],
+                    borderColor: ['#0f172a'],
+                    borderWidth: 4,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: '#e2e8f0',
+                            font: { size: 14 }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            }
+        });
+
+        const performanceChartCtx = document.getElementById('performanceChart').getContext('2d');
+        const performanceLabels = ['Option B (Baseline)', wrapLabels('Option C (Rejected due to latency + MQ limits)', 22)];
+        new Chart(performanceChartCtx, {
+            type: 'bar',
+            data: {
+                labels: performanceLabels,
+                datasets: [{
+                    label: 'Additional Latency (ms)',
+                    data: [5, 40],
+                    backgroundColor: ['#38bdf8', '#f97316'],
+                    borderColor: ['#0ea5e9', '#c2410c'],
+                    borderWidth: 2,
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8' },
+                        title: {
+                            display: true,
+                            text: 'Milliseconds (ms)',
+                            color: '#e2e8f0'
+                        }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { color: '#94a3b8' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
