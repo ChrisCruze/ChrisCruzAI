@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atomic Note: Trigger Configuration Matrix</title>
+    <meta name="description" content="Composable user, event, and time-based triggers that power Cuculi's smart nudge engine with guardrails and experimentation velocity.">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta name="article:published_time" content="2025-09-15T00:00:00Z">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at bottom left, rgba(244, 114, 182, 0.25), rgba(17, 24, 39, 0.95));
+            color: #f3f4f6;
+        }
+        .note-surface {
+            background: rgba(24, 24, 37, 0.88);
+            border: 1px solid rgba(236, 72, 153, 0.35);
+            box-shadow: 0 24px 48px rgba(80, 7, 36, 0.45);
+        }
+        .badge {
+            letter-spacing: 0.35em;
+        }
+        .grid-card {
+            background: rgba(236, 72, 153, 0.15);
+            border: 1px solid rgba(244, 114, 182, 0.35);
+        }
+        a { color: #f9a8d4; }
+        a:hover { color: #fce7f3; }
+    </style>
+</head>
+<body class="antialiased">
+    <header class="fixed top-0 left-0 right-0 z-40 bg-slate-950/60 backdrop-blur">
+        <div class="max-w-4xl mx-auto px-6 py-4 flex items-center justify-between">
+            <a href="../index.html" class="text-sm font-semibold tracking-tight text-slate-200 hover:text-pink-300 transition">ChrisCruz<span class="text-pink-300">.ai</span></a>
+            <nav class="hidden md:flex items-center space-x-6 text-xs text-slate-400 uppercase tracking-[0.35em]">
+                <a href="../blogs/smart-nudges-implementation-deep-dive-cuculi-ai.html" class="hover:text-slate-100 transition">Back to Playbook</a>
+                <a href="index.html" class="hover:text-slate-100 transition">Atomic Index</a>
+            </nav>
+            <span class="text-[10px] font-semibold uppercase tracking-[0.4em] text-pink-300">Atomic Note</span>
+        </div>
+    </header>
+
+    <main class="pt-24 pb-20 px-6">
+        <article class="max-w-3xl mx-auto note-surface rounded-3xl p-8 md:p-12">
+            <header class="mb-10">
+                <p class="badge text-xs font-semibold uppercase text-pink-200 mb-3">Trigger Design</p>
+                <h1 class="text-3xl md:text-4xl font-black tracking-tight mb-4 text-slate-50">Trigger Configuration Matrix</h1>
+                <p class="text-slate-300 text-sm uppercase tracking-[0.3em]">Updated September 15, 2025</p>
+            </header>
+
+            <section class="mb-10">
+                <h2 class="text-xl font-semibold text-pink-100 mb-3">Mission</h2>
+                <p class="text-slate-200 leading-relaxed">
+                    Give product and lifecycle teams a declarative toolkit to orchestrate user, event, and time-based nudges with confidence, while preserving compliance guardrails and measurement fidelity.
+                </p>
+            </section>
+
+            <section class="mb-10 grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-pink-100 mb-3">Matrix Dimensions</h3>
+                    <ul class="space-y-2 text-slate-200 text-sm">
+                        <li>• <strong>User:</strong> Lifecycle stage, attendance streak, reciprocity score, host/vip tags.</li>
+                        <li>• <strong>Event:</strong> Capacity, category, host responsiveness, waitlist depth.</li>
+                        <li>• <strong>Time:</strong> Countdown windows, weekday & hour heuristics, quiet hours.</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-semibold text-pink-100 mb-3">Guardrails</h3>
+                    <ul class="space-y-2 text-slate-200 text-sm">
+                        <li>• Frequency caps at user + channel level with override approvals logged.</li>
+                        <li>• Compliance flags for scarcity claims validated via <a href="smart-nudges-insight-control-note.html">Control Tower</a> data.</li>
+                        <li>• Suppression lists for churned or paused members synced hourly.</li>
+                        <li>• Regression tests before publishing new YAML recipes.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="mb-10">
+                <h3 class="text-lg font-semibold text-pink-100 mb-3">Sample YAML Snippet</h3>
+                <div class="grid-card rounded-2xl p-4 text-sm">
+<pre class="overflow-x-auto"><code>recipe: scarcity_last_call
+user:
+  stage: active
+  reciprocity_score: ">=3"
+event:
+  capacity_remaining: "<=3"
+  host_trust: "high"
+time:
+  window_before_start: "PT12H"
+channel: sms
+provider: twilio
+copy_template: scarcity_last_call_v2
+experiments:
+  - name: proof_variant
+    personalization: attendee_social_handles
+    holdout: 10%</code></pre>
+                </div>
+            </section>
+
+            <section class="mb-10">
+                <h3 class="text-lg font-semibold text-pink-100 mb-3">Operational Cadence</h3>
+                <div class="grid md:grid-cols-2 gap-4 text-sm text-slate-200">
+                    <div class="grid-card rounded-2xl p-4">
+                        <h4 class="font-semibold text-slate-50 mb-2">Weekly</h4>
+                        <p>Prioritize new recipes based on insights from the <a href="smart-nudges-insight-control-note.html">Control Tower Blueprint</a>.</p>
+                    </div>
+                    <div class="grid-card rounded-2xl p-4">
+                        <h4 class="font-semibold text-slate-50 mb-2">Daily</h4>
+                        <p>Review failed runs and suppression reasons in the <a href="smart-nudges-delivery-stack-note.html">Delivery Guide</a>.</p>
+                    </div>
+                    <div class="grid-card rounded-2xl p-4">
+                        <h4 class="font-semibold text-slate-50 mb-2">Release</h4>
+                        <p>Peer-review YAML changes, run automated regression tests, and capture diff notes in Git.</p>
+                    </div>
+                    <div class="grid-card rounded-2xl p-4">
+                        <h4 class="font-semibold text-slate-50 mb-2">Monthly</h4>
+                        <p>Audit reciprocity-driven nudges with the <a href="smart-nudges-psychology-impact-note.html">Psychology Evidence Pack</a> to ensure alignment.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mb-10">
+                <h3 class="text-lg font-semibold text-pink-100 mb-3">Operator Moves</h3>
+                <ul class="space-y-2 text-slate-200 text-sm leading-relaxed">
+                    <li>• Version control every YAML file and link pull requests to dashboard charts showing expected impact.</li>
+                    <li>• Partner with data science to update heuristics when seat sell-through or RSVP curves shift.</li>
+                    <li>• Surface new trigger ideas in the <a href="../blogs/smart-nudges-implementation-deep-dive-cuculi-ai.html" class="underline">Four-Pillar Strategy</a> meeting for prioritization.</li>
+                </ul>
+            </section>
+
+            <footer class="border-t border-slate-800 pt-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 text-xs uppercase tracking-[0.3em] text-pink-200">
+                <a href="smart-nudges-delivery-stack-note.html" class="flex items-center">⬅ Delivery Stack Guide</a>
+                <a href="smart-nudges-psychology-impact-note.html" class="flex items-center">Psychology Evidence ➜</a>
+            </footer>
+        </article>
+    </main>
+</body>
+</html>
