@@ -37,9 +37,14 @@
         const historyDiv = document.getElementById('history');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const historyLoadingSpinner = document.getElementById('historyLoadingSpinner');
+        const copyCsvButton = document.getElementById('copyCsvButton');
+        const copyYamlButton = document.getElementById('copyYamlButton');
+        const downloadCsvButton = document.getElementById('downloadCsvButton');
+        const downloadYamlButton = document.getElementById('downloadYamlButton');
 
         let burnRatePerMile = 0.62; // Default value
         const targetWeight = 170;
+        let historyEntries = [];
 
         // --- Firebase Configuration ---
         const configRef = ref(db, 'config/burnRatePerMile');
@@ -53,6 +58,8 @@
         });
 
 
+        setExportButtonsDisabled(true);
+
         // --- Event Listeners ---
         typeSelect.addEventListener('change', () => {
             if (typeSelect.value === 'after_running') {
@@ -61,6 +68,11 @@
                 milesRanContainer.classList.add('hidden');
             }
         });
+
+        copyCsvButton.addEventListener('click', () => handleCopy('csv'));
+        copyYamlButton.addEventListener('click', () => handleCopy('yaml'));
+        downloadCsvButton.addEventListener('click', () => handleDownload('csv'));
+        downloadYamlButton.addEventListener('click', () => handleDownload('yaml'));
 
         weightForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -207,16 +219,29 @@
                 historyDiv.innerHTML = '';
                 if (!snapshot.exists()) {
                     historyDiv.innerHTML = '<p class="text-center text-gray-500">No weight entries yet.</p>';
+                    historyEntries = [];
+                    setExportButtonsDisabled(true);
                     return;
                 }
 
-                const entries = [];
+                const rawEntries = [];
                 snapshot.forEach((childSnapshot) => {
-                    entries.push({ key: childSnapshot.key, ...childSnapshot.val() });
+                    rawEntries.push({ key: childSnapshot.key, ...childSnapshot.val() });
                 });
 
+                const newestFirstEntries = rawEntries.reverse();
+                historyEntries = newestFirstEntries.map(({ weight, type, timestamp, miles_ran }) => {
+                    const entry = { weight, type, timestamp };
+                    if (typeof miles_ran !== 'undefined') {
+                        entry.miles_ran = miles_ran;
+                    }
+                    return entry;
+                });
+
+                setExportButtonsDisabled(historyEntries.length === 0);
+
                 // Reverse to show newest first
-                entries.reverse().forEach(entry => {
+                newestFirstEntries.forEach(entry => {
                     const entryDiv = document.createElement('div');
                     entryDiv.className = 'bg-white p-4 rounded-lg shadow-sm flex justify-between items-center';
 
@@ -236,6 +261,143 @@
                     `;
                     historyDiv.appendChild(entryDiv);
                 });
+            });
+        }
+
+        async function handleCopy(format) {
+            const data = getFormattedData(format);
+            if (!data) {
+                return;
+            }
+
+            try {
+                await copyTextToClipboard(data);
+                const label = format === 'csv' ? 'CSV' : 'YML';
+                showResult(`Copied weight data to clipboard in ${label} format.`, 'success');
+            } catch (error) {
+                console.error(`Error copying ${format} data:`, error);
+                showResult('Failed to copy weight data to clipboard.', 'error');
+            }
+        }
+
+        function handleDownload(format) {
+            const data = getFormattedData(format);
+            if (!data) {
+                return;
+            }
+
+            const isCsv = format === 'csv';
+            const extension = isCsv ? 'csv' : 'yml';
+            const mimeType = isCsv ? 'text/csv' : 'application/x-yaml';
+            const timestamp = new Date().toISOString().slice(0, 10);
+            downloadData(data, `weight-data-${timestamp}.${extension}`, mimeType);
+            const label = isCsv ? 'CSV' : 'YML';
+            showResult(`Started download for weight data in ${label} format.`, 'success');
+        }
+
+        function getFormattedData(format) {
+            if (!historyEntries.length) {
+                showResult('No weight data to export yet.', 'warning');
+                return null;
+            }
+
+            if (format === 'csv') {
+                return convertEntriesToCsv(historyEntries);
+            }
+
+            if (format === 'yaml') {
+                return convertEntriesToYaml(historyEntries);
+            }
+
+            console.warn(`Unsupported format requested: ${format}`);
+            return null;
+        }
+
+        function convertEntriesToCsv(entries) {
+            const headers = ['weight', 'type', 'timestamp', 'miles_ran'];
+            const rows = entries.map(entry => [
+                escapeCsvValue(entry.weight),
+                escapeCsvValue(entry.type),
+                escapeCsvValue(entry.timestamp),
+                escapeCsvValue(entry.miles_ran ?? '')
+            ].join(','));
+
+            return [headers.join(','), ...rows].join('\n');
+        }
+
+        function escapeCsvValue(value) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+
+            const stringValue = String(value);
+            if (/[",\n]/.test(stringValue)) {
+                return `"${stringValue.replace(/"/g, '""')}"`;
+            }
+
+            return stringValue;
+        }
+
+        function convertEntriesToYaml(entries) {
+            const lines = ['weights:'];
+
+            entries.forEach(entry => {
+                lines.push('  - weight: ' + entry.weight);
+                lines.push('    type: ' + entry.type);
+                lines.push('    timestamp: "' + entry.timestamp + '"');
+                if (typeof entry.miles_ran !== 'undefined') {
+                    lines.push('    miles_ran: ' + entry.miles_ran);
+                }
+            });
+
+            return lines.join('\n');
+        }
+
+        async function copyTextToClipboard(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                return navigator.clipboard.writeText(text);
+            }
+
+            return new Promise((resolve, reject) => {
+                try {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = text;
+                    textArea.setAttribute('readonly', '');
+                    textArea.style.position = 'fixed';
+                    textArea.style.opacity = '0';
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    resolve();
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        }
+
+        function downloadData(data, filename, mimeType) {
+            const blob = new Blob([data], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+
+        function setExportButtonsDisabled(isDisabled) {
+            [copyCsvButton, copyYamlButton, downloadCsvButton, downloadYamlButton].forEach(button => {
+                if (!button) {
+                    return;
+                }
+
+                button.disabled = isDisabled;
+                button.classList.toggle('opacity-50', isDisabled);
+                button.classList.toggle('cursor-not-allowed', isDisabled);
             });
         }
 
@@ -302,7 +464,15 @@
 
             <!-- History Section -->
             <div>
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">Weight History</h2>
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-4">
+                    <h2 class="text-2xl font-bold text-gray-800">Weight History</h2>
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" id="copyCsvButton" class="px-3 py-2 text-sm font-medium text-indigo-600 border border-indigo-200 rounded-md hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1">Copy CSV</button>
+                        <button type="button" id="copyYamlButton" class="px-3 py-2 text-sm font-medium text-indigo-600 border border-indigo-200 rounded-md hover:bg-indigo-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1">Copy YML</button>
+                        <button type="button" id="downloadCsvButton" class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1">Download CSV</button>
+                        <button type="button" id="downloadYamlButton" class="px-3 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1">Download YML</button>
+                    </div>
+                </div>
                 <div class="text-center">
                      <svg id="historyLoadingSpinner" class="animate-spin mx-auto h-8 w-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
