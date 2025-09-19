@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Nudges - Implementation Deep Dive | Cuculi AI</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💡</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style type="text/tailwindcss">
+        :root {
+            --primary-color: #4f46e5; /* Indigo 600 */
+            --secondary-color: #f8fafc; /* Slate 50 */
+            --text-primary: #1e293b; /* Slate 800 */
+            --text-secondary: #64748b; /* Slate 500 */
+            --border-color: #e2e8f0; /* Slate 200 */
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f1f5f9; /* Slate 100 */
+        }
+        
+        /* Custom Styles for Components */
+        .section-card {
+            @apply bg-white rounded-2xl shadow-lg p-6 md:p-10 mb-12 transition-all duration-300;
+        }
+
+        .section-title {
+            @apply text-3xl font-bold mb-8 text-indigo-600 flex items-center gap-3;
+        }
+        
+        .section-title .material-symbols-outlined {
+            @apply text-4xl;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        }
+
+        /* Accordion styles for Progressive Disclosure */
+        .accordion-item .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .accordion-item.open .accordion-content {
+            max-height: 5000px; /* Adjust as needed */
+        }
+        .accordion-item.open .accordion-icon {
+            transform: rotate(45deg);
+        }
+        .accordion-trigger {
+            @apply flex justify-between items-center w-full text-left py-4 px-5 rounded-lg font-semibold text-lg cursor-pointer transition-colors duration-300;
+        }
+        .accordion-icon {
+            @apply transition-transform duration-300 material-symbols-outlined;
+        }
+
+        /* Light Theme Accordion */
+        .accordion-light .accordion-item { @apply bg-white border border-slate-200 rounded-lg; }
+        .accordion-light .accordion-trigger { @apply bg-slate-50 hover:bg-slate-100 text-slate-800; }
+        .accordion-light .accordion-content { @apply p-5 pt-2 text-slate-600; }
+        
+        /* Dark Theme Accordion */
+        .accordion-dark .accordion-item { @apply bg-slate-700 border border-slate-600 rounded-lg; }
+        .accordion-dark .accordion-trigger { @apply bg-slate-700 text-slate-200 hover:bg-slate-600; }
+        .accordion-dark .accordion-content { @apply p-5 pt-2 text-slate-300; }
+
+        /* Sticky Header */
+        header {
+            @apply sticky top-0 z-50 backdrop-blur-lg bg-white/80 transition-shadow duration-300;
+        }
+        header.scrolled {
+             @apply shadow-md;
+        }
+        
+        nav a.active {
+            @apply text-indigo-600 font-semibold;
+        }
+        
+        /* Reimagined Architecture Diagram */
+        .arch-diagram { @apply flex flex-col md:flex-row items-center justify-center gap-2 text-center my-8; }
+        .arch-node { @apply bg-slate-100 border border-slate-300 rounded-lg p-4 w-48 shadow-sm text-sm font-semibold text-slate-700; }
+        .arch-arrow { @apply text-slate-400 font-bold text-2xl transform; }
+
+        /* Code Block Styling */
+        .code-block {
+            @apply bg-slate-800 text-slate-200 p-5 rounded-lg font-mono text-sm overflow-x-auto my-4;
+            @apply ring-2 ring-slate-700;
+        }
+        .code-block-header {
+            @apply flex justify-between items-center pb-3 mb-3 border-b border-slate-600;
+        }
+        .code-block-title {
+            @apply text-slate-400 font-semibold;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div class="relative min-h-screen flex flex-col">
+        <!-- Header -->
+        <header id="main-header" class="border-b border-solid border-[var(--border-color)]">
+            <div class="container mx-auto px-6">
+                <div class="flex items-center justify-between h-20">
+                    <div class="flex items-center gap-4">
+                        <svg class="size-8 text-[var(--primary-color)]" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                            <path clip-rule="evenodd" d="M12.0799 24L4 19.2479L9.95537 8.75216L18.04 13.4961L18.0446 4H29.9554L29.96 13.4961L38.0446 8.75216L44 19.2479L35.92 24L44 28.7521L38.0446 39.2479L29.96 34.5039L29.9554 44H18.0446L18.04 34.5039L9.95537 39.2479L4 28.7521L12.0799 24Z" fill="currentColor" fill-rule="evenodd"></path>
+                        </svg>
+                        <h1 class="text-[var(--text-primary)] text-xl font-bold tracking-tighter">Cuculi AI Vision</h1>
+                    </div>
+                    <nav class="hidden lg:flex items-center gap-6">
+                        <a class="nav-link text-[var(--text-secondary)] hover:text-[var(--primary-color)] text-sm font-medium leading-normal transition-colors" href="#playbook">Playbook</a>
+                        <a class="nav-link text-[var(--text-secondary)] hover:text-[var(--primary-color)] text-sm font-medium leading-normal transition-colors" href="#architecture">Architecture</a>
+                        <a class="nav-link text-[var(--text-secondary)] hover:text-[var(--primary-color)] text-sm font-medium leading-normal transition-colors" href="#timeline">Timeline</a>
+                        <a class="nav-link text-[var(--text-secondary)] hover:text-[var(--primary-color)] text-sm font-medium leading-normal transition-colors" href="#tech-details">Technical</a>
+                        <a class="nav-link text-[var(--text-secondary)] hover:text-[var(--primary-color)] text-sm font-medium leading-normal transition-colors" href="#metrics">Metrics</a>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <main class="flex-1">
+            <div class="container mx-auto px-6 py-12 md:py-20">
+
+                <!-- Hero Section -->
+                <section class="hero text-white text-center py-20 px-6 rounded-3xl mb-16">
+                    <h1 class="text-5xl md:text-6xl font-black mb-4 tracking-tight">The Smart Nudge Playbook</h1>
+                    <p class="text-xl md:text-2xl max-w-3xl mx-auto text-indigo-200">Our end-to-end strategy for building a psychology-driven notification system that turns passive users into active participants.</p>
+                </section>
+
+                <!-- 10 Pillar Playbook Section -->
+                <section id="playbook" class="section-card">
+                    <h2 class="section-title"><span class="material-symbols-outlined">checklist</span>The 10-Pillar Playbook</h2>
+                    <div id="playbook-accordion" class="accordion-container accordion-light space-y-4">
+                        <!-- Playbook accordion items will be generated by JS -->
+                    </div>
+                </section>
+                
+                <!-- Technical Architecture -->
+                <section id="architecture" class="section-card">
+                    <h2 class="section-title"><span class="material-symbols-outlined">account_tree</span>Microservices Architecture</h2>
+                    <div class="arch-diagram">
+                        <div class="arch-node">User Action</div>
+                        <div class="arch-arrow md:rotate-0 rotate-90">&rarr;</div>
+                        <div class="arch-node">Event Ingestion</div>
+                        <div class="arch-arrow md:rotate-0 rotate-90">&rarr;</div>
+                        <div class="arch-node">Configurable Rules Engine</div>
+                        <div class="arch-arrow md:rotate-90">&darr;</div>
+                    </div>
+                     <div class="arch-diagram md:flex-row-reverse">
+                        <div class="arch-node">Orchestration & Delivery</div>
+                        <div class="arch-arrow md:rotate-180 rotate-90">&larr;</div>
+                        <div class="arch-node">AI Personalization Engine</div>
+                    </div>
+                </section>
+                
+                <!-- Implementation Timeline -->
+                <section id="timeline" class="section-card">
+                    <h2 class="section-title"><span class="material-symbols-outlined">calendar_month</span>Implementation Timeline</h2>
+                     <div class="relative border-l-2 border-indigo-200 pl-10 space-y-12">
+                         <div class="timeline-item">
+                            <div class="absolute -left-3.5 top-0 size-6 bg-indigo-500 rounded-full border-4 border-white"></div>
+                            <p class="text-indigo-500 font-semibold mb-1">Sep 2025</p>
+                            <h4 class="font-bold text-lg mb-2">Foundation & Rules Engine</h4>
+                            <p class="text-sm text-slate-600">Build the core data capture, segmentation, and configurable rules engine.</p>
+                         </div>
+                         <div class="timeline-item">
+                             <div class="absolute -left-3.5 top-0 size-6 bg-indigo-500 rounded-full border-4 border-white"></div>
+                            <p class="text-indigo-500 font-semibold mb-1">Oct 2025</p>
+                            <h4 class="font-bold text-lg mb-2">Orchestration & Core Nudges</h4>
+                            <p class="text-sm text-slate-600">Implement orchestration, visibility tools, and initial psychology-driven nudges.</p>
+                         </div>
+                         <div class="timeline-item">
+                            <div class="absolute -left-3.5 top-0 size-6 bg-indigo-500 rounded-full border-4 border-white"></div>
+                            <p class="text-indigo-500 font-semibold mb-1">Nov 2025</p>
+                            <h4 class="font-bold text-lg mb-2">AI Personalization & Social Graph</h4>
+                            <p class="text-sm text-slate-600">Integrate the AI engine for dynamic copy and leverage the social graph.</p>
+                         </div>
+                         <div class="timeline-item">
+                             <div class="absolute -left-3.5 top-0 size-6 bg-indigo-500 rounded-full border-4 border-white"></div>
+                            <p class="text-indigo-500 font-semibold mb-1">Dec 2025</p>
+                            <h4 class="font-bold text-lg mb-2">Dashboards & Optimization</h4>
+                            <p class="text-sm text-slate-600">Build comprehensive dashboards and begin A/B testing and optimization cycles.</p>
+                         </div>
+                     </div>
+                </section>
+                
+                <!-- Technical Details Accordion -->
+                <section id="tech-details" class="section-card bg-slate-800 text-white">
+                    <h2 class="section-title !text-white"><span class="material-symbols-outlined">code</span>Technical Deep Dive</h2>
+                     <p class="text-lg text-slate-300 mb-8 max-w-3xl">A look at the implementation details, from the hybrid AI/rules engine to the orchestration layer.</p>
+                     <div id="tech-accordion" class="accordion-container accordion-dark space-y-4">
+                        <!-- Technical accordion items will be generated here -->
+                    </div>
+                </section>
+
+                <!-- Success Metrics -->
+                <section id="metrics" class="section-card">
+                    <h2 class="section-title"><span class="material-symbols-outlined">query_stats</span>Global Success Metrics</h2>
+                    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <div>
+                            <h3 class="font-semibold text-slate-800 mb-2 border-b pb-2">🚀 Engagement</h3>
+                            <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
+                                <li>CTR & Open Rate</li>
+                                <li>Session Length</li>
+                                <li>Recommendation Acceptance</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h3 class="font-semibold text-slate-800 mb-2 border-b pb-2">✅ Conversion</h3>
+                            <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
+                                <li>RSVP Percentage</li>
+                                <li>Attendance Percentage</li>
+                                <li>User Reviews Submitted</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h3 class="font-semibold text-slate-800 mb-2 border-b pb-2">🔄 Retention</h3>
+                            <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
+                                <li>Dormant User Reactivation</li>
+                                <li>Repeat Bookings</li>
+                                <li>Churn Reduction</li>
+                            </ul>
+                        </div>
+                         <div>
+                            <h3 class="font-semibold text-slate-800 mb-2 border-b pb-2">❤️ Advocacy</h3>
+                            <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
+                                <li>User Referrals</li>
+                                <li>New Hosts Created</li>
+                                <li>Social Shares</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-800 mb-2 border-b pb-2">📈 AI Uplift</h3>
+                            <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
+                                <li>AI vs. Rule-Only Baseline</li>
+                                <li>Personalization Quality Score</li>
+                                <li>Uplift in Core Metrics</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-800 mb-2 border-b pb-2">⚙️ Operational Efficiency</h3>
+                            <ul class="text-sm text-slate-600 space-y-1 list-disc pl-5">
+                                <li>Config Update Time</li>
+                                <li>Experiment Velocity</li>
+                                <li>Orchestration Accuracy</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Summary Section -->
+                <section class="bg-indigo-700 text-white text-center py-12 px-6 rounded-3xl">
+                    <h2 class="text-3xl font-bold mb-4">A Complete End-to-End Strategy</h2>
+                    <p class="text-lg max-w-4xl mx-auto text-indigo-200">
+                        This 10-pillar playbook provides a full notification and recommendation strategy, covering:
+                        <span class="font-semibold text-white">Psychology</span> (why people act),
+                        <span class="font-semibold text-white">Segmentation</span> (who to target),
+                        <span class="font-semibold text-white">Journey Mapping</span> (when to nudge),
+                        <span class="font-semibold text-white">Data Capture</span> (what to know),
+                        <span class="font-semibold text-white">Behavioral Signals</span> (how they act),
+                        <span class="font-semibold text-white">Social Graph</span> (who they know),
+                        <span class="font-semibold text-white">Dashboards</span> (how it’s working),
+                        <span class="font-semibold text-white">Configurable Rules</span> (easy iteration),
+                        <span class="font-semibold text-white">Orchestration</span> (full visibility), and the
+                        <span class="font-semibold text-white">AI + Rules Balance</span> (smart and safe).
+                    </p>
+                </section>
+            </div>
+        </main>
+    </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // --- Generic Accordion Setup ---
+    function setupAccordion(containerId, items) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = items.map((item, index) => {
+            const triggerContent = item.trigger || `<span>${item.title}</span>`;
+            return `
+            <div class="accordion-item">
+                <div class="accordion-trigger" data-index="${index}">
+                    ${triggerContent}
+                    <span class="accordion-icon">+</span>
+                </div>
+                <div class="accordion-content">
+                    ${item.content}
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // --- Data for Accordions ---
+
+    // 1. Playbook Accordion Data
+    const playbookItems = [
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">psychology</span><div><h3 class="font-semibold text-slate-800 mb-1">1. Psychology-Driven</h3><p class="text-sm text-slate-500 font-normal">Use scarcity, social proof, and reciprocity to maximize engagement.</p></div></div>`,
+            content: `We tap into core human motivations. For example, a scarcity nudge might say, "Only 3 spots left!", while a social proof nudge would highlight, "15 people from your industry are going." This addresses the user's 'why' behind taking an action.`
+        },
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">groups</span><div><h3 class="font-semibold text-slate-800 mb-1">2. Segmentation Approach</h3><p class="text-sm text-slate-500 font-normal">Differentiated strategies for new, active, and dormant user cohorts.</p></div></div>`,
+            content: `One size doesn't fit all. <strong>New users</strong> receive welcoming, onboarding-focused nudges. <strong>Active users</strong> get discovery and social nudges. <strong>Dormant users</strong> are targeted with compelling re-engagement offers and summaries of what they've missed.`
+        },
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">conversion_path</span><div><h3 class="font-semibold text-slate-800 mb-1">3. User Journey Progression</h3><p class="text-sm text-slate-500 font-normal">Map notifications to every funnel stage, from awareness to advocacy.</p></div></div>`,
+            content: `We guide users through their entire lifecycle. <strong>Awareness:</strong> "New event type you might like: Rooftop Mixers." <strong>Interest:</strong> "See who's going to the Mixer." <strong>Action:</strong> "Last chance to RSVP!" <strong>Advocacy:</strong> "How was it? Leave a review!"`
+        },
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">dynamic_form</span><div><h3 class="font-semibold text-slate-800 mb-1">4. Richer Onboarding</h3><p class="text-sm text-slate-500 font-normal">Solve the cold-start problem by capturing rich user data early.</p></div></div>`,
+            content: `First impressions matter. We use a multi-step onboarding flow including preference quizzes ("What's your ideal weekend vibe?"), profile completion prompts, and optional friend list imports to immediately personalize the user's experience from day one.`
+        },
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">ads_click</span><div><h3 class="font-semibold text-slate-800 mb-1">5. Implicit Behavior Tracking</h3><p class="text-sm text-slate-500 font-normal">Leverage clicks, views, and scrolls to enrich personalization passively.</p></div></div>`,
+            content: `Actions speak louder than words. If a user repeatedly views food-related events without RSVPing, the system can infer interest and send a targeted nudge with an early-bird discount or a similar, less crowded event to overcome their hesitation.`
+        },
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">hub</span><div><h3 class="font-semibold text-slate-800 mb-1">6. Social Graph Connections</h3><p class="text-sm text-slate-500 font-normal">Use friend activity as a key recommendation and engagement layer.</p></div></div>`,
+            content: `The system vectorizes user and event relationships. Recommendations are powered not just by what a user likes, but by what people in their social and professional cluster attend, creating powerful network effects and building community.`
+        },
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">monitoring</span><div><h3 class="font-semibold text-slate-800 mb-1">7. Comprehensive Dashboards</h3><p class="text-sm text-slate-500 font-normal">Track performance by segment, funnel stage, and A/B test.</p></div></div>`,
+            content: `What gets measured gets improved. Key dashboards include a <strong>Funnel Conversion View</strong> (tracking users from nudge to attendance), a <strong>Nudge Performance Leaderboard</strong> (ranking which nudges are most effective), and a <strong>Segment Health Monitor</strong>.`
+        },
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">tune</span><div><h3 class="font-semibold text-slate-800 mb-1">8. Configurable Rules Engine</h3><p class="text-sm text-slate-500 font-normal">Manage triggers and timing in a config file for rapid experimentation.</p></div></div>`,
+            content: `To stay agile, product managers can test new hypotheses (e.g., "send a scarcity alert 24 hours before an event") by simply updating a YAML file and deploying. This removes engineering bottlenecks and dramatically increases experiment velocity.`
+        },
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">visibility</span><div><h3 class="font-semibold text-slate-800 mb-1">9. Notification Orchestration</h3><p class="text-sm text-slate-500 font-normal">Provide clear visibility into queued, user-level, and event-level notifications.</p></div></div>`,
+            content: `This provides a "mission control" view. Support teams can see a user's entire notification history to resolve issues. Marketing can see which events need a promotional boost. It ensures transparency and control over the entire system.`
+        },
+        { 
+            trigger: `<div class="flex items-start gap-4"><span class="material-symbols-outlined text-indigo-500 bg-indigo-100 p-2 rounded-full">smart_toy</span><div><h3 class="font-semibold text-slate-800 mb-1">10. AI + Rules Balance</h3><p class="text-sm text-slate-500 font-normal">Combine AI personalization with rule-based predictability and guardrails.</p></div></div>`,
+            content: `This is the core of our "smart and safe" approach. <strong>Rules</strong> provide safety ("Never email a user more than once a day"). <strong>AI</strong> provides nuance ("Based on this user's positive review of a similar event, use an enthusiastic and familiar tone in the next notification.").`
+        },
+    ];
+
+    // 2. Technical Details Accordion Data
+    const techItems = [
+        {
+            title: 'Balancing AI and Rules',
+            content: `
+            <p class="mb-4">Our objective is to combine AI-driven personalization with rule-based predictability to achieve both innovation and control. This hybrid engine uses rules as guardrails while AI optimizes for personalization.</p>
+            <h4 class="font-semibold text-slate-100 mb-2">Tactics:</h4>
+            <ul class="list-disc pl-5 space-y-2 text-sm mb-4">
+                <li><strong>Hybrid Engine:</strong> Rules define hard constraints (frequency caps, compliance), while AI fills in personalization (copy tone, event ranking, timing optimization).</li>
+                <li><strong>Retrieval-Augmented Generation (RAG):</strong> AI dynamically retrieves context (user history, friend activity) to generate more relevant copy.</li>
+                <li><strong>AI as Optimizer:</strong> Leverage embeddings and reinforcement signals (CTR, RSVP conversion) to improve recommendation selection.</li>
+                <li><strong>Auditability:</strong> Log both rule triggers and AI decisions for transparency and debugging.</li>
+            </ul>
+             <h4 class="font-semibold text-slate-100 mb-2">Benefits:</h4>
+             <p class="text-sm">Predictability from rules, personalization from AI, and a system that can scale experiments while remaining safe and controlled.</p>
+            `
+        },
+        {
+            title: 'Configurable Rules Engine & Orchestration',
+            content: `
+            <p class="mb-4">To allow for rapid experimentation, all triggers, timing, and copy templates are managed in a YAML/JSON config file. This allows non-engineers to iterate on strategies without code changes.</p>
+            <h4 class="font-semibold text-slate-100 mb-2">Orchestration & Visibility Views:</h4>
+            <ul class="list-disc pl-5 space-y-2 text-sm">
+                <li><strong>User-level:</strong> A timeline of all queued and sent notifications for a specific user.</li>
+                <li><strong>Message-type:</strong> Shows the qualifying user sets for a given nudge type.</li>
+                <li><strong>Event-level:</strong> All notifications tied to a specific event.</li>
+                <li><strong>Time-table:</strong> A schedule of when notifications are planned to be dispatched.</li>
+            </ul>`
+        },
+        {
+            title: 'Code Example: Rules Engine',
+            content: `
+                <div class="code-block-header">
+                     <span class="code-block-title">mongo_aggregation.js</span>
+                     <button class="copy-btn text-xs bg-slate-600 px-2 py-1 rounded hover:bg-slate-500">Copy</button>
+                </div>
+                <pre class="code-block"><code>// Simplified pipeline to find eligible nudges
+const pipeline = [
+  { $match: { userId: ObjectId(userId) } },
+  { $lookup: { from: "user_behavior", ... } },
+  { $lookup: { from: "events", ... } },
+  {
+    $addFields: {
+      eligibleNudges: {
+        $filter: { ... } // Logic from config file
+      }
+    }
+  },
+  // ... more stages for scoring and ranking
+];
+db.collection('users').aggregate(pipeline);</code></pre>
+            `
+        }
+    ];
+
+    // Initialize all accordions
+    setupAccordion('playbook-accordion', playbookItems);
+    setupAccordion('tech-accordion', techItems);
+    
+    // --- Accordion Click Handler ---
+    document.querySelectorAll('.accordion-container').forEach(container => {
+        container.addEventListener('click', function(e) {
+            const trigger = e.target.closest('.accordion-trigger');
+            if (trigger) {
+                const item = trigger.parentElement;
+                item.classList.toggle('open');
+            }
+        });
+    });
+    
+    // --- Sticky Header Logic ---
+    const header = document.getElementById('main-header');
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+    });
+
+    // --- Active Nav Link on Scroll ---
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                navLinks.forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href').substring(1) === entry.target.id) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { rootMargin: '-30% 0px -70% 0px' });
+
+    sections.forEach(section => {
+        observer.observe(section);
+    });
+
+    // --- Code Copying Logic ---
+    document.body.addEventListener('click', function(e) {
+        const copyBtn = e.target.closest('.copy-btn');
+        if (copyBtn) {
+            const codeBlock = copyBtn.closest('.accordion-content').querySelector('pre code');
+            if (codeBlock) {
+                const textToCopy = codeBlock.innerText;
+                const tempTextarea = document.createElement('textarea');
+                tempTextarea.value = textToCopy;
+                document.body.appendChild(tempTextarea);
+                tempTextarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempTextarea);
+                
+                copyBtn.innerText = 'Copied!';
+                setTimeout(() => { copyBtn.innerText = 'Copy'; }, 2000);
+            }
+        }
+    });
+});
+</script>
+
+</body>
+</html>
