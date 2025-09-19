@@ -219,7 +219,7 @@
                     <span class="gradient-text">Option B as the Resilient Bridge to CDA</span>
                 </h1>
                 <p class="text-lg md:text-xl text-slate-300 text-center max-w-3xl mx-auto leading-relaxed">
-                    After testing three competing designs for cross-product transaction history, the team uncovered a mainframe MQ connection constraint that collapsed the favored Option C. This field report captures why Option B became the pragmatic path, how it supports a Q1 2026 Cross-DDA-Account (CDA) launch, and what it unlocks for a utilities-only API future.
+                    As DDA goes primary and customers expect a seamless transaction history across channels, we needed to determine the best path forward for delivering consistent data without overwhelming our mainframe or fracturing the consumer experience. This field report documents the options we evaluated, the constraints we uncovered, and the rationale for the architectural path we ultimately aligned on.
                 </p>
                 <div class="mt-10 grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div class="highlight-box p-6">
@@ -240,10 +240,16 @@
 
         <section class="px-6 pb-16">
             <div class="container mx-auto max-w-4xl space-y-8">
+                <div class="highlight-box p-8 space-y-4">
+                    <h2 class="text-2xl font-bold">Problem Statement</h2>
+                    <p class="text-slate-100 leading-relaxed">
+                        We must enable unified transaction history while DDA goes primary, meet the CDA delivery window, and keep the mainframe stable. Assessing the best path forward demanded that we weigh latency, mainframe MQ connection limits, and consumer change management so that the solution we choose accelerates—not derails—the march toward a single cross-product "uber" API.
+                    </p>
+                </div>
                 <div class="highlight-box p-8">
                     <h2 class="text-2xl font-bold mb-4">Executive Summary</h2>
                     <p class="text-slate-100 leading-relaxed mb-4">
-                        Option B — directing Digital Channels and Search to orchestrate both the DDA Transaction History API for list views and the Cross-Product API for search — is now the interim architecture. Option C, the intelligent router that originally won support, failed due to mainframe MQ connection limits that would have required ~40 new persistent connections. The team is mobilizing consumer alignment, AWS ingestion acceleration, and legacy API decommissioning to launch CDA search and transaction list experiences by Q1 2026 while preserving the long-term vision of a unified, utilities-only API hosted on AWS.
+                        Option B — directing Digital Channels and Search to orchestrate both the DDA Transaction History API for list views and the Cross-Product API for search — is the interim architecture we are moving ahead with. Option C, the intelligent router that originally won support, faltered when we uncovered the mainframe MQ connection ceiling and recognized the latency it would add under load. We still view Option C as the eventual best decision once the infrastructure gap closes, yet Option B keeps us on schedule, advances the DDA-going-primary initiative, and preserves momentum toward a utilities-only API hosted on AWS.
                     </p>
                     <p class="text-slate-300 text-sm">
                         Cross-link to deeper systems thinking: <a href="../blogs/system-thinking-empire-building.html" class="cross-link">System Thinking: The Foundation of Every Great Empire</a>.
@@ -295,36 +301,74 @@
                         <p class="text-slate-200 leading-relaxed">
                             Three viable patterns emerged. Each pushes us toward the Cross-Product API target in different ways, and each demands a conscious tolerance for technical debt so we can hit the end-to-end testing milestone on schedule.
                         </p>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div class="highlight-box p-5 space-y-3">
-                                <h4 class="text-base font-semibold text-slate-100 uppercase tracking-wide">Option A: System-of-Record Integration</h4>
-                                <p class="text-slate-200 text-sm">
-                                    The most resilient path embeds DDA system-of-record logic directly into Cross-Product. It creates a single utility surface with built-in failover.
-                                </p>
-                                <p class="text-slate-300 text-xs">
-                                    Tradeoff: Highest complexity and change scope; would delay consumer migration timelines well past the forcing milestone.
-                                </p>
-                            </div>
-                            <div class="highlight-box p-5 space-y-3 border border-emerald-400/50">
-                                <h4 class="text-base font-semibold text-emerald-200 uppercase tracking-wide">Option B: HTTP Orchestration Model</h4>
-                                <p class="text-slate-200 text-sm">
-                                    Consumers orchestrate HTTP requests across DDA Transaction History for lists and Cross-Product for search. It is achievable within the current timeline, respects existing SOR integrations, and remains the realistic fallback if other approaches stall.
-                                </p>
-                                <p class="text-slate-300 text-xs">
-                                    Tradeoff: Requires coordinated consumer migration and disciplined retirement of dual-call logic after rollout; we knowingly accept this debt to land the milestone.
-                                </p>
-                            </div>
-                            <div class="challenge-card p-5 space-y-3 border border-red-400/50">
-                                <h4 class="text-base font-semibold text-rose-200 uppercase tracking-wide">Option C: Library Routing Bridge</h4>
-                                <p class="text-slate-200 text-sm">
-                                    Embeds a shared DDA library inside Cross-Product to route list traffic without a network hop, aligning strongly with the eventual utility fabric.
-                                </p>
-                                <ul class="text-slate-300 text-xs space-y-1">
-                                    <li>➕ Acts as a consumer migration bridge toward the target state.</li>
-                                    <li>➖ Adds 30–40ms latency and requires MQ connectivity that Mainframe/SOR partners rejected.</li>
-                                    <li>➖ No new consumer connections, yet only viable if teams roll off legacy API versions while rolling onto the shared library.</li>
-                                </ul>
-                            </div>
+                        <div class="space-y-4">
+                            <details class="highlight-box p-5 space-y-3">
+                                <summary class="text-base font-semibold text-slate-100 uppercase tracking-wide cursor-pointer">Option A: System-of-Record Integration</summary>
+                                <div class="space-y-3 text-sm text-slate-200">
+                                    <p>
+                                        Embed DDA system-of-record logic directly into Cross-Product so every experience calls a single utility. This is the purest expression of the long-term vision.
+                                    </p>
+                                    <div>
+                                        <p class="font-semibold text-slate-100 text-xs uppercase tracking-wide">Pros</p>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li>Ultimate resilience with one API responsible for list, search, and failover behavior.</li>
+                                            <li>Eliminates duplicate consumer orchestration paths at the cost of a larger initial build.</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-slate-100 text-xs uppercase tracking-wide">Cons</p>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li>Engineering scope exceeds the immediate milestone and jeopardizes CDA commitments.</li>
+                                            <li>Requires synchronized cutovers from all consumers, increasing operational risk.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </details>
+                            <details class="highlight-box p-5 space-y-3 border border-emerald-400/50">
+                                <summary class="text-base font-semibold text-emerald-200 uppercase tracking-wide cursor-pointer">Option B: HTTP Orchestration Model</summary>
+                                <div class="space-y-3 text-sm text-slate-200">
+                                    <p>
+                                        Keep DDA Transaction History and Cross-Product as separate services while Digital Channels and Search orchestrate calls to both. This was designed as the pragmatic bridge.
+                                    </p>
+                                    <div>
+                                        <p class="font-semibold text-slate-100 text-xs uppercase tracking-wide">Pros</p>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li>Delivers within existing timelines with minimal backend disruption.</li>
+                                            <li>Respects known SOR integrations and allows incremental consumer migration.</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-slate-100 text-xs uppercase tracking-wide">Cons</p>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li>Creates temporary dual-call logic that must be retired post-launch.</li>
+                                            <li>Requires disciplined governance to ensure all consumers roll off older API versions.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </details>
+                            <details class="highlight-box p-5 space-y-3 border border-red-400/50">
+                                <summary class="text-base font-semibold text-rose-200 uppercase tracking-wide cursor-pointer">Option C: Library Routing Bridge</summary>
+                                <div class="space-y-3 text-sm text-slate-200">
+                                    <p>
+                                        Embed a shared DDA library inside Cross-Product so it can route list traffic without a network hop. This progressive disclosure of intelligence inside Cross-Product initially emerged as the favorite.
+                                    </p>
+                                    <div>
+                                        <p class="font-semibold text-slate-100 text-xs uppercase tracking-wide">Pros</p>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li>Aligns tightly with the target-state "uber" API vision.</li>
+                                            <li>Reduces consumer complexity by consolidating orchestration in Cross-Product.</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold text-slate-100 text-xs uppercase tracking-wide">Cons</p>
+                                        <ul class="list-disc list-inside space-y-1">
+                                            <li>Introduces 30–40ms of latency during routing, impacting SLA headroom.</li>
+                                            <li>Requires ~40 additional MQ connections that mainframe partners cannot support today.</li>
+                                            <li>Demands concurrent roll-off of legacy API versions while the library goes live.</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </details>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="option-table mt-2">
@@ -364,6 +408,18 @@
                                 </tbody>
                             </table>
                         </div>
+                        <div class="highlight-box p-8 space-y-3">
+                            <h4 class="text-xl font-semibold text-slate-100">Why Option C Slipped</h4>
+                            <p class="text-slate-200 leading-relaxed">
+                                Option C carried early momentum because it concentrated intelligence in Cross-Product and looked like the cleanest route to a single "uber" API. That enthusiasm cooled once the infrastructure reality set in: standing up the library would require roughly 40 additional MQ connections and would still add 30–40ms of routing latency. Mainframe partners confirmed that the MQ headroom simply does not exist, so the favorite option instantly turned into an infeasible one.
+                            </p>
+                        </div>
+                        <div class="highlight-box p-8 space-y-3">
+                            <h4 class="text-xl font-semibold text-slate-100">Alignment on the Path Forward</h4>
+                            <p class="text-slate-200 leading-relaxed">
+                                We aligned on using the DDA-going-primary initiative to keep marching toward Cross-Product as the future "uber" API. Option C remains the architectural north star once MQ capacity and latency concerns are solved, yet Option B is the next best decision and the one we are executing. The MQ discovery forced us to pivot, and now Option B lets us honor CDA milestones while continuing to retire older integrations.
+                            </p>
+                        </div>
                         <p class="text-slate-300 text-sm">
                             Architecture history fans can cross-reference <a href="../blogs/dda-api-migration-v2-to-v3.html" class="cross-link">DDA API Migration: V2 to V3</a> to see how incremental modernization succeeds.
                         </p>
@@ -376,13 +432,16 @@
 
                     <div class="highlight-box p-8 space-y-4">
                         <h3 class="text-xl font-semibold text-slate-100">Next Steps for Consumer Migration</h3>
+                        <p class="text-slate-200 text-sm">Other takeaways include disciplined consumer migration, version management, and clearer guidance for who uses which API.</p>
                         <ul class="list-disc list-inside space-y-3 text-slate-100">
-                            <li>Begin contacting consumers now about rolling off old connections and retiring unsupported API versions.</li>
-                            <li>Assess and document what each API provides to guarantee feature parity as consumers migrate to new experiences.</li>
+                            <li>Begin contacting consumers now about rolling off old connections and retiring unsupported API versions to reduce persistent mainframe MQ load.</li>
+                            <li>Treat every roll-out of refreshed APIs as a simultaneous roll-off of prior versions so connection counts trend downward.</li>
+                            <li>Assess and document what each API version provides to guarantee compatibility and feature parity as we plan future iterations.</li>
                             <li>Build a decision tree for adoption so every team has a clear runway:
                                 <ul class="list-disc list-inside ml-5 space-y-2 text-slate-200">
                                     <li>Digital Channels → Cross-Product API.</li>
                                     <li>OSC Servicing → Transaction History API.</li>
+                                    <li>CDFO → Transaction History API (until cross-product capabilities expand).</li>
                                     <li>Ensure roll-off plans double as roll-on support for the new orchestration paths.</li>
                                 </ul>
                             </li>
@@ -403,6 +462,11 @@
                                 </div>
                                 <div class="decision-branch">
                                     <div class="decision-node">OSC Servicing</div>
+                                    <div class="decision-connector"></div>
+                                    <div class="decision-leaf">Adopt Transaction History API</div>
+                                </div>
+                                <div class="decision-branch">
+                                    <div class="decision-node">CDFO</div>
                                     <div class="decision-connector"></div>
                                     <div class="decision-leaf">Adopt Transaction History API</div>
                                 </div>
