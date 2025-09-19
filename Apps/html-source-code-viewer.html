@@ -27,6 +27,17 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #555;
         }
+        .modal-open {
+            overflow: hidden;
+        }
+        #previewDialog {
+            transition: width 0.3s ease, height 0.3s ease;
+        }
+        #previewDialog.expanded {
+            width: 95vw;
+            height: 90vh;
+            max-width: none;
+        }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen p-4">
@@ -70,10 +81,35 @@
 
             <!-- Result Display Section -->
             <div id="resultContainer" class="hidden relative">
-                <button id="copyBtn" class="absolute top-3 right-3 bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-opacity duration-200 opacity-80 hover:opacity-100">
-                    Copy Code
-                </button>
+                <div class="absolute top-3 right-3 flex flex-col gap-2 sm:flex-row sm:items-center">
+                    <button id="previewBtn" class="bg-white/90 text-gray-900 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-opacity duration-200 opacity-80 hover:opacity-100 shadow-sm">
+                        Render Preview
+                    </button>
+                    <button id="copyBtn" class="bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs font-semibold hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-opacity duration-200 opacity-80 hover:opacity-100 shadow-sm">
+                        Copy Code
+                    </button>
+                </div>
                 <pre class="bg-gray-900 text-white p-4 rounded-lg overflow-auto max-h-[60vh] text-sm leading-relaxed"><code id="htmlOutput"></code></pre>
+            </div>
+
+            <div id="previewModal" class="hidden fixed inset-0 z-50 bg-gray-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+                <div id="previewDialog" class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl h-[80vh] flex flex-col overflow-hidden">
+                    <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-gray-200 bg-gray-50">
+                        <div>
+                            <h3 class="text-lg font-semibold text-gray-900">Rendered Preview</h3>
+                            <p class="text-xs text-gray-500">Sandboxed view using the fetched HTML markup.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button id="previewExpandBtn" class="px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 transition">
+                                Expand
+                            </button>
+                            <button id="previewCloseBtn" class="px-3 py-1.5 text-xs font-semibold text-white bg-gray-900 hover:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-500 transition">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                    <iframe id="previewFrame" class="flex-1 w-full bg-white" sandbox="allow-forms allow-same-origin allow-scripts"></iframe>
+                </div>
             </div>
 
             <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
@@ -107,6 +143,15 @@
         const resultContainer = document.getElementById('resultContainer');
         const htmlOutput = document.getElementById('htmlOutput');
         const copyBtn = document.getElementById('copyBtn');
+        const previewBtn = document.getElementById('previewBtn');
+        const previewModal = document.getElementById('previewModal');
+        const previewDialog = document.getElementById('previewDialog');
+        const previewFrame = document.getElementById('previewFrame');
+        const previewCloseBtn = document.getElementById('previewCloseBtn');
+        const previewExpandBtn = document.getElementById('previewExpandBtn');
+
+        let previewHtml = '';
+        let isPreviewExpanded = false;
 
         // --- Event Listeners ---
 
@@ -138,6 +183,20 @@
             document.body.removeChild(tempTextArea);
         });
 
+        previewBtn.addEventListener('click', openPreview);
+        previewCloseBtn.addEventListener('click', closePreview);
+        previewExpandBtn.addEventListener('click', togglePreviewSize);
+        previewModal.addEventListener('click', (event) => {
+            if (event.target === previewModal) {
+                closePreview();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && !previewModal.classList.contains('hidden')) {
+                closePreview();
+            }
+        });
+
         // --- Core Functions ---
 
         async function fetchHtmlSource() {
@@ -151,6 +210,10 @@
             resultContainer.classList.add('hidden');
             showMessage('Fetching source code...', 'loading');
 
+            if (!previewModal.classList.contains('hidden')) {
+                closePreview();
+            }
+
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
 
             try {
@@ -163,6 +226,8 @@
                 const htmlText = await response.text();
 
                 htmlOutput.textContent = htmlText;
+                previewHtml = buildPreviewDocument(htmlText, url);
+                previewFrame.srcdoc = previewHtml;
                 resultContainer.classList.remove('hidden');
                 showMessage('Source code fetched successfully!', 'success');
             } catch (error) {
@@ -171,6 +236,34 @@
             } finally {
                 setLoading(false);
             }
+        }
+
+        function openPreview() {
+            if (!htmlOutput.textContent.trim()) {
+                showMessage('Fetch HTML before opening the preview window.', 'error');
+                return;
+            }
+
+            previewFrame.srcdoc = previewHtml || htmlOutput.textContent;
+            previewModal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
+        }
+
+        function closePreview() {
+            previewModal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+            previewFrame.srcdoc = '';
+            if (isPreviewExpanded) {
+                previewDialog.classList.remove('expanded');
+                previewExpandBtn.textContent = 'Expand';
+                isPreviewExpanded = false;
+            }
+        }
+
+        function togglePreviewSize() {
+            isPreviewExpanded = !isPreviewExpanded;
+            previewDialog.classList.toggle('expanded', isPreviewExpanded);
+            previewExpandBtn.textContent = isPreviewExpanded ? 'Shrink' : 'Expand';
         }
 
         // --- Helper Functions ---
@@ -189,6 +282,29 @@
                 loadingSpinner.classList.add('hidden');
                 fetchBtnText.textContent = 'Fetch HTML';
             }
+        }
+
+        function buildPreviewDocument(html, sourceUrl) {
+            let previewDocument = html;
+
+            try {
+                const baseHref = new URL('./', sourceUrl).href;
+                const baseTag = `<base href="${baseHref}" target="_blank">`;
+
+                if (!/<base\s/i.test(previewDocument)) {
+                    if (/<head[^>]*>/i.test(previewDocument)) {
+                        previewDocument = previewDocument.replace(/<head([^>]*)>/i, `<head$1>${baseTag}`);
+                    } else if (/<html[^>]*>/i.test(previewDocument)) {
+                        previewDocument = previewDocument.replace(/<html([^>]*)>/i, `<html$1><head>${baseTag}</head>`);
+                    } else {
+                        previewDocument = `<head>${baseTag}</head>${previewDocument}`;
+                    }
+                }
+            } catch (err) {
+                console.warn('Preview base tag injection failed:', err);
+            }
+
+            return previewDocument;
         }
 
         function showMessage(msg, type = 'info') {
