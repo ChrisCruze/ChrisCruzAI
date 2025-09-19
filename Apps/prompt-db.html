@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt DB</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb; /* gray-50 */
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9; /* slate-100 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; /* slate-300 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; /* slate-400 */
+        }
+        .modal {
+            display: none;
+        }
+        .modal.active {
+            display: flex;
+        }
+        .hide-scroll {
+            overflow: hidden;
+        }
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            background-color: #2563eb; /* blue-600 */
+            color: #ffffff;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+            cursor: pointer;
+        }
+        .btn-primary:hover {
+            background-color: #1d4ed8; /* blue-700 */
+        }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            background-color: #ffffff;
+            color: #374151; /* gray-700 */
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            border: 1px solid #d1d5db; /* gray-300 */
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+            cursor: pointer;
+        }
+        .btn-secondary:hover {
+            background-color: #f9fafb; /* gray-50 */
+        }
+        .btn-danger {
+            display: inline-flex;
+            align-items: center;
+            background-color: #dc2626; /* red-600 */
+            color: #ffffff;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+            cursor: pointer;
+        }
+        .btn-danger:hover {
+            background-color: #b91c1c; /* red-700 */
+        }
+        .input-base {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid #d1d5db; /* gray-300 */
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            color: #1f2937; /* gray-800 */
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .input-base::placeholder {
+            color: #9ca3af; /* gray-400 */
+        }
+        .input-base:focus {
+            outline: none;
+            border-color: #2563eb; /* blue-600 */
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+    </style>
+</head>
+<body class="text-gray-800">
+
+    <div id="app" class="h-screen w-screen flex flex-col p-4 sm:p-6 overflow-hidden">
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-4 sm:mb-6 flex-shrink-0">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Prompt DB</h1>
+            <button id="new-prompt-btn" class="btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                New Prompt
+            </button>
+        </header>
+
+        <!-- Main Content -->
+        <main id="main-content" class="flex-grow h-full overflow-hidden grid grid-cols-1 md:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- Left Panel: Prompt List -->
+            <div class="md:col-span-1 xl:col-span-1 bg-white rounded-xl p-4 flex flex-col h-full border border-gray-200 shadow-sm">
+                <div class="relative mb-4">
+                    <input type="text" id="search-input" placeholder="Search prompts..." class="input-base pl-10">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                    </div>
+                </div>
+                <div id="prompt-list-container" class="overflow-y-auto flex-grow -mr-2 pr-2">
+                    <!-- Prompt list items will be injected here -->
+                </div>
+            </div>
+
+            <!-- Right Panel: Prompt Details -->
+            <div id="prompt-details-container" class="md:col-span-2 xl:col-span-3 bg-white rounded-xl p-6 flex flex-col h-full overflow-y-auto border border-gray-200 shadow-sm">
+                 <!-- Details will be injected here. Shows loading/error/empty state -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div id="prompt-modal" class="modal fixed inset-0 bg-gray-900/60 items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col border border-gray-200">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200">
+                <h2 id="modal-title" class="text-xl font-semibold text-gray-900">Create New Prompt</h2>
+                <button id="modal-close-btn" class="text-gray-400 hover:text-gray-600 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg></button>
+            </div>
+            <form id="prompt-form" class="p-6 space-y-4 overflow-y-auto">
+                <input type="hidden" id="prompt-id">
+                <div>
+                    <label for="Name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" name="Name" id="prompt-name" class="input-base" required />
+                </div>
+                <div>
+                    <label for="Description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <input type="text" name="Description" id="prompt-description" class="input-base" />
+                </div>
+                <div>
+                    <label for="URL" class="block text-sm font-medium text-gray-700 mb-1">URL (Optional)</label>
+                    <input type="url" name="URL" id="prompt-url" class="input-base" />
+                </div>
+                <div>
+                    <label for="Prompt" class="block text-sm font-medium text-gray-700 mb-1">Prompt</label>
+                    <textarea name="Prompt" id="prompt-text" class="input-base min-h-[120px]" required></textarea>
+                </div>
+                <div>
+                    <label for="Notes" class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                    <textarea name="Notes" id="prompt-notes" class="input-base min-h-[120px]"></textarea>
+                </div>
+                <div class="flex justify-end pt-4 space-x-3">
+                    <button type="button" id="modal-cancel-btn" class="btn-secondary">Cancel</button>
+                    <button type="submit" class="btn-primary">Save Prompt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="delete-modal" class="modal fixed inset-0 bg-gray-900/60 items-center justify-center p-4 z-50 backdrop-blur-sm">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 border border-gray-200">
+            <h3 class="text-xl font-bold text-gray-900">Confirm Deletion</h3>
+            <p class="text-gray-600 mt-4">
+                Are you sure you want to delete the prompt <strong id="delete-prompt-name" class="text-red-600"></strong>? This action cannot be undone.
+            </p>
+            <div class="flex justify-end mt-6 space-x-3">
+                <button id="delete-cancel-btn" class="btn-secondary">Cancel</button>
+                <button id="delete-confirm-btn" class="btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // --- Configuration ---
+        const AIRTABLE_CONFIG = {
+            API_KEY: "patdMoOPya9xAXGLG.3a26ab9163b441fa24a5e1edc3d775c4608e447dd7c0ffa50d6de697d121c022",
+            BASE_ID: "appfT5cOqUEHngl0t",
+            TABLE_ID: "tblC9oVqrRuIIoUKT",
+        };
+        const API_URL = `https://api.airtable.com/v0/${AIRTABLE_CONFIG.BASE_ID}/${AIRTABLE_CONFIG.TABLE_ID}`;
+        const HEADERS = {
+            Authorization: `Bearer ${AIRTABLE_CONFIG.API_KEY}`,
+            "Content-Type": "application/json",
+        };
+
+        // --- State ---
+        let allPrompts = [];
+        let selectedPromptId = null;
+        let currentError = null;
+        
+        // --- DOM Elements ---
+        const promptListContainer = document.getElementById('prompt-list-container');
+        const promptDetailsContainer = document.getElementById('prompt-details-container');
+        const searchInput = document.getElementById('search-input');
+        const newPromptBtn = document.getElementById('new-prompt-btn');
+
+        // Modals
+        const promptModal = document.getElementById('prompt-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const promptForm = document.getElementById('prompt-form');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+
+        const deleteModal = document.getElementById('delete-modal');
+        const deletePromptName = document.getElementById('delete-prompt-name');
+        const deleteCancelBtn = document.getElementById('delete-cancel-btn');
+        const deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+
+        // --- Render Functions ---
+        const renderSpinner = (container) => {
+            container.innerHTML = `
+                <div class="flex justify-center items-center h-full">
+                    <svg class="animate-spin h-10 w-10 text-blue-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>`;
+        };
+
+        const renderError = (container, message) => {
+            container.innerHTML = `
+                <div class="flex flex-col items-center justify-center h-full text-center bg-red-50 rounded-lg p-4 border border-red-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                    <h3 class="text-xl font-semibold text-red-800">An Error Occurred</h3>
+                    <p class="text-red-600 mt-2">${message}</p>
+                </div>`;
+        };
+
+        const renderPromptList = () => {
+            const searchTerm = searchInput.value.toLowerCase();
+            const filteredPrompts = allPrompts.filter(p => {
+                const fields = p.fields;
+                return (
+                    fields.Name?.toLowerCase().includes(searchTerm) ||
+                    fields.Description?.toLowerCase().includes(searchTerm) ||
+                    fields.Prompt?.toLowerCase().includes(searchTerm) ||
+                    fields.Notes?.toLowerCase().includes(searchTerm)
+                );
+            });
+
+            if (filteredPrompts.length === 0) {
+                promptListContainer.innerHTML = `<div class="text-center py-10 text-gray-500">No prompts found.</div>`;
+                return;
+            }
+
+            promptListContainer.innerHTML = filteredPrompts.map(prompt => `
+                <div data-id="${prompt.id}" class="prompt-item p-3 rounded-lg cursor-pointer mb-2 transition-colors duration-200 ${selectedPromptId === prompt.id ? 'bg-blue-50 text-blue-800' : 'hover:bg-gray-100'}">
+                    <h3 class="font-semibold text-gray-800 truncate">${prompt.fields.Name || 'Untitled Prompt'}</h3>
+                    <p class="text-sm text-gray-500 truncate">${prompt.fields.Description || 'No description'}</p>
+                </div>
+            `).join('');
+        };
+
+        const renderPromptDetails = () => {
+            if (currentError) {
+                renderError(promptDetailsContainer, currentError);
+                return;
+            }
+
+            const prompt = allPrompts.find(p => p.id === selectedPromptId);
+            if (!prompt) {
+                promptDetailsContainer.innerHTML = `
+                    <div class="flex items-center justify-center h-full text-gray-500">
+                        <p>${allPrompts.length > 0 ? "Select a prompt to view details" : "No prompts available. Add one to get started!"}</p>
+                    </div>`;
+                return;
+            }
+            
+            const { Name, Description, URL, Prompt, Notes } = prompt.fields;
+
+            promptDetailsContainer.innerHTML = `
+                <div class="flex flex-col sm:flex-row justify-between items-start mb-6">
+                    <div class="flex-grow">
+                        <h2 class="text-2xl font-bold text-gray-900">${Name}</h2>
+                        <p class="text-gray-600 mt-1">${Description || ''}</p>
+                        ${URL ? `<a href="${URL}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:text-blue-700 transition-colors text-sm mt-1 block break-all">${URL}</a>` : ''}
+                    </div>
+                    <div class="flex items-center space-x-2 flex-shrink-0 mt-4 sm:mt-0 sm:ml-4">
+                        <button id="copy-btn" class="relative bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold py-2 px-4 rounded-md flex items-center transition-colors border border-gray-300 shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                            Copy
+                        </button>
+                        <button id="edit-btn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold p-2 rounded-md transition-colors border border-gray-300 shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L15.232 5.232z" /></svg></button>
+                        <button id="delete-btn" class="bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold p-2 rounded-md transition-colors border border-gray-300 shadow-sm"><svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                    </div>
+                </div>
+
+                <div class="space-y-6 text-gray-700 flex-grow">
+                    <div>
+                        <h4 class="font-semibold text-gray-500 text-sm uppercase tracking-wider mb-2">Prompt</h4>
+                        <pre class="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap font-mono text-sm leading-relaxed text-gray-800 border border-gray-200">${Prompt || ''}</pre>
+                    </div>
+                    <div>
+                        <h4 class="font-semibold text-gray-500 text-sm uppercase tracking-wider mb-2">Notes</h4>
+                        <pre class="bg-gray-50 p-4 rounded-lg whitespace-pre-wrap font-sans text-sm leading-relaxed text-gray-800 border border-gray-200">${Notes || ''}</pre>
+                    </div>
+                </div>
+            `;
+            addDetailsEventListeners();
+        };
+
+        // --- API Functions ---
+        const fetchPrompts = async () => {
+            renderSpinner(promptListContainer);
+            renderSpinner(promptDetailsContainer);
+            currentError = null;
+            try {
+                const response = await fetch(API_URL, { headers: HEADERS });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const data = await response.json();
+                allPrompts = data.records.sort((a, b) => (a.fields.Name || '').localeCompare(b.fields.Name || ''));
+                if (allPrompts.length > 0 && !selectedPromptId) {
+                    selectedPromptId = allPrompts[0].id;
+                }
+            } catch (e) {
+                currentError = e.message;
+                console.error("Failed to fetch prompts:", e);
+            } finally {
+                renderPromptList();
+                renderPromptDetails();
+            }
+        };
+
+        const savePrompt = async (promptData) => {
+            const id = document.getElementById('prompt-id').value;
+            const url = id ? `${API_URL}/${id}` : API_URL;
+            const method = id ? 'PATCH' : 'POST';
+            const body = id ? { fields: promptData } : { records: [{ fields: promptData }] };
+            
+            try {
+                const response = await fetch(url, { method, headers: HEADERS, body: JSON.stringify(body) });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                const result = await response.json();
+                const newRecord = result.records ? result.records[0] : result;
+                selectedPromptId = newRecord.id;
+                closePromptModal();
+                await fetchPrompts();
+            } catch (e) {
+                currentError = e.message;
+                console.error("Failed to save prompt:", e);
+                renderPromptDetails();
+            }
+        };
+
+        const deletePrompt = async (id) => {
+            try {
+                const response = await fetch(`${API_URL}/${id}`, { method: 'DELETE', headers: HEADERS });
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                selectedPromptId = null;
+                closeDeleteModal();
+                await fetchPrompts();
+            } catch (e) {
+                currentError = e.message;
+                console.error("Failed to delete prompt:", e);
+                renderPromptDetails();
+            }
+        };
+
+        // --- Modal Logic ---
+        const openPromptModal = (prompt = null) => {
+            promptForm.reset();
+            if (prompt) {
+                modalTitle.textContent = 'Edit Prompt';
+                document.getElementById('prompt-id').value = prompt.id;
+                document.getElementById('prompt-name').value = prompt.fields.Name || '';
+                document.getElementById('prompt-description').value = prompt.fields.Description || '';
+                document.getElementById('prompt-url').value = prompt.fields.URL || '';
+                document.getElementById('prompt-text').value = prompt.fields.Prompt || '';
+                document.getElementById('prompt-notes').value = prompt.fields.Notes || '';
+            } else {
+                modalTitle.textContent = 'Create New Prompt';
+                document.getElementById('prompt-id').value = '';
+            }
+            promptModal.classList.add('active');
+            document.body.classList.add('hide-scroll');
+        };
+
+        const closePromptModal = () => {
+            promptModal.classList.remove('active');
+            document.body.classList.remove('hide-scroll');
+        };
+
+        const openDeleteModal = (prompt) => {
+            deletePromptName.textContent = `"${prompt.fields.Name}"`;
+            deleteConfirmBtn.dataset.id = prompt.id;
+            deleteModal.classList.add('active');
+            document.body.classList.add('hide-scroll');
+        };
+        
+        const closeDeleteModal = () => {
+            deleteModal.classList.remove('active');
+            document.body.classList.remove('hide-scroll');
+        };
+
+        // --- Event Listeners ---
+        const addDetailsEventListeners = () => {
+            const copyBtn = document.getElementById('copy-btn');
+            const editBtn = document.getElementById('edit-btn');
+            const deleteBtn = document.getElementById('delete-btn');
+
+            if(copyBtn) {
+                copyBtn.addEventListener('click', () => {
+                    const prompt = allPrompts.find(p => p.id === selectedPromptId);
+                    if (prompt?.fields.Prompt) {
+                        navigator.clipboard.writeText(prompt.fields.Prompt).then(() => {
+                            copyBtn.innerHTML = 'Copied!';
+                            copyBtn.classList.add('bg-green-100', 'text-green-700');
+                            setTimeout(() => {
+                                copyBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>Copy`;
+                                copyBtn.classList.remove('bg-green-100', 'text-green-700');
+                            }, 2000);
+                        });
+                    }
+                });
+            }
+            if(editBtn) {
+                editBtn.addEventListener('click', () => {
+                    const prompt = allPrompts.find(p => p.id === selectedPromptId);
+                    if (prompt) openPromptModal(prompt);
+                });
+            }
+            if(deleteBtn) {
+                deleteBtn.addEventListener('click', () => {
+                    const prompt = allPrompts.find(p => p.id === selectedPromptId);
+                    if (prompt) openDeleteModal(prompt);
+                });
+            }
+        };
+
+        searchInput.addEventListener('input', renderPromptList);
+
+        promptListContainer.addEventListener('click', (e) => {
+            const item = e.target.closest('.prompt-item');
+            if (item) {
+                selectedPromptId = item.dataset.id;
+                renderPromptList();
+                renderPromptDetails();
+            }
+        });
+        
+        newPromptBtn.addEventListener('click', () => openPromptModal());
+        modalCloseBtn.addEventListener('click', closePromptModal);
+        modalCancelBtn.addEventListener('click', closePromptModal);
+        
+        deleteCancelBtn.addEventListener('click', closeDeleteModal);
+        deleteConfirmBtn.addEventListener('click', (e) => {
+            deletePrompt(e.currentTarget.dataset.id);
+        });
+
+        promptForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const promptData = Object.fromEntries(formData.entries());
+            savePrompt(promptData);
+        });
+
+        // --- Initial Load ---
+        fetchPrompts();
+    });
+    </script>
+</body>
+</html>
