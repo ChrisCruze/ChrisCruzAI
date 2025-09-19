@@ -75,6 +75,14 @@
                             <option value="device_phone">Device (Phone First)</option>
                         </select>
                     </div>
+                    <div class="flex-1">
+                        <label for="completion-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filter by</label>
+                        <select id="completion-filter" class="w-full bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">All Tasks</option>
+                            <option value="incomplete">Incomplete Tasks</option>
+                            <option value="complete">Complete Tasks</option>
+                        </select>
+                    </div>
                     <div class="flex-1 flex flex-col justify-end">
                          <button id="review-unrefined-button" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 disabled:bg-yellow-300 disabled:cursor-not-allowed">
                             Review Unrefined
@@ -215,7 +223,8 @@
         let currentTaskIndex = 0;
         let isSortingMode = false;
         let currentSortMethod = 'default';
-        
+        let currentCompletionFilter = 'all';
+
         // Timer state
         let timerInterval = null;
         let timerStartTime = null;
@@ -224,6 +233,7 @@
         const deviceLabels = ['Computer', 'Phone'];
         const durationLabels = ['5min', '25min', '50min'];
         const ACTIVE_TIMER_LABEL = 'active-timer';
+        const COMPLETION_LOG_PATTERN = /\[\d{1,2}:\d{2}:\d{2}(?:am|pm)-\d{1,2}:\d{2}:\d{2}(?:am|pm)\|\d+(?:\.\d+)?min]/i;
 
         // Views
         const taskListView = document.getElementById('task-list-view');
@@ -239,6 +249,7 @@
         const startSortingButton = document.getElementById('start-sorting-button');
         const reviewUnrefinedButton = document.getElementById('review-unrefined-button');
         const sortSelect = document.getElementById('sort-select');
+        const completionFilter = document.getElementById('completion-filter');
         
         // Editor View Elements
         const backButton = document.getElementById('back-button');
@@ -305,7 +316,6 @@
                 sortAndDisplayTasks();
                 const unrefinedCount = allTasks.filter(isTaskUnrefined).length;
                 reviewUnrefinedButton.disabled = unrefinedCount === 0;
-                startSortingButton.disabled = allTasks.length === 0;
             } finally {
                 loadingIndicator.classList.add('hidden');
                 refreshButton.classList.remove('animate-spin');
@@ -450,23 +460,47 @@
             return sorted;
         }
 
+        function isTaskMarkedComplete(task) {
+            if (!task || !task.content) return false;
+            return COMPLETION_LOG_PATTERN.test(task.content);
+        }
+
+        function applyCompletionFilter(tasks, filter) {
+            switch (filter) {
+                case 'complete':
+                    return tasks.filter(isTaskMarkedComplete);
+                case 'incomplete':
+                    return tasks.filter(task => !isTaskMarkedComplete(task));
+                case 'all':
+                default:
+                    return [...tasks];
+            }
+        }
+
+        function updateStartSortingButtonState(filteredTasks = null) {
+            const relevantTasks = filteredTasks ?? applyCompletionFilter(allTasks, currentCompletionFilter);
+            startSortingButton.disabled = relevantTasks.length === 0;
+        }
+
         function sortAndDisplayTasks() {
-            const sortedTasks = getSortedTasks(allTasks, currentSortMethod);
+            const filteredTasks = applyCompletionFilter(allTasks, currentCompletionFilter);
+            const sortedTasks = getSortedTasks(filteredTasks, currentSortMethod);
             displayTasks(sortedTasks);
+            updateStartSortingButtonState(filteredTasks);
         }
 
         function displayTasks(tasks) {
             taskList.innerHTML = '';
             if (tasks.length === 0) {
-                taskList.innerHTML = '<li class="text-center text-gray-500 dark:text-gray-400 py-4">No tasks found.</li>';
+                taskList.innerHTML = '<li class="text-center text-gray-500 dark:text-gray-400 py-4">No tasks match the current filters.</li>';
                 return;
             }
-            
+
             tasks.forEach(task => {
                 const li = document.createElement('li');
                 li.className = 'bg-gray-50 dark:bg-gray-700 p-4 rounded-lg flex items-center justify-between shadow-sm flex-wrap';
                 li.dataset.taskId = task.id;
-                
+
                 const getLabelHtml = (label) => {
                     let classes = '';
                     if (label === ACTIVE_TIMER_LABEL) classes = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300 animate-pulse';
@@ -476,11 +510,14 @@
                     return `<span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full ${classes}">${label}</span>`;
                 };
                 const labelsHtml = task.labels.map(getLabelHtml).join('');
+                const completionBadge = isTaskMarkedComplete(task)
+                    ? '<span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">Complete</span>'
+                    : '<span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200">Incomplete</span>';
 
                 li.innerHTML = `
                     <span class="flex-grow mr-4">${task.content}</span>
                     <div class="flex items-center flex-shrink-0 mt-2 sm:mt-0">
-                        ${labelsHtml}
+                        ${completionBadge}${labelsHtml}
                         <span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full ${getPriority(task.priority).classes}">${getPriority(task.priority).text}</span>
                     </div>
                 `;
@@ -809,7 +846,9 @@
         refreshButton.addEventListener('click', fetchAllTasks);
         
         startSortingButton.addEventListener('click', () => {
-            const tasksForSession = getSortedTasks(allTasks, currentSortMethod);
+            const filteredTasks = applyCompletionFilter(allTasks, currentCompletionFilter);
+            if (filteredTasks.length === 0) return;
+            const tasksForSession = getSortedTasks(filteredTasks, currentSortMethod);
             startSortingSession(tasksForSession, 'Sorting All Tasks');
         });
 
@@ -820,6 +859,11 @@
 
         sortSelect.addEventListener('change', (e) => {
             currentSortMethod = e.target.value;
+            sortAndDisplayTasks();
+        });
+
+        completionFilter.addEventListener('change', (e) => {
+            currentCompletionFilter = e.target.value;
             sortAndDisplayTasks();
         });
 
