@@ -326,6 +326,183 @@
                 </div>
             </section>
 
+            <section class="mt-12" id="cuculi-alignment">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">How the Cuculi Blueprint Aligns with Your Three Key Components</h2>
+                <p>
+                    Integrating Cuculi's field-tested notification playbook with the in-flight architecture sharpens the focus on infrastructure, prompt craft, and retrieval quality. The comparison below highlights how each of your pillars is reinforced by Cuculi's patterns and the operational moves to adopt.
+                </p>
+                <div class="table-wrapper mt-8">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Your Component</th>
+                                <th>What Cuculi Adds / Reinforces</th>
+                                <th>Key Patterns to Adopt</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Infrastructure</strong></td>
+                                <td>
+                                    <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                                        <li>Favors serverless (AWS Lambda) for event-driven nudges to maximize cost efficiency and automatic scaling.</li>
+                                        <li>Standardizes on API Gateway in front of microservices for routing, authentication, and rate governance.</li>
+                                        <li>Uses MongoDB Atlas as a unified datastore for operational records and embeddings, minimizing data drift.</li>
+                                        <li>Runs an event-driven pipeline (mobile SDK &rarr; Kafka &rarr; triggers) that keeps upstream agents well fed with behavioral signals.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                                        <li>Keep services single-purpose and lightweight.</li>
+                                        <li>Lean on AWS Lambda (or equivalent) for trigger handling and elastic scale.</li>
+                                        <li>Front APIs with API Gateway-class services for routing, auth, and throttling.</li>
+                                        <li>Adopt a unified data system whenever possible and lean into MongoDB Atlas vector search.</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Prompt Template / LLM Agent Instructions</strong></td>
+                                <td>
+                                    <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                                        <li>Defines personas, goals, tones, and guardrails per agent (Intent, User Recommendation, Event Targeting, Profile Completion).</li>
+                                        <li>Constrains outputs (e.g., &lt;140 characters, single CTA, no hallucinations) for consistency and auditability.</li>
+                                        <li>Makes prompts context-aware with recent activity, profile insights, and segment cues.</li>
+                                        <li>Logs prompt, context, and completion tuples for audit trails, metrics, and experimentation.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                                        <li>Design distinct prompt templates and personas for every agent.</li>
+                                        <li>Encode tone, length, style, and psychological guardrails directly into prompt scaffolding.</li>
+                                        <li>Inject user, event, and recency context prior to every LLM invocation.</li>
+                                        <li>Capture rich metadata for prompt runs to power evaluation and A/B testing.</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Vector Search / Retrieve Context / Data Retrieval</strong></td>
+                                <td>
+                                    <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                                        <li>Stores embeddings alongside profiles and event documents in MongoDB for a single source of truth.</li>
+                                        <li>Employs MongoDB Atlas vector search with hybrid filters (geography, recency, availability) in the User Recommendation service.</li>
+                                        <li>Lets the Event Targeting service work in reverse&mdash;starting with event embeddings to surface matching diners.</li>
+                                        <li>Extends the data model with narrative embeddings (persona and event stories) to boost retrieval fidelity.</li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                                        <li>Generate embeddings with consistent model families to maintain a stable similarity space.</li>
+                                        <li>Blend vector similarity with business filters for precise targeting.</li>
+                                        <li>Invest in MongoDB vector-search indexes and narrative-rich entities.</li>
+                                        <li>Instrument feedback loops to refine embeddings and retrieval logic.</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="mt-12" id="integration-blueprint">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Integration: Proposed Architecture &amp; Adjustments</h2>
+                <p>
+                    Bringing these ingredients together results in a pragmatic plan for unifying existing work with Cuculi's blueprint. The outline below surfaces the architectural touchpoints, operational scaffolding, and prompt craft needed to move from concept to durable system.
+                </p>
+
+                <div class="bg-white border border-slate-200 rounded-2xl shadow-lg p-8 mt-8">
+                    <h3 class="text-2xl font-semibold text-slate-900 mb-4">Overall High-Level Architecture</h3>
+                    <ul class="list-disc pl-6 space-y-3 text-slate-700">
+                        <li><strong>Event / User Front-end / Triggers:</strong> User interactions (views, clicks, RSVPs, inactivity) emit events via the app SDK or backend into Kafka or a managed queue.</li>
+                        <li><strong>Intent Service (Routing Brain):</strong> Consumes trigger events and applies rules or ML classifiers to determine which downstream agent to call next.</li>
+                        <li><strong>Microservice Agents:</strong>
+                            <ul class="list-disc pl-6 space-y-2 text-slate-700 mt-2">
+                                <li><strong>User Recommendation Agent:</strong> Retrieves candidate events with vector search, applies geo/availability filters, and produces notification payloads.</li>
+                                <li><strong>Event Targeting Agent:</strong> Starts from event embeddings to surface high-fit diners based on similarity plus constraints.</li>
+                                <li><strong>Profile Completion Agent:</strong> Detects onboarding gaps and crafts prompts nudging users to finish setup.</li>
+                                <li><strong>Optional Agents:</strong> Reminders, follow-ups, or lifecycle milestones that reuse the same scaffolding.</li>
+                            </ul>
+                        </li>
+                        <li><strong>Data Layer:</strong> MongoDB Atlas stores user and event documents, embeddings, narratives, and telemetry metadata.</li>
+                        <li><strong>Prompt Templates &amp; Guardrails:</strong> Each agent ships with a persona-specific system prompt, constraints, and observable metrics.</li>
+                        <li><strong>Delivery &amp; Feedback Loop:</strong> Push, email, and SMS channels log opens, clicks, and RSVPs to refine intent logic and prompts.</li>
+                        <li><strong>Observability &amp; Monitoring:</strong> Centralized logging captures prompts, context, outputs, latency, and errors for compliance and tuning.</li>
+                    </ul>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-8 mt-10">
+                    <h3 class="text-2xl font-semibold text-slate-900 mb-4">Directory / Component Structure</h3>
+                    <p class="text-slate-700 mb-4">A lightweight repository layout keeps agent prompts, retrieval logic, and infrastructure as code tidy:</p>
+                    <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-sm overflow-x-auto"><code>/notification-service/
+  /agents/
+    /intent_service/
+      handler.py
+      prompt_template.txt
+      rules.py
+      ml_model/
+    /user_recommendation_service/
+      handler.py
+      prompt_template.txt
+      retrieval.py
+    /event_targeting_service/
+      handler.py
+      prompt_template.txt
+      retrieval.py
+    /profile_completion_service/
+      handler.py
+      prompt_template.txt
+  /common/
+    embedding_utils.py
+    mongo_client.py
+    schema_definitions.py
+    logging_utils.py
+    telemetry/
+  /infrastructure/
+    serverless/
+      template.yaml
+      api_gateway_config/
+    docker/
+  /events/
+    producer/
+    kafka_integration/
+    stream_processor/
+  tests/
+    unit/
+    integration/
+  README.md</code></pre>
+                </div>
+
+                <div class="bg-white border border-slate-200 rounded-2xl shadow-lg p-8 mt-10">
+                    <h3 class="text-2xl font-semibold text-slate-900 mb-4">Prompt Template Example: User Recommendation Agent</h3>
+                    <p class="text-slate-700 mb-4">Prompts merge behavioral context, persona guardrails, and output constraints so copy stays crisp and on-brand.</p>
+                    <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-sm overflow-x-auto"><code>System Prompt:
+You are the User Recommendation Agent for [AppName].
+- Output: a single notification message ≤ 140 characters.
+- Tone: enthusiastic, friendly, with slight FOMO when appropriate.
+- Constraints: only suggest events that match the user’s profile, are geographically nearby, have available slots, and are upcoming within the next [X] hours/days.
+- Use urgency (e.g., "Only 2 spots left") sparingly and only when warranted.
+- Do not invent event details.
+
+Context Provided:
+{user_persona_narrative}
+{user_persona_embedding}
+{candidate_events: event_narrative + embedding + metadata (time, location, tags, availability)}
+
+Task:
+Select up to N candidate events and craft one notification inviting the user to RSVP with a single clear CTA.</code></pre>
+                </div>
+
+                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-8 mt-10">
+                    <h3 class="text-2xl font-semibold text-slate-900 mb-4">Considerations, Trade-offs, and Watchouts</h3>
+                    <ul class="list-disc pl-6 space-y-3 text-slate-700">
+                        <li><strong>Cold Starts:</strong> Serverless Lambdas may incur latency; provisioned concurrency or scheduled warming keeps critical agents responsive.</li>
+                        <li><strong>End-to-End Latency:</strong> Vector search, LLM inference, and network hops stack up&mdash;store embeddings near compute and cache hot queries.</li>
+                        <li><strong>Prompt Versioning:</strong> Track prompt revisions and associate them with notification outcomes to guide future experiments.</li>
+                        <li><strong>Notification Fatigue:</strong> Enforce frequency caps, opt-out handling, and duplicate suppression to respect members' attention.</li>
+                        <li><strong>Embedding Governance:</strong> Maintain consistent models, support migrations, and close the loop with performance telemetry to evolve retrieval quality.</li>
+                    </ul>
+                </div>
+            </section>
+
             <section class="mt-12" id="mitigating-serverless-challenges">
                 <h2 class="text-3xl font-bold text-slate-900 mb-4">Mitigating Serverless Challenges</h2>
                 <p>
