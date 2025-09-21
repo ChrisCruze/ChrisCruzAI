@@ -19,6 +19,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -72,6 +73,30 @@
         .reference-list li {
             margin-bottom: 0.5rem;
         }
+        .infographic-section {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.12);
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 520px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 340px;
+            }
+        }
+        .footnote-link {
+            text-decoration: none;
+            color: #2563eb;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -100,30 +125,407 @@
 
         <article class="prose max-w-none">
             <p class="text-xl font-semibold text-slate-800">
-                as we kick off notification project as part of my mission to implement AI as part of Cuculi, we need to work together to build AI Micro-Services to be leveraged by Engineers for sending out the nudge notifications. I want this program to feel like a shared moonshot—an invitation to reimagine how every push we send helps members feel understood, welcomed, and inspired to take part.
+                As we kick off the notification program inside Cuculi, we are designing AI microservices that engineers can depend on to deliver psychologically informed nudges with the precision of a concierge team. The blueprint below turns that moonshot into a shared and testable architecture.
             </p>
 
-            <section class="mt-12">
-                <h2 class="text-3xl font-bold text-slate-900 mb-4">Beginning: Define the Intent and the Standard</h2>
+            <div class="callout mt-8">
+                <p class="font-semibold text-slate-900 mb-2">Explore the collaboration space</p>
+                <p class="text-slate-600 mb-0">
+                    Dive into the evolving research notes, prompt experiments, and visual artifacts that complement this article:
+                    <a href="https://docs.google.com/document/d/1Su_dYqnaEedNsjl43TTvo9tzYWgq1YDYR4iIQEK1Ln4/edit?tab=t.0" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Google Doc Blueprint</a>,
+                    <a href="https://gemini.google.com/app/459bbe4fb6b46f7b" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Gemini Design Companion</a>, and
+                    <a href="https://claude.ai/public/artifacts/33df412f-8311-4c45-b675-0142f9ccc895" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Claude Artifact Walkthrough</a>.
+                </p>
+            </div>
+
+            <section class="mt-12" id="technical-blueprint">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">A Technical Blueprint for AI-Powered Microservices to Drive User Engagement in a Social Dining Application</h2>
+                <p>
+                    Hyper-personalized nudges are the antidote to broadcast fatigue. When every notification distills intent, timing, and tone, members stop feeling marketed to and start feeling guided. That shift requires a service mesh that can perceive context, infer intent, and produce psychologically tuned copy in real time—all while remaining observable, auditable, and maintainable by a lean team.
+                </p>
+            </section>
+
+            <section class="mt-12" id="strategic-foundation">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Strategic Foundation: A Modern Architecture for Personalized Engagement</h2>
+                <p>
+                    Generic, broadcast-style notifications are increasingly ineffective, leading to user fatigue and abandonment. The alternative is hyper-personalization—context-aware, psychologically informed nudges that guide behavior toward valuable outcomes.<sup><a href="#ref-1" class="footnote-link">1</a></sup> Modern recommendation engines fuse AI, NLP, and vector search to deliver real-time personalization that drives satisfaction and business metrics.<sup><a href="#ref-3" class="footnote-link">3</a></sup>
+                </p>
+                <p>
+                    The foundation of this personalization is understanding user intent—the motivation behind each action, not merely the action itself.<sup><a href="#ref-4" class="footnote-link">4</a></sup><sup><a href="#ref-5" class="footnote-link">5</a></sup> By inferring intent, the system can craft intuitive, high-signal experiences that increase loyalty and conversion. This architecture translates those principles into a production-ready stack tailored for a social dining product.
+                </p>
+            </section>
+
+            <section class="mt-12" id="architectural-paradigm">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Architectural Paradigm: LLM-as-a-Microservice</h2>
+                <p>
+                    Treat each large language model interaction as a discrete microservice, encapsulated behind a well-defined API. The LLM-as-a-Microservice pattern decouples experimental AI work from stable application code, enabling rapid evolution of prompts, model selections, and guardrails without destabilizing the broader platform.<sup><a href="#ref-6" class="footnote-link">6</a></sup>
+                </p>
+                <ul class="list-disc pl-6 text-slate-700">
+                    <li><strong>Encapsulation:</strong> Each service owns its prompts, retries, and post-processing, isolating LLM complexity from the rest of the system.<sup><a href="#ref-6" class="footnote-link">6</a></sup></li>
+                    <li><strong>Composability:</strong> Lightweight REST contracts allow intent, recommendation, and targeting agents to orchestrate sophisticated workflows.<sup><a href="#ref-6" class="footnote-link">6</a></sup></li>
+                    <li><strong>Independent Deployment &amp; Scalability:</strong> Teams can A/B test prompts, swap models, and ship updates independently—critical for fast-paced AI iteration.<sup><a href="#ref-6" class="footnote-link">6</a></sup><sup><a href="#ref-7" class="footnote-link">7</a></sup></li>
+                </ul>
+                <p>
+                    The trade-offs—additional network hops and distributed-system complexity—are mitigated through strong observability, contract testing, and infrastructure automation.
+                </p>
+            </section>
+
+            <section class="mt-12" id="system-infrastructure">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">System Infrastructure: A Serverless-First Deployment on AWS</h2>
+                <h3 class="text-2xl font-semibold text-slate-900 mb-3">The Deployment Decision: AWS Lambda vs. Containerized Flask</h3>
+                <p>
+                    Two deployment paths dominate Python microservices: serverless functions (AWS Lambda) and containerized Flask workloads on ECS or EC2. Lambda's pay-per-use economics, automatic scaling, and managed infrastructure make it ideal for sporadic, event-driven workloads such as engagement nudges.<sup><a href="#ref-9" class="footnote-link">9</a></sup><sup><a href="#ref-11" class="footnote-link">11</a></sup>
+                </p>
+                <div class="table-wrapper mt-6 mb-8">
+                    <table>
+                        <caption class="text-sm text-slate-500 caption-bottom">Table 1: Deployment Strategy Comparison (Lambda vs. Containerized Flask on ECS/EC2)</caption>
+                        <thead>
+                            <tr>
+                                <th>Feature</th>
+                                <th>AWS Lambda</th>
+                                <th>Containerized Flask (ECS/EC2)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Cost Model</strong></td>
+                                <td>Pay-per-invocation and duration; no idle costs.<sup><a href="#ref-11" class="footnote-link">11</a></sup></td>
+                                <td>Always-on instance spend regardless of traffic volume.<sup><a href="#ref-11" class="footnote-link">11</a></sup></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Scalability</strong></td>
+                                <td>Instant scaling from zero to thousands of concurrent executions managed by AWS.<sup><a href="#ref-9" class="footnote-link">9</a></sup></td>
+                                <td>Requires configuring auto-scaling groups, load balancers, and container orchestration.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Maintenance Overhead</strong></td>
+                                <td>No server management; AWS handles patching and runtime updates.<sup><a href="#ref-9" class="footnote-link">9</a></sup></td>
+                                <td>Teams manage EC2 instances, container runtimes, and orchestration policies.<sup><a href="#ref-10" class="footnote-link">10</a></sup></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Cold Start Latency</strong></td>
+                                <td>Possible cold starts mitigated with provisioned concurrency.<sup><a href="#ref-11" class="footnote-link">11</a></sup></td>
+                                <td>Warm instances deliver consistent response times but incur idle costs.</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Developer Experience</strong></td>
+                                <td>Testing requires tools like AWS SAM to emulate the cloud runtime.<sup><a href="#ref-11" class="footnote-link">11</a></sup><sup><a href="#ref-18" class="footnote-link">18</a></sup></td>
+                                <td>Familiar local development flows but more complex deployment pipelines.<sup><a href="#ref-12" class="footnote-link">12</a></sup></td>
+                            </tr>
+                            <tr>
+                                <td><strong>State Management</strong></td>
+                                <td>Stateless execution encourages externalizing shared data.<sup><a href="#ref-11" class="footnote-link">11</a></sup></td>
+                                <td>In-memory state is possible but complicates horizontal scaling.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <p>
+                    Because notifications trigger on discrete events or timed checks rather than constant traffic, dedicated Lambda functions per microservice maximize cost efficiency and alignment with Cuculi's engagement rhythms.
+                </p>
+            </section>
+
+            <section class="mt-12" id="system-architecture-overview">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">System Architecture Overview</h2>
+                <p>
+                    Amazon API Gateway fronts each microservice endpoint, providing routing, authentication, rate limiting, and throttling before requests reach their Lambda handlers.<sup><a href="#ref-14" class="footnote-link">14</a></sup><sup><a href="#ref-15" class="footnote-link">15</a></sup><sup><a href="#ref-16" class="footnote-link">16</a></sup> MongoDB Atlas anchors the data layer, storing operational documents alongside embeddings so retrieval and personalization happen inside a unified datastore.<sup><a href="#ref-21" class="footnote-link">21</a></sup><sup><a href="#ref-22" class="footnote-link">22</a></sup>
+                </p>
+                <figure class="mt-8">
+                    <img src="https://i.imgur.com/example.png" alt="High-level architecture showing the mobile app connecting through API Gateway to Lambda microservices backed by MongoDB Atlas" class="w-full rounded-2xl shadow-lg border border-slate-200" />
+                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figure 1: Request flow from client to AI agent microservices and MongoDB Atlas.</figcaption>
+                </figure>
+
+                <div class="infographic-section mt-12 p-6 md:p-10">
+                    <header class="text-center mb-12">
+                        <h3 class="text-3xl font-bold text-gray-800">The AI-Powered Engagement Engine</h3>
+                        <p class="text-lg text-gray-600 mt-2">Boosting user retention for a social dining app with psychology-driven microservices.</p>
+                    </header>
+
+                    <section class="mb-12">
+                        <h4 class="text-2xl font-semibold text-gray-800 mb-6 text-center">Microservice Journey</h4>
+                        <div class="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-8">
+                            <div class="text-center">
+                                <div class="bg-blue-500 text-white rounded-full h-24 w-24 flex items-center justify-center mx-auto mb-2 text-4xl">🧑‍💻</div>
+                                <p class="font-semibold">User</p>
+                            </div>
+                            <div class="text-5xl text-gray-400">→</div>
+                            <div class="text-center">
+                                <div class="bg-indigo-500 text-white rounded-full h-24 w-24 flex items-center justify-center mx-auto mb-2 text-4xl">📱</div>
+                                <p class="font-semibold">Social Dining App</p>
+                            </div>
+                            <div class="text-5xl text-gray-400">→</div>
+                            <div class="text-center">
+                                <div class="bg-purple-500 text-white rounded-lg p-4 mx-auto mb-2">
+                                    <h5 class="font-bold">AI Agent Microservices</h5>
+                                    <p class="text-sm">(Python / Lambda)</p>
+                                </div>
+                            </div>
+                            <div class="text-5xl text-gray-400">→</div>
+                            <div class="text-center">
+                                <div class="bg-green-500 text-white rounded-full h-24 w-24 flex items-center justify-center mx-auto mb-2 text-4xl">🍃</div>
+                                <p class="font-semibold">MongoDB Atlas</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                        <div class="bg-white rounded-lg shadow-md p-6 border border-slate-100">
+                            <h5 class="text-xl font-bold text-gray-800 mb-4">Intent Service: The Strategist</h5>
+                            <p class="text-gray-600 mb-4">Analyzes user activity to decide the \"why\" and \"when\" for each notification. It is the routing brain that picks the nudge moment.</p>
+                            <div class="chart-container">
+                                <canvas id="intentChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-md p-6 border border-slate-100">
+                            <h5 class="text-xl font-bold text-gray-800 mb-4">User Recommendation: The Friend</h5>
+                            <p class="text-gray-600 mb-4">Crafts personalized event suggestions by pairing vector search with a friendly, FOMO-aware tone.</p>
+                            <div class="chart-container">
+                                <canvas id="recommendationChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-md p-6 border border-slate-100">
+                            <h5 class="text-xl font-bold text-gray-800 mb-4">Event Targeting: The Networker</h5>
+                            <p class="text-gray-600 mb-4">Surfaces the most compatible audience for each event, ensuring invitations feel exclusive and relevant.</p>
+                            <div class="chart-container">
+                                <canvas id="targetingChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="bg-white rounded-lg shadow-md p-6 border border-slate-100">
+                            <h5 class="text-xl font-bold text-gray-800 mb-4">Profile Completion: The Host</h5>
+                            <p class="text-gray-600 mb-4">Encourages new members to finish onboarding with warm, value-driven nudges.</p>
+                            <div class="chart-container">
+                                <canvas id="profileChart"></canvas>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="bg-white rounded-lg shadow-md p-6 border border-slate-100">
+                        <h4 class="text-2xl font-bold text-gray-800 mb-4 text-center">The Psychology of Engagement</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                            <div>
+                                <div class="bg-red-500 text-white rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-2 text-2xl">⏳</div>
+                                <h5 class="font-bold">Urgency &amp; Scarcity</h5>
+                                <p class="text-gray-600 text-sm">Limited availability triggers FOMO and faster action.</p>
+                            </div>
+                            <div>
+                                <div class="bg-yellow-500 text-white rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-2 text-2xl">🎯</div>
+                                <h5 class="font-bold">Personalization</h5>
+                                <p class="text-gray-600 text-sm">Specific matches demonstrate that the app understands each diner.</p>
+                            </div>
+                            <div>
+                                <div class="bg-teal-500 text-white rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-2 text-2xl">🤝</div>
+                                <h5 class="font-bold">Social Proof</h5>
+                                <p class="text-gray-600 text-sm">Highlighting friends and community momentum reinforces trust.</p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <footer class="text-center mt-12 text-gray-500 text-sm">
+                        This infographic illustrates a conceptual framework for the AI-powered notification system.
+                    </footer>
+                </div>
+            </section>
+
+            <section class="mt-12" id="mitigating-serverless-challenges">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Mitigating Serverless Challenges</h2>
+                <p>
+                    Cold starts introduce latency when Lambda functions scale from zero. Provisioned Concurrency eliminates the delay for latency-sensitive services, while scheduled warmers suffice for background tasks.<sup><a href="#ref-11" class="footnote-link">11</a></sup> Local development parity improves through AWS SAM, which emulates Lambda and API Gateway locally for test-driven workflows.<sup><a href="#ref-18" class="footnote-link">18</a></sup>
+                </p>
+                <p>
+                    Dependency management relies on Lambda Layers for shared libraries (e.g., <code>pymongo</code>, <code>langchain-mongodb</code>) and function-specific deployment bundles assembled via SAM or the Serverless Framework.<sup><a href="#ref-19" class="footnote-link">19</a></sup>
+                </p>
+            </section>
+
+            <section class="mt-12" id="data-layer">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">The Data Layer: Powering Semantics with MongoDB Atlas Vector Search</h2>
+                <p>
+                    MongoDB Atlas' flexible document model stores evolving user profiles, event catalogs, and embeddings in a single operational plane.<sup><a href="#ref-21" class="footnote-link">21</a></sup><sup><a href="#ref-22" class="footnote-link">22</a></sup> Embeddings live alongside their narrative context, eliminating synchronization overhead with separate vector databases.<sup><a href="#ref-21" class="footnote-link">21</a></sup>
+                </p>
+                <h3 class="text-2xl font-semibold text-slate-900 mb-3">Data Modeling and Enrichment</h3>
+                <p>
+                    Enriched narratives dramatically improve semantic retrieval. Raw profile attributes transform into persona stories before embedding, producing higher-quality matches.<sup><a href="#ref-23" class="footnote-link">23</a></sup><sup><a href="#ref-24" class="footnote-link">24</a></sup> Below are representative schemas for the <code>users</code> and <code>events</code> collections.
+                </p>
+                <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-sm overflow-x-auto"><code>{
+  "_id": "ObjectId('...')",
+  "name": "Alex Johnson",
+  "created_at": "ISODate('...')",
+  "profile_info": {
+    "dietary_preferences": ["vegetarian"],
+    "favorite_cuisines": ["Italian", "Mexican"],
+    "profile_completion_percentage": 75
+  },
+  "activity_history": {
+    "last_login": "ISODate('...')",
+    "recent_events_viewed": ["ObjectId('...')"]
+  },
+  "user_persona_narrative": "Alex is a social diner who prefers vegetarian options...",
+  "user_persona_embedding": [0.012, -0.345, ..., 0.987]
+}</code></pre>
+                <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-sm overflow-x-auto mt-6"><code>{
+  "_id": "ObjectId('...')",
+  "title": "Neighborhood Pasta Making Class",
+  "description": "Learn to make fresh pasta from scratch!",
+  "location": {"type": "Point", "coordinates": [-73.987, 40.748]},
+  "time": "ISODate('...')",
+  "tags": ["cooking class", "italian", "social"],
+  "spots_left": 5,
+  "attendees": ["ObjectId('...')"],
+  "event_narrative": "This is an intimate, hands-on cooking class...",
+  "event_narrative_embedding": [0.543, 0.123, ..., -0.654]
+}</code></pre>
+
+                <h3 class="text-2xl font-semibold text-slate-900 mt-10 mb-3">Implementing Vector Search</h3>
+                <ol class="list-decimal pl-6 text-slate-700">
+                    <li><strong>Generate Embeddings:</strong> Use consistent embedding models (OpenAI, Voyage AI, Hugging Face) to ensure vectors share the same semantic space.<sup><a href="#ref-26" class="footnote-link">26</a></sup><sup><a href="#ref-27" class="footnote-link">27</a></sup></li>
+                    <li><strong>Store Embeddings:</strong> Persist vectors within the corresponding MongoDB documents for unified access.<sup><a href="#ref-21" class="footnote-link">21</a></sup></li>
+                    <li><strong>Create Vector Indexes:</strong> Define Atlas Vector Search indexes specifying field, dimensions, and similarity metric.<sup><a href="#ref-25" class="footnote-link">25</a></sup></li>
+                    <li><strong>Query with <code>$vectorSearch</code>:</strong> Combine semantic similarity with filters such as geography or recency for hybrid search experiences.<sup><a href="#ref-22" class="footnote-link">22</a></sup><sup><a href="#ref-28" class="footnote-link">28</a></sup></li>
+                </ol>
+                <p>
+                    This approach keeps recommendations accurate, low-latency, and always in sync with the freshest behavioral data.<sup><a href="#ref-41" class="footnote-link">41</a></sup><sup><a href="#ref-42" class="footnote-link">42</a></sup>
+                </p>
+            </section>
+            <section class="mt-12" id="agent-microservices">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">The AI Agent Microservices: A Deep Dive</h2>
+                <div class="table-wrapper mt-6 mb-8">
+                    <table>
+                        <caption class="text-sm text-slate-500 caption-bottom">Table 2: Microservice Agent API Specification</caption>
+                        <thead>
+                            <tr>
+                                <th>Service Name</th>
+                                <th>Endpoint</th>
+                                <th>HTTP Method</th>
+                                <th>Request Payload</th>
+                                <th>Success Response</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Intent Service</strong></td>
+                                <td><code>/nudge/intent</code></td>
+                                <td>POST</td>
+                                <td><code>{"userId": "...", "triggerEvent": "app_opened_no_rsvp"}</code></td>
+                                <td><code>{"nudgeType": "event_recommendation", "targetService": "/recommendations/user"}</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>User Recommendation</strong></td>
+                                <td><code>/recommendations/user</code></td>
+                                <td>POST</td>
+                                <td><code>{"userId": "..."}</code></td>
+                                <td><code>{"notificationText": "Foodie alert! A sushi making class is happening near you tonight. Only 3 spots left!"}</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Event Targeting</strong></td>
+                                <td><code>/targeting/event</code></td>
+                                <td>POST</td>
+                                <td><code>{"eventId": "..."}</code></td>
+                                <td><code>{"userIds": ["...", "...", "..."]}</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Profile Completion</strong></td>
+                                <td><code>/onboarding/profile-completion</code></td>
+                                <td>POST</td>
+                                <td><code>{"userId": "..."}</code></td>
+                                <td><code>{"notificationText": "Welcome, Alex! Complete your profile to get personalized event matches."}</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="text-2xl font-semibold text-slate-900 mb-3">Intent Service Agent</h3>
+                <p>
+                    The Intent Service is the routing brain. V1 launches as a transparent rules engine so we can ship value before accumulating labeled outcomes. Each rule inspects MongoDB for recency, momentum, and state to select the next best action.<sup><a href="#ref-30" class="footnote-link">30</a></sup><sup><a href="#ref-31" class="footnote-link">31</a></sup><sup><a href="#ref-32" class="footnote-link">32</a></sup><sup><a href="#ref-33" class="footnote-link">33</a></sup>
+                </p>
+                <ul class="list-disc pl-6 text-slate-700">
+                    <li><strong>Rule Examples:</strong> Profile completion nudges for new members, re-engagement nudges after 24 hours of inactivity, event reminders for upcoming RSVPs, and follow-up suggestions for viewed-but-not-booked events.</li>
+                    <li><strong>Phase Two:</strong> After capturing outcomes, upgrade to a classifier (e.g., Gradient Boosted Trees) that predicts the highest-probability nudge for each context.<sup><a href="#ref-31" class="footnote-link">31</a></sup></li>
+                </ul>
+
+                <h3 class="text-2xl font-semibold text-slate-900 mt-10 mb-3">User Recommendation Service Agent</h3>
+                <p>
+                    This agent implements a Retrieval-Augmented Generation (RAG) pipeline that pairs semantic retrieval with a tightly scoped prompt.<sup><a href="#ref-34" class="footnote-link">34</a></sup><sup><a href="#ref-35" class="footnote-link">35</a></sup><sup><a href="#ref-36" class="footnote-link">36</a></sup> It fetches the user persona, runs a vector search against enriched events, filters for availability and geography, then instructs the LLM to generate a notification under 140 characters highlighting urgency and relevance.<sup><a href="#ref-37" class="footnote-link">37</a></sup><sup><a href="#ref-38" class="footnote-link">38</a></sup><sup><a href="#ref-39" class="footnote-link">39</a></sup><sup><a href="#ref-40" class="footnote-link">40</a></sup>
+                </p>
+
+                <h3 class="text-2xl font-semibold text-slate-900 mt-10 mb-3">Event Targeting Service Agent</h3>
+                <p>
+                    The targeting agent inverts the query: it uses an event's embedding to find compatible diners. Business rules ensure we avoid fatigue (no duplicate nudges, respect opt-outs) while offering event creators a summarized audience snapshot.
+                </p>
+
+                <h3 class="text-2xl font-semibold text-slate-900 mt-10 mb-3">Profile Completion Service Agent</h3>
+                <p>
+                    Onboarding nudges focus on benefit framing—"complete your profile to unlock better matches"—and a single CTA. Tone guidelines keep the voice supportive and optimistic.<sup><a href="#ref-37" class="footnote-link">37</a></sup><sup><a href="#ref-43" class="footnote-link">43</a></sup><sup><a href="#ref-44" class="footnote-link">44</a></sup><sup><a href="#ref-45" class="footnote-link">45</a></sup>
+                </p>
+
+                <div class="table-wrapper mt-10">
+                    <table>
+                        <caption class="text-sm text-slate-500 caption-bottom">Table 3: Prompt Engineering Framework Application</caption>
+                        <thead>
+                            <tr>
+                                <th>Microservice Agent</th>
+                                <th>Persona</th>
+                                <th>Core Goal</th>
+                                <th>Psychological Principle</th>
+                                <th>Key Prompt Technique</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>User Recommendation</td>
+                                <td>Enthusiastic Community Manager</td>
+                                <td>Drive RSVP</td>
+                                <td>Scarcity / Urgency (FOMO)<sup><a href="#ref-38" class="footnote-link">38</a></sup></td>
+                                <td>Role-playing &amp; Context Injection</td>
+                            </tr>
+                            <tr>
+                                <td>Event Targeting</td>
+                                <td>Data Analyst</td>
+                                <td>Inform Promoter</td>
+                                <td>N/A (Internal-Facing)</td>
+                                <td>Data Summarization</td>
+                            </tr>
+                            <tr>
+                                <td>Profile Completion</td>
+                                <td>Welcoming Onboarding Assistant</td>
+                                <td>Drive Profile Edit</td>
+                                <td>Benefit Highlighting<sup><a href="#ref-43" class="footnote-link">43</a></sup></td>
+                                <td>Single CTA &amp; Persona Role-playing</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="mt-12" id="real-time-pipeline">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Real-Time Data Pipeline: The Central Nervous System</h2>
+                <p>
+                    Event-driven architecture ensures that every tap, browse, and period of inactivity can trigger the right microservice at the right time.<sup><a href="#ref-46" class="footnote-link">46</a></sup><sup><a href="#ref-47" class="footnote-link">47</a></sup><sup><a href="#ref-48" class="footnote-link">48</a></sup> Mobile SDKs capture lifecycle, navigation, and interaction events, streaming them through a Kafka REST proxy to the ingestion layer.<sup><a href="#ref-50" class="footnote-link">50</a></sup><sup><a href="#ref-51" class="footnote-link">51</a></sup><sup><a href="#ref-52" class="footnote-link">52</a></sup><sup><a href="#ref-53" class="footnote-link">53</a></sup>
+                </p>
+                <figure class="mt-8">
+                    <img src="https://i.imgur.com/example2.png" alt="Event-driven data pipeline with mobile SDK, Kafka REST proxy, stream processor, and intent service triggers" class="w-full rounded-2xl shadow-lg border border-slate-200" />
+                    <figcaption class="text-sm text-slate-500 mt-2 text-center">Figure 2: Event-driven data pipeline powering real-time triggers.</figcaption>
+                </figure>
+                <p class="mt-8">
+                    Kafka provides durable, replayable streams for building robust trigger logic and analytics.<sup><a href="#ref-46" class="footnote-link">46</a></sup><sup><a href="#ref-49" class="footnote-link">49</a></sup><sup><a href="#ref-54" class="footnote-link">54</a></sup><sup><a href="#ref-55" class="footnote-link">55</a></sup> Consumer services maintain lightweight timers for inactivity thresholds and forward structured triggers to the Intent Service, keeping stream processing separate from AI orchestration.
+                </p>
+            </section>
+
+            <section class="mt-12" id="execution-layers">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Translating the Blueprint into Day-to-Day Execution</h2>
+                <h3 class="text-2xl font-semibold text-slate-900 mb-3">Beginning: Define the Intent and the Standard</h3>
                 <div class="callout mb-6">
                     <p class="font-semibold text-slate-900">North Star</p>
                     <p class="text-slate-600 mb-0">Every notification should compress intelligence, context, and urgency into fewer than 140 characters while feeling unmistakably "Cuculi." That means consistent tone systems, audit-ready telemetry, and end-to-end observability from prompt to delivery.</p>
                 </div>
                 <p>
-                    We start by codifying what an ideal nudge looks like: clear call-to-action, direct reference to the member’s latest behavior, and a concise psychological trigger. By treating each LLM-powered microservice as a distinct product—with its own goal, guardrails, and success metrics—we preserve creative range while maintaining enterprise-grade accountability.
+                    We codify the definition of an ideal nudge: concise CTA, direct behavioral reference, and a purposeful psychological trigger. Treating each microservice as a product—with its own metrics, guardrails, and persona—keeps creativity and accountability in balance. The organizational frame borrows from AWS guidance on containerized Flask microservices and serverless agent orchestration patterns to anchor routing discipline before the first prompt ships.<sup><a href="#ref-18" class="footnote-link">18</a></sup><sup><a href="#ref-19" class="footnote-link">19</a></sup>
                 </p>
-                <p>
-                    The organizational frame leans on <a href="https://aws.amazon.com/blogs/opensource/deploying-python-flask-microservices-to-aws-using-open-source-tools/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">AWS guidance for containerized Flask microservices</a> and <a href="https://aws.amazon.com/blogs/compute/effectively-building-ai-agents-on-aws-serverless/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">serverless agent orchestration strategies</a>. These patterns give us the routing discipline and scaling guardrails we need before the first prompt is even drafted.
-                </p>
-            </section>
 
-            <section class="mt-12">
-                <h2 class="text-3xl font-bold text-slate-900 mb-4">Middle: Architect the Agent Mesh</h2>
+                <h3 class="text-2xl font-semibold text-slate-900 mt-10 mb-3">Middle: Architect the Agent Mesh</h3>
                 <p>
-                    The technical system is a mesh of RESTful agents, each deployed as either a Flask Blueprint or an AWS Lambda function, fronted by a shared API gateway. Every service loads its own prompt template, persona, and guardrail logic at boot. MongoDB Atlas handles primary storage, giving each agent a low-latency path to user, event, and embedding collections. Vector search becomes the personalization backbone, aligning with <a href="https://www.mongodb.com/docs/atlas/architecture/current/solutions-library/media-personalization/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">MongoDB’s reference architecture for media personalization</a> and <a href="https://www.mongodb.com/products/platform/atlas-vector-search" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Atlas Vector Search</a> best practices.
+                    The system is a mesh of RESTful agents, each deployed as a Lambda function fronted by API Gateway. Every service boots with its own persona prompt, guardrails, and telemetry. MongoDB Atlas handles primary storage, enabling low-latency access to user, event, and embedding collections. Vector search becomes the personalization backbone, echoing MongoDB's reference architectures.<sup><a href="#ref-21" class="footnote-link">21</a></sup><sup><a href="#ref-22" class="footnote-link">22</a></sup>
                 </p>
                 <p>
-                    To uphold transparency, each response is templated: a single notification string with a CTA, purposeful psychology cue, and no hallucinated claims. Analytics logging captures the prompt, context payload, completion tokens, and downstream delivery status for continuous tuning—borrowing lessons from <a href="https://www.braze.com/resources/articles/push-notifications-best-practices" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">push notification playbooks</a> and <a href="https://www.joinglyph.com/blog/ai-voice-and-llm-to-supercharge-marketing" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">AI-enabled marketing experiments</a>.
+                    Transparency is non-negotiable. Responses are templated, logs capture prompt/context/completion/delivery, and observability mirrors best practices from modern push notification playbooks. This foundation lets us iterate quickly without sacrificing trust.
                 </p>
 
                 <div class="table-wrapper mt-8 mb-12">
@@ -141,42 +543,38 @@
                             <tr>
                                 <td><strong>Intent Nudge</strong></td>
                                 <td><code>/api/intent-nudge</code></td>
-                                <td>In: <code>user_id</code>, <code>recent_activity</code><br>Out: Notification text &lt;140 chars</td>
-                                <td>Classifies member momentum, selects nudge type (first-touch, follow-up, or alternative) using recency and sentiment scores.</td>
-                                <td>Coach-like, direct, and time-bound. Applies scarcity cues when activity dips.</td>
+                                <td>In: <code>user_id</code>, <code>recent_activity</code><br>Out: notification text &lt; 140 characters</td>
+                                <td>Classifies member momentum and selects the nudge type using recency and sentiment signals.</td>
+                                <td>Coach-like, direct, and time-bound with scarcity cues when activity dips.</td>
                             </tr>
                             <tr>
                                 <td><strong>User Event Recommender</strong></td>
                                 <td><code>/api/recommend-event</code></td>
-                                <td>In: <code>user_id</code>, profile vector<br>Out: Event invite message</td>
-                                <td>Runs similarity search on event embeddings, cross-checks social graph proximity, then frames invite with social proof.</td>
-                                <td>Conversational and enthusiastic friend persona anchoring on shared interests.</td>
+                                <td>In: <code>user_id</code>, profile vector<br>Out: event invite message</td>
+                                <td>Runs similarity search on event embeddings and cross-checks social proximity.</td>
+                                <td>Conversational, enthusiastic friend persona anchored on shared interests.</td>
                             </tr>
                             <tr>
                                 <td><strong>Event-to-User Matcher</strong></td>
                                 <td><code>/api/event-target</code></td>
-                                <td>In: <code>event_id</code><br>Out: Batch of {user_id, message}</td>
-                                <td>Generates ranked audience list with fairness weighting, ensuring a balance of loyalists and explorers.</td>
-                                <td>High-energy promoter; emphasizes exclusivity without overpromising.</td>
+                                <td>In: <code>event_id</code><br>Out: batch of {user_id, message}</td>
+                                <td>Generates ranked audience lists with fairness weighting.</td>
+                                <td>High-energy promoter emphasizing exclusivity without overpromising.</td>
                             </tr>
                             <tr>
                                 <td><strong>Profile Completion Guide</strong></td>
                                 <td><code>/api/complete-profile</code></td>
-                                <td>In: <code>user_id</code>, profile status<br>Out: Motivational reminder</td>
-                                <td>Evaluates missing profile fields, surfaces nearest unlocked benefits, and personalizes reinforcement cue.</td>
-                                <td>Encouraging mentor tone centered on unlocking value and belonging.</td>
+                                <td>In: <code>user_id</code>, profile status<br>Out: motivational reminder</td>
+                                <td>Surfaces missing profile fields and the benefits unlocked by completing them.</td>
+                                <td>Encouraging mentor tone centered on belonging and value.</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
 
-                <p>
-                    We deploy via container images or Lambda layers, guided by <a href="https://dev.to/aws-builders/from-docker-to-lambda-an-aws-admins-journey-into-python-applications-24e4" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Docker-to-Lambda transition playbooks</a> and <a href="https://dev.to/amolo/how-to-build-microservices-with-fauna-python-flask-and-deploy-to-vercel-4k19" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Flask microservice deployment tutorials</a>. Observability hooks—structured logging, OpenTelemetry traces, and event-based alerts—flow into a central quality hub so our engineers can iterate safely.
-                </p>
-
                 <div class="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-lg mt-10">
-                    <h3 class="text-2xl font-semibold text-slate-900 mb-4">Prompt Blueprint</h3>
-                    <p class="text-slate-600 mb-4">Each agent maintains a system prompt like the snippet below to keep outputs concise, actionable, and psychologically tuned.</p>
+                    <h4 class="text-2xl font-semibold text-slate-900 mb-4">Prompt Blueprint</h4>
+                    <p class="text-slate-600 mb-4">Each agent maintains a system prompt snippet that keeps outputs concise, actionable, and psychologically tuned.</p>
                     <pre class="bg-slate-900 text-slate-100 p-4 rounded-xl text-sm overflow-x-auto"><code>You are the Intent Nudge agent for Cuculi.
 - Output a single push notification under 140 characters.
 - Reference the user's latest dining signal.
@@ -186,36 +584,229 @@
 Context: {{recent_activity_snapshot}}
 Goal: Drive the next RSVP within 24 hours.</code></pre>
                 </div>
-            </section>
 
-            <section class="mt-12">
-                <h2 class="text-3xl font-bold text-slate-900 mb-4">End: Orchestrate, Measure, and Keep Human in the Loop</h2>
+                <h3 class="text-2xl font-semibold text-slate-900 mt-12 mb-3">End: Orchestrate, Measure, and Keep Human in the Loop</h3>
                 <p>
-                    Orchestration hinges on a lightweight router that selects the right agent, validates payloads, and manages retries. Slow LLM calls route through async workers powered by <a href="https://aws.amazon.com/blogs/compute/effectively-building-ai-agents-on-aws-serverless/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">serverless queues and Step Functions</a>. Delivery channels—FCM, APNs, SMS via Twilio—feed engagement metrics back into a reinforcement loop so prompt templates evolve with real outcomes.
-                </p>
-                <p>
-                    MongoDB vector search results, open rates, and RSVP conversions roll into a living scorecard. Weekly reviews pair the data with qualitative readouts from community leads, making sure the system stays empathetic, not just efficient. Inspiration from <a href="https://insight7.io/llms-that-coach-reps-on-personalization-techniques-in-sales-emails/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">coaching-style LLM programs</a> reminds us that tone and timing can be coached just like a sales team.
+                    A lightweight router validates payloads, manages retries, and escalates slow LLM calls to async workers powered by serverless queues and Step Functions. Delivery channels (FCM, APNs, SMS) feed open rates and RSVPs back into the loop so prompts evolve with observed behavior.
                 </p>
                 <ul class="list-disc pl-6 text-slate-700">
-                    <li><strong>Shared dashboards</strong> clarify which agent version drove lifts, aligning product, engineering, and community teams on reality.</li>
-                    <li><strong>Prompt retrospectives</strong> treat each iteration like a product release—documented diffs, hypothesis tracking, and QA sign-off.</li>
-                    <li><strong>Human escalation paths</strong> keep a concierge or community manager ready to intervene whenever the AI needs a human touch.</li>
+                    <li><strong>Shared dashboards</strong> illuminate which agent versions drove lifts across product, engineering, and community teams.</li>
+                    <li><strong>Prompt retrospectives</strong> treat copy changes like product releases with documented hypotheses and QA sign-off.</li>
+                    <li><strong>Human escalation paths</strong> keep concierges ready to intervene when nuance demands human judgment.</li>
                 </ul>
                 <p>
-                    The outcome: an elegant, modular notification stack that feels personal, scales responsibly, and keeps our teams collaborating. This is how we transform nudges into genuine invitations.
+                    The outcome is an elegant, modular notification stack that feels personal, scales responsibly, and keeps cross-functional teams in sync.
                 </p>
             </section>
 
-            <section class="mt-16">
-                <h2 class="text-2xl font-semibold text-slate-900 mb-3">Key Resources to Dive Deeper</h2>
-                <ul class="reference-list list-disc pl-6 text-slate-700">
-                    <li><a href="https://dev.to/aarushikansal/superpower-your-push-notifications-with-ai-348l" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Superpower Your Push Notifications with AI</a> — frameworks for urgency and clarity in copywriting.</li>
-                    <li><a href="https://www.mongodb.com/company/bloginnovationai-powered-media-personalization-mongodb-vector-search" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">AI-Powered Personalization with MongoDB Vector Search</a> — deep dive on embeddings and segmentation.</li>
-                    <li><a href="https://aws.amazon.com/blogs/compute/effectively-building-ai-agents-on-aws-serverless/" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Effectively Building AI Agents on AWS Serverless</a> — orchestration best practices for LLM workloads.</li>
-                    <li><a href="https://arxiv.org/html/2411.00027" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">Frontiers in Notification Science</a> — emerging research on multi-agent personalization loops.</li>
-                </ul>
+            <section class="mt-12" id="roadmap">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Strategic Roadmap and Conclusion</h2>
+                <ol class="list-decimal pl-6 text-slate-700">
+                    <li><strong>Phase 1 – Foundational Layers:</strong> Stand up MongoDB Atlas, define schemas, build CRUD APIs, integrate analytics SDKs, and stream raw events into Kafka.</li>
+                    <li><strong>Phase 2 – First Value:</strong> Deploy the Profile Completion agent with the rules-based Intent Service to drive immediate onboarding improvements.</li>
+                    <li><strong>Phase 3 – Core AI Features:</strong> Enrich data via LLMs, generate embeddings, configure vector indexes, and launch the Recommendation and Targeting agents.</li>
+                    <li><strong>Phase 4 – Optimization &amp; Adaptation:</strong> Analyze outcomes, train a machine-learning-powered Intent Service, and evolve prompts based on behavioral feedback.</li>
+                </ol>
+                <p>
+                    This architecture pairs serverless agility with semantic intelligence so Cuculi can move beyond generic notifications. By inferring intent, enriching data, and orchestrating persona-rich agents, every nudge becomes a strategic invitation that compounds retention and community value.
+                </p>
+            </section>
+            <section class="mt-16" id="works-cited">
+                <h2 class="text-2xl font-semibold text-slate-900 mb-4">Works Cited</h2>
+                <ol class="reference-list list-decimal pl-6 text-slate-700 space-y-2">
+                    <li id="ref-1">A Model for Designing Personalized and Context-Aware Nudges - SciTePress, accessed September 21, 2025, <a href="https://www.scitepress.org/Papers/2024/128828/128828.pdf" target="_blank" rel="noopener noreferrer">https://www.scitepress.org/Papers/2024/128828/128828.pdf</a>.</li>
+                    <li id="ref-2">What Is Nudge Theory? Does It Apply to Change Management? - Prosci, accessed September 21, 2025, <a href="https://www.prosci.com/blog/nudge-theory" target="_blank" rel="noopener noreferrer">https://www.prosci.com/blog/nudge-theory</a>.</li>
+                    <li id="ref-3">What is a Recommendation Engine? - MongoDB, accessed September 21, 2025, <a href="https://www.mongodb.com/resources/basics/artificial-intelligence/recommendation-engines" target="_blank" rel="noopener noreferrer">https://www.mongodb.com/resources/basics/artificial-intelligence/recommendation-engines</a>.</li>
+                    <li id="ref-4">What Is User Intent (&amp; How It Improves Conversion Rates) - Coveo, accessed September 21, 2025, <a href="https://www.coveo.com/blog/what-is-user-intent/" target="_blank" rel="noopener noreferrer">https://www.coveo.com/blog/what-is-user-intent/</a>.</li>
+                    <li id="ref-5">The Importance of Understanding User Intent for Creating Successful Mobile Apps, accessed September 21, 2025, <a href="https://contextsdk.com/blogposts/the-importance-of-understanding-user-intent-for-creating-successful-mobile-apps" target="_blank" rel="noopener noreferrer">https://contextsdk.com/blogposts/the-importance-of-understanding-user-intent-for-creating-successful-mobile-apps</a>.</li>
+                    <li id="ref-6">LLM-as-Microservice: Integration Patterns and Trade-offs | by Shukri Shukriev | Medium, accessed September 21, 2025, <a href="https://shukriev.medium.com/llm-as-microservice-integration-patterns-and-trade-offs-f05b29945489" target="_blank" rel="noopener noreferrer">https://shukriev.medium.com/llm-as-microservice-integration-patterns-and-trade-offs-f05b29945489</a>.</li>
+                    <li id="ref-7">Learning to Build Scalable LLM Chat Application: Microservices ..., accessed September 21, 2025, <a href="https://shaktiwadekar.medium.com/learning-to-build-scalable-llm-chat-application-microservices-architecture-and-docker-93ea1335871e" target="_blank" rel="noopener noreferrer">https://shaktiwadekar.medium.com/learning-to-build-scalable-llm-chat-application-microservices-architecture-and-docker-93ea1335871e</a>.</li>
+                    <li id="ref-8">LLM-Generated Microservice Implementations from RESTful API Definitions - arXiv, accessed September 21, 2025, <a href="https://arxiv.org/html/2502.09766v1" target="_blank" rel="noopener noreferrer">https://arxiv.org/html/2502.09766v1</a>.</li>
+                    <li id="ref-9">Serverless Computing with Flask and AWS Lambda - Mangum, accessed September 21, 2025, <a href="https://mangum.io/serverless-computing-with-flask-and-aws-lambda/" target="_blank" rel="noopener noreferrer">https://mangum.io/serverless-computing-with-flask-and-aws-lambda/</a>.</li>
+                    <li id="ref-10">To Flask or not to Flask with AWS Lambda | by Jay Shah | Medium, accessed September 21, 2025, <a href="https://medium.com/@shahjaykiran/to-flask-or-not-to-flask-with-aws-lambda-aee525dfb004" target="_blank" rel="noopener noreferrer">https://medium.com/@shahjaykiran/to-flask-or-not-to-flask-with-aws-lambda-aee525dfb004</a>.</li>
+                    <li id="ref-11">Why or why not use AWS Lambda instead of a web framework for your REST APIs? (Business projects) : r/Python - Reddit, accessed September 21, 2025, <a href="https://www.reddit.com/r/Python/comments/1092py3/why_or_why_not_use_aws_lambda_instead_of_a_web/" target="_blank" rel="noopener noreferrer">https://www.reddit.com/r/Python/comments/1092py3/why_or_why_not_use_aws_lambda_instead_of_a_web/</a>.</li>
+                    <li id="ref-12">Flask &amp; Django on AWS Lambda: Serverless Python Made Simple | by Akhshy Ganesh, accessed September 21, 2025, <a href="https://medium.com/@akhshyganesh/flask-django-on-aws-lambda-serverless-python-made-simple-b36e568f9c3c" target="_blank" rel="noopener noreferrer">https://medium.com/@akhshyganesh/flask-django-on-aws-lambda-serverless-python-made-simple-b36e568f9c3c</a>.</li>
+                    <li id="ref-13">End-to-End Tutorial on Combining AWS Lambda, Docker, and Python : r/flask - Reddit, accessed September 21, 2025, <a href="https://www.reddit.com/r/flask/comments/13cqx6g/endtoend_tutorial_on_combining_aws_lambda_docker/" target="_blank" rel="noopener noreferrer">https://www.reddit.com/r/flask/comments/13cqx6g/endtoend_tutorial_on_combining_aws_lambda_docker/</a>.</li>
+                    <li id="ref-14">Tutorial: Build a REST API with AWS API Gateway and Lambda - Cloud 303, accessed September 21, 2025, <a href="https://home.cloud303.io/blog/aws-knowledge-base-100/tutorial-build-a-rest-api-with-aws-api-gateway-and-lambda-100" target="_blank" rel="noopener noreferrer">https://home.cloud303.io/blog/aws-knowledge-base-100/tutorial-build-a-rest-api-with-aws-api-gateway-and-lambda-100</a>.</li>
+                    <li id="ref-15">AWS API Gateway: The ultimate guide - Solo.io, accessed September 21, 2025, <a href="https://www.solo.io/topics/api-gateway/aws-api-gateway" target="_blank" rel="noopener noreferrer">https://www.solo.io/topics/api-gateway/aws-api-gateway</a>.</li>
+                    <li id="ref-16">Using AWS Lambda with API Gateway - Baeldung, accessed September 21, 2025, <a href="https://www.baeldung.com/aws-lambda-api-gateway" target="_blank" rel="noopener noreferrer">https://www.baeldung.com/aws-lambda-api-gateway</a>.</li>
+                    <li id="ref-17">AWS Lambda Events - REST API (API Gateway v1) - Serverless Framework, accessed September 21, 2025, <a href="https://www.serverless.com/framework/docs/providers/aws/events/apigateway" target="_blank" rel="noopener noreferrer">https://www.serverless.com/framework/docs/providers/aws/events/apigateway</a>.</li>
+                    <li id="ref-18">Flask on AWS Serverless: A learning journey - Part 1 - Hacksaw, accessed September 21, 2025, <a href="https://hacksaw.co.za/blog/flask-on-aws-serverless-a-learning-journey-part-1/" target="_blank" rel="noopener noreferrer">https://hacksaw.co.za/blog/flask-on-aws-serverless-a-learning-journey-part-1/</a>.</li>
+                    <li id="ref-19">How to deploy Flask app on aws lambda?, accessed September 21, 2025, <a href="https://repost.aws/questions/QUsNTRMwF3QF-89DVEzCSJNQ/how-to-deploy-flask-app-on-aws-lambda" target="_blank" rel="noopener noreferrer">https://repost.aws/questions/QUsNTRMwF3QF-89DVEzCSJNQ/how-to-deploy-flask-app-on-aws-lambda</a>.</li>
+                    <li id="ref-20">Deploy a serverless Flask app with Zappa and Amazon RDS - Mattermost, accessed September 21, 2025, <a href="https://mattermost.com/blog/deploy-a-serverless-flask-app-with-zappa-and-amazon-rds/" target="_blank" rel="noopener noreferrer">https://mattermost.com/blog/deploy-a-serverless-flask-app-with-zappa-and-amazon-rds/</a>.</li>
+                    <li id="ref-21">MongoDB Atlas Vector Search: A Comprehensive Guide - GeoPITS, accessed September 21, 2025, <a href="https://www.geopits.com/blog/a-guide-to-mongodb-atlas-vector-search.html" target="_blank" rel="noopener noreferrer">https://www.geopits.com/blog/a-guide-to-mongodb-atlas-vector-search.html</a>.</li>
+                    <li id="ref-22">Atlas Vector Search - MongoDB, accessed September 21, 2025, <a href="https://www.mongodb.com/products/platform/atlas-vector-search" target="_blank" rel="noopener noreferrer">https://www.mongodb.com/products/platform/atlas-vector-search</a>.</li>
+                    <li id="ref-23">Building with LLMs: A Machine Learning Course Recommendation Engine, accessed September 21, 2025, <a href="https://apxml.com/posts/how-to-build-ml-course-recommendation-engine" target="_blank" rel="noopener noreferrer">https://apxml.com/posts/how-to-build-ml-course-recommendation-engine</a>.</li>
+                    <li id="ref-24">Need help building a customer recommendation system using LLMs : r/LLMDevs - Reddit, accessed September 21, 2025, <a href="https://www.reddit.com/r/LLMDevs/comments/1kwehqc/need_help_building_a_customer_recommendation/" target="_blank" rel="noopener noreferrer">https://www.reddit.com/r/LLMDevs/comments/1kwehqc/need_help_building_a_customer_recommendation/</a>.</li>
+                    <li id="ref-25">MongoDB Vector Search Overview - Atlas - MongoDB Docs, accessed September 21, 2025, <a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/" target="_blank" rel="noopener noreferrer">https://www.mongodb.com/docs/atlas/atlas-vector-search/vector-search-overview/</a>.</li>
+                    <li id="ref-26">Get Started with the MongoDB LangChain Integration - Atlas, accessed September 21, 2025, <a href="https://www.mongodb.com/docs/atlas/ai-integrations/langchain/get-started/" target="_blank" rel="noopener noreferrer">https://www.mongodb.com/docs/atlas/ai-integrations/langchain/get-started/</a>.</li>
+                    <li id="ref-27">How to Create Vector Embeddings - Atlas - MongoDB Docs, accessed September 21, 2025, <a href="https://www.mongodb.com/docs/atlas/atlas-vector-search/create-embeddings/" target="_blank" rel="noopener noreferrer">https://www.mongodb.com/docs/atlas/atlas-vector-search/create-embeddings/</a>.</li>
+                    <li id="ref-28">MongoDB Atlas - LangChain.js, accessed September 21, 2025, <a href="https://js.langchain.com/docs/integrations/vectorstores/mongodb_atlas/" target="_blank" rel="noopener noreferrer">https://js.langchain.com/docs/integrations/vectorstores/mongodb_atlas/</a>.</li>
+                    <li id="ref-29">MongoDB Atlas Vector Search in .NET (full tutorial) - YouTube, accessed September 21, 2025, <a href="https://www.youtube.com/watch?v=LQJJjIjUW6U" target="_blank" rel="noopener noreferrer">https://www.youtube.com/watch?v=LQJJjIjUW6U</a>.</li>
+                    <li id="ref-30">The Conundrum of Using Rule-Based vs. Machine Learning Systems, accessed September 21, 2025, <a href="https://www.zucisystems.com/blog/the-conundrum-of-using-rule-based-vs-machine-learning-systems/" target="_blank" rel="noopener noreferrer">https://www.zucisystems.com/blog/the-conundrum-of-using-rule-based-vs-machine-learning-systems/</a>.</li>
+                    <li id="ref-31">Rules Based Engine vs Machine Learning Monitoring Systems, accessed September 21, 2025, <a href="https://www.logicloop.com/fraud-risk/machine-learning-vs-rules-based-monitoring" target="_blank" rel="noopener noreferrer">https://www.logicloop.com/fraud-risk/machine-learning-vs-rules-based-monitoring</a>.</li>
+                    <li id="ref-32">Navigating the Future of Decision Management - Rules Engines vs. Machine Learning, accessed September 21, 2025, <a href="https://www.higson.io/blog/navigating-the-future-of-decision-management-rules-engines-vs-machine-learning/" target="_blank" rel="noopener noreferrer">https://www.higson.io/blog/navigating-the-future-of-decision-management-rules-engines-vs-machine-learning/</a>.</li>
+                    <li id="ref-33">Rule Engine vs Machine Learning? - GeeksforGeeks, accessed September 21, 2025, <a href="https://www.geeksforgeeks.org/machine-learning/rule-engine-vs-machine-learning/" target="_blank" rel="noopener noreferrer">https://www.geeksforgeeks.org/machine-learning/rule-engine-vs-machine-learning/</a>.</li>
+                    <li id="ref-34">Build a LLM powered semantic recommendation engine - Craft AI, accessed September 21, 2025, <a href="https://www.craft.ai/en/post/build-a-llm-powered-semantic-recommendation-engine-using-a-vector-database" target="_blank" rel="noopener noreferrer">https://www.craft.ai/en/post/build-a-llm-powered-semantic-recommendation-engine-using-a-vector-database</a>.</li>
+                    <li id="ref-35">Integrate MongoDB with LangChain - Atlas, accessed September 21, 2025, <a href="https://www.mongodb.com/docs/atlas/ai-integrations/langchain/" target="_blank" rel="noopener noreferrer">https://www.mongodb.com/docs/atlas/ai-integrations/langchain/</a>.</li>
+                    <li id="ref-36">MongoDB Atlas | 🦜️ LangChain - ️ LangChain, accessed September 21, 2025, <a href="https://python.langchain.com/docs/integrations/vectorstores/mongodb_atlas/" target="_blank" rel="noopener noreferrer">https://python.langchain.com/docs/integrations/vectorstores/mongodb_atlas/</a>.</li>
+                    <li id="ref-37">Prompt Engineering for Large Language Models (LLMs), accessed September 21, 2025, <a href="https://www.gravitee.io/blog/prompt-engineering-for-llms" target="_blank" rel="noopener noreferrer">https://www.gravitee.io/blog/prompt-engineering-for-llms</a>.</li>
+                    <li id="ref-38">Turning Intent into Action: how the Create Action Funnel empowers UX Design - Medium, accessed September 21, 2025, <a href="https://medium.com/design-bootcamp/turning-intent-into-action-how-the-create-action-funnel-empowers-ux-design-c26e8ba98515" target="_blank" rel="noopener noreferrer">https://medium.com/design-bootcamp/turning-intent-into-action-how-the-create-action-funnel-empowers-ux-design-c26e8ba98515</a>.</li>
+                    <li id="ref-39">AI Prompt Engineering: Complete Guide + Examples - Prismic, accessed September 21, 2025, <a href="https://prismic.io/blog/prompt-engineering" target="_blank" rel="noopener noreferrer">https://prismic.io/blog/prompt-engineering</a>.</li>
+                    <li id="ref-40">Tutorial | Prompt engineering with LLMs - Dataiku Knowledge Base, accessed September 21, 2025, <a href="https://knowledge.dataiku.com/latest/gen-ai/text-processing/tutorial-prompt-engineering.html" target="_blank" rel="noopener noreferrer">https://knowledge.dataiku.com/latest/gen-ai/text-processing/tutorial-prompt-engineering.html</a>.</li>
+                    <li id="ref-41">Vector Search | Vertex AI | Google Cloud, accessed September 21, 2025, <a href="https://cloud.google.com/vertex-ai/docs/vector-search/overview" target="_blank" rel="noopener noreferrer">https://cloud.google.com/vertex-ai/docs/vector-search/overview</a>.</li>
+                    <li id="ref-42">What Is Vector Search? Definition and Examples | TigerData, accessed September 21, 2025, <a href="https://www.tigerdata.com/learn/understanding-vector-search" target="_blank" rel="noopener noreferrer">https://www.tigerdata.com/learn/understanding-vector-search</a>.</li>
+                    <li id="ref-43">The Complete Guide To In-App Nudges 2025: Building Seamless User Experiences, accessed September 21, 2025, <a href="https://nudgenow.com/blogs/in-app-nudges" target="_blank" rel="noopener noreferrer">https://nudgenow.com/blogs/in-app-nudges</a>.</li>
+                    <li id="ref-44">Crossing the Finish Line with Behavioral Nudges, accessed September 21, 2025, <a href="https://knowledge.technolutions.net/docs/behavior-based-application-outreach" target="_blank" rel="noopener noreferrer">https://knowledge.technolutions.net/docs/behavior-based-application-outreach</a>.</li>
+                    <li id="ref-45">Nudging Basics: Contextual Nudges in Apps | by Anna Po | Medium, accessed September 21, 2025, <a href="https://medium.com/@helloannapo/behavioural-design-basics-contextual-nudges-in-apps-1d3232c46cea" target="_blank" rel="noopener noreferrer">https://medium.com/@helloannapo/behavioural-design-basics-contextual-nudges-in-apps-1d3232c46cea</a>.</li>
+                    <li id="ref-46">How to build real-time systems with Apache Kafka - StatusNeo, accessed September 21, 2025, <a href="https://statusneo.com/how-to-build-real-time-systems-with-apache-kafka/" target="_blank" rel="noopener noreferrer">https://statusneo.com/how-to-build-real-time-systems-with-apache-kafka/</a>.</li>
+                    <li id="ref-47">Event-Driven Architecture (EDA): A Complete Introduction - Confluent, accessed September 21, 2025, <a href="https://www.confluent.io/learn/event-driven-architecture/" target="_blank" rel="noopener noreferrer">https://www.confluent.io/learn/event-driven-architecture/</a>.</li>
+                    <li id="ref-48">How to Implement Event-Driven Architecture for Real-Time Apps? - Maruti Techlabs, accessed September 21, 2025, <a href="https://marutitech.com/event-driven-architecture-real-time-apps/" target="_blank" rel="noopener noreferrer">https://marutitech.com/event-driven-architecture-real-time-apps/</a>.</li>
+                    <li id="ref-49">Real-Time Event Streaming: RudderStack vs. Apache Kafka, accessed September 21, 2025, <a href="https://www.rudderstack.com/blog/real-time-event-streaming-rudderstack-vs-apache-kafka/" target="_blank" rel="noopener noreferrer">https://www.rudderstack.com/blog/real-time-event-streaming-rudderstack-vs-apache-kafka/</a>.</li>
+                    <li id="ref-50">Mobile App Tracking: Practical Guide &amp; Best Tools [2025] - UXCam, accessed September 21, 2025, <a href="https://uxcam.com/blog/mobile-app-tracking-tools/" target="_blank" rel="noopener noreferrer">https://uxcam.com/blog/mobile-app-tracking-tools/</a>.</li>
+                    <li id="ref-51">How to Implement Analytics Mobile App? (2025 Update) - Netguru, accessed September 21, 2025, <a href="https://www.netguru.com/blog/analytics-in-mobile-app" target="_blank" rel="noopener noreferrer">https://www.netguru.com/blog/analytics-in-mobile-app</a>.</li>
+                    <li id="ref-52">8 Mobile App Analytics Tools to Build Better Apps | Fullstory, accessed September 21, 2025, <a href="https://www.fullstory.com/blog/mobile-app-analytics-tools/" target="_blank" rel="noopener noreferrer">https://www.fullstory.com/blog/mobile-app-analytics-tools/</a>.</li>
+                    <li id="ref-53">Tracking User Activity in Web Applications: Effective Tactics &amp; Tools - Userpilot, accessed September 21, 2025, <a href="https://userpilot.com/blog/tracking-user-activity-in-web-applications/" target="_blank" rel="noopener noreferrer">https://userpilot.com/blog/tracking-user-activity-in-web-applications/</a>.</li>
+                    <li id="ref-54">Powered By - Apache Kafka, accessed September 21, 2025, <a href="https://kafka.apache.org/powered-by" target="_blank" rel="noopener noreferrer">https://kafka.apache.org/powered-by</a>.</li>
+                    <li id="ref-55">Building scalable real time event processing with Kafka and Flink - DoorDash, accessed September 21, 2025, <a href="https://careersatdoordash.com/blog/building-scalable-real-time-event-processing-with-kafka-and-flink/" target="_blank" rel="noopener noreferrer">https://careersatdoordash.com/blog/building-scalable-real-time-event-processing-with-kafka-and-flink/</a>.</li>
+                </ol>
             </section>
         </article>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (typeof Chart === 'undefined') {
+                return;
+            }
+
+            const wrapLabels = (label) => {
+                if (typeof label === 'string' && label.length > 16) {
+                    const words = label.split(' ');
+                    const lines = [];
+                    let currentLine = '';
+                    words.forEach(word => {
+                        if ((currentLine + word).length > 16) {
+                            lines.push(currentLine.trim());
+                            currentLine = '';
+                        }
+                        currentLine += word + ' ';
+                    });
+                    lines.push(currentLine.trim());
+                    return lines;
+                }
+                return label;
+            };
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                let label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                }
+                return label;
+            };
+
+            const intentChartCtx = document.getElementById('intentChart');
+            if (intentChartCtx) {
+                new Chart(intentChartCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Recommend Event', 'Re-engage User', 'Profile Completion Nudge', 'Send at a Different Time'].map(wrapLabels),
+                        datasets: [{
+                            label: 'Intent Distribution',
+                            data: [55, 25, 15, 5],
+                            backgroundColor: ['#3B82F6', '#8B5CF6', '#10B981', '#F59E0B'],
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'top' },
+                            tooltip: { callbacks: { title: tooltipTitleCallback } }
+                        }
+                    }
+                });
+            }
+
+            const recommendationChartCtx = document.getElementById('recommendationChart');
+            if (recommendationChartCtx) {
+                new Chart(recommendationChartCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Personalized Pick', 'Friend Attending', 'Limited Spots', 'General Suggestion'].map(wrapLabels),
+                        datasets: [{
+                            label: 'Recommendation Type by Engagement',
+                            data: [78, 65, 50, 30],
+                            backgroundColor: '#10B981',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: { callbacks: { title: tooltipTitleCallback } }
+                        }
+                    }
+                });
+            }
+
+            const targetingChartCtx = document.getElementById('targetingChart');
+            if (targetingChartCtx) {
+                new Chart(targetingChartCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Cuisine Match', 'Vibe Preference', 'Location Proximity', 'Past Attendance', 'Social Graph'].map(wrapLabels),
+                        datasets: [{
+                            label: 'User Compatibility Score',
+                            data: [90, 75, 85, 60, 80],
+                            fill: true,
+                            backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                            borderColor: '#8B5CF6',
+                            pointBackgroundColor: '#8B5CF6',
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            tooltip: { callbacks: { title: tooltipTitleCallback } }
+                        }
+                    }
+                });
+            }
+
+            const profileChartCtx = document.getElementById('profileChart');
+            if (profileChartCtx) {
+                new Chart(profileChartCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Day 1', 'Day 2', 'Day 3', 'Day 4', 'Day 5'],
+                        datasets: [{
+                            label: 'Profile Completion Rate with Nudges',
+                            data: [40, 65, 75, 82, 90],
+                            borderColor: '#F59E0B',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, max: 100 }
+                        },
+                        plugins: {
+                            tooltip: { callbacks: { title: tooltipTitleCallback } }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>
