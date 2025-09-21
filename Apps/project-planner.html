@@ -703,12 +703,15 @@
         
         // --- Drag and Drop Handlers (Mouse & Touch) ---
         function handleDragStart(e) {
-            draggedElement = e.target;
-            e.dataTransfer.effectAllowed = 'move';
-            setTimeout(() => e.target.classList.add('dragging'), 0);
+            draggedElement = e.currentTarget;
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', draggedElement.dataset.id || '');
+            }
+            setTimeout(() => draggedElement.classList.add('dragging'), 0);
         }
         function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
+            e.currentTarget.classList.remove('dragging');
             draggedElement = null;
         }
         function getDragAfterElement(container, y) {
@@ -722,6 +725,7 @@
         }
         function handleDragOver(e) {
             e.preventDefault();
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
             const quadrant = e.currentTarget;
             quadrant.classList.add('drag-over');
             const afterElement = getDragAfterElement(quadrant, e.clientY);
@@ -1060,12 +1064,19 @@
                     else endReview();
                 }
             });
-            
+
             Promise.all([fetchTodoistTasks(), fetchCompletedTodoistTasks()]).then(() => {
                 updateAllProjectKPIs();
                 renderAllViews();
             });
-            
+
+            quadrants.forEach(quadrant => {
+                quadrant.addEventListener('dragenter', (e) => e.preventDefault());
+                quadrant.addEventListener('dragover', handleDragOver);
+                quadrant.addEventListener('dragleave', handleDragLeave);
+                quadrant.addEventListener('drop', handleDrop);
+            });
+
             // View & Main Action Listeners
             document.getElementById('matrix-view-btn').addEventListener('click', () => toggleView('matrix'));
             document.getElementById('table-view-btn').addEventListener('click', () => toggleView('table'));
