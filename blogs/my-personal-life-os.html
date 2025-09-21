@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Personal Life OS: Ditching Chaos for a System That Works | ChrisCruz.ai</title>
+    <meta name="description" content="Discover how I combined PARA, Timeboxing, Biological Prime Time, and the 2-Minute Rule into a light, sustainable Life OS. Learn the daily and weekly habits that keep the system running and build your own version."/>
+    <meta name="keywords" content="Life OS, productivity system, PARA method, timeboxing, biological prime time, 2-minute rule, weekly review, Chris Cruz"/>
+    <meta name="author" content="Christopher Manuel Cruz-Guzman"/>
+    <meta property="og:title" content="My Personal Life OS: Ditching Chaos for a System That Works"/>
+    <meta property="og:description" content="A practical blueprint for combining PARA, Timeboxing, Biological Prime Time, and the 2-Minute Rule into a personal Life OS."/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:url" content="https://chriscruz.ai/blogs/my-personal-life-os.html"/>
+    <meta property="og:image" content="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="My Personal Life OS: Ditching Chaos for a System That Works"/>
+    <meta name="twitter:description" content="How I blended proven productivity frameworks into a Life OS that keeps chaos away."/>
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1400&q=80"/>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #F0F8FF;
+            color: #1F2937;
+        }
+        .prose p {
+            margin-bottom: 1.25rem;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 640px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 420px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .flowchart-node {
+            border: 2px solid #B0C4DE;
+            background-color: #FFFFFF;
+            padding: 1.25rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            box-shadow: 0 6px 14px rgba(70, 130, 180, 0.12);
+            flex-grow: 1;
+        }
+        .flowchart-connector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 0;
+            color: #4682B4;
+            font-weight: 700;
+        }
+        .flowchart-connector::after {
+            content: '→';
+            font-size: 2.25rem;
+        }
+        @media (max-width: 767px) {
+            .flowchart-connector {
+                padding: 0.5rem 0;
+            }
+            .flowchart-connector::after {
+                content: '↓';
+            }
+        }
+        .best-practice-card {
+            background-color: #FFFFFF;
+            border: 1px solid #D6E4FF;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(70, 130, 180, 0.12);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .best-practice-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 35px rgba(70, 130, 180, 0.18);
+        }
+        .section-shell {
+            background-color: #FFFFFF;
+            border-radius: 1rem;
+            box-shadow: 0 20px 45px rgba(176, 196, 222, 0.25);
+        }
+        .accent-text {
+            color: #4682B4;
+        }
+        .tag-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.35rem 0.75rem;
+            border-radius: 9999px;
+            background-color: rgba(70, 130, 180, 0.12);
+            color: #1F4A6E;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="bg-[#4682B4] text-white py-12 md:py-16 px-6">
+        <div class="max-w-5xl mx-auto text-center">
+            <div class="flex justify-center mb-4">
+                <span class="tag-pill bg-white/20 text-white">LifeOS Blueprint</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-extrabold leading-tight mb-4">My Personal "Life OS": How I Ditched the Chaos and Built a System That Actually Works</h1>
+            <p class="text-lg md:text-xl max-w-3xl mx-auto text-blue-50">The antidote to sticky-note chaos isn't another rigid framework—it’s a modular operating system built from the best practices that fit your brain, your energy, and your life.</p>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto px-4 md:px-8 -mt-12 md:-mt-16 pb-16">
+        <article class="section-shell p-6 md:p-10 space-y-16">
+
+            <section id="origin-story" class="prose max-w-none">
+                <h2 class="text-3xl font-bold accent-text mb-4">From Sunday Scaries to Systems Thinking</h2>
+                <p>We have all stared down a Sunday evening calendar that felt like a tidal wave. For years my weeks were a blur of half-finished tasks, unsent emails, and a to-do list that only existed in my head. I would sprint into a new framework—maybe GTD, maybe the hottest new app—follow it perfectly for five days, and then abandon it the moment real life punched through. Each reset chipped away at my confidence and made productivity feel like an unsolved riddle.</p>
+                <p>The breakthrough came when I stopped searching for a magic-bullet methodology and started acting like an architect. Instead of surrendering to one doctrine, I studied dozens of systems and cherry-picked the components that actually matched my rhythms. The result is a personal Life Operating System that is light, modular, and honest about how my brain works.</p>
+            </section>
+
+            <section id="blueprint" class="space-y-8">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold accent-text mb-4">The Framework: My Productivity Cocktail</h2>
+                    <p class="text-lg text-gray-600">Three pillars keep everything humming. They give me structure without turning my week into a spreadsheet of shame.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="best-practice-card">
+                        <h3 class="text-2xl font-semibold text-[#5F9EA0] mb-3">PARA Method</h3>
+                        <p class="text-gray-600">Projects, Areas, Resources, Archives. Every file, note, and bookmark has a logical home so retrieval never steals creative energy.</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 space-y-1 mt-4">
+                            <li>Projects: Q4 marketing push, family vacation plan</li>
+                            <li>Areas: Health, finances, content lab</li>
+                            <li>Resources: Templates, research, inspiration</li>
+                            <li>Archives: Completed or dormant work</li>
+                        </ul>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-2xl font-semibold text-[#5F9EA0] mb-3">Timeboxing + Biological Prime Time</h3>
+                        <p class="text-gray-600">Every priority lives on the calendar. Deep work blocks land in my natural energy peak (9–11 AM) so the hardest work gets my best brain.</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 space-y-1 mt-4">
+                            <li>Calendar first, to-do list second</li>
+                            <li>Reserve peak hours for creation and strategy</li>
+                            <li>Batch meetings and email when energy dips</li>
+                        </ul>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-2xl font-semibold text-[#5F9EA0] mb-3">The 2-Minute Rule</h3>
+                        <p class="text-gray-600">If it takes less than two minutes, it happens immediately. That keeps mental debt from piling up and preserves momentum all day.</p>
+                        <ul class="list-disc list-inside text-sm text-gray-500 space-y-1 mt-4">
+                            <li>Fire off the micro-email now</li>
+                            <li>File the document into PARA instantly</li>
+                            <li>Reset your workspace before leaving</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="daily-ops" class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+                <div class="prose max-w-none">
+                    <h2 class="text-3xl font-bold accent-text mb-4">How the System Runs Day to Day</h2>
+                    <p>My calendar is the operating console. Every morning at 9:00 AM I drop into a two-hour <strong>Prime Time Block</strong> for the single most important task—writing, systems architecture, or complex problem solving. Notifications are off, browsers stay closed, and the PARA workspace I need is already open.</p>
+                    <p>Afternoons are built for collaboration and lighter execution. That is when calls, email processing, and two-minute tasks stack up. I batch inbox time so it never hijacks the flow. At 5:00 PM sharp I perform an <strong>Evening Shutdown</strong>: inbox to zero, review tomorrow’s commitments, and capture the next day’s highlight. That ritual draws a bright line between work and personal time.</p>
+                </div>
+                <div class="bg-[#E6F2FF] border border-[#B0C4DE] rounded-2xl p-6 shadow-lg">
+                    <h3 class="text-2xl font-semibold text-[#1F4A6E] mb-4">My Daily Cadence</h3>
+                    <div class="space-y-4 text-gray-700">
+                        <div>
+                            <p class="font-semibold">Morning (9–11 AM)</p>
+                            <p>Prime Time deep work block. One mission, zero distractions.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Midday (11 AM–2 PM)</p>
+                            <p>Collaborative sessions, standups, or shipping medium-weight tasks.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Afternoon (2–5 PM)</p>
+                            <p>Admin sweeps, content reviews, two-minute quick wins, and energy-friendly meetings.</p>
+                        </div>
+                        <div>
+                            <p class="font-semibold">Evening Shutdown (5 PM)</p>
+                            <p>Review PARA dashboard, confirm tomorrow’s highlight, close all loops.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="friday-review" class="prose max-w-none">
+                <h2 class="text-3xl font-bold accent-text mb-4">The Weekly Cornerstone: Friday Review</h2>
+                <p>One protected hour on Friday keeps the Life OS honest. I open every capture bucket, clear inboxes, and ask myself three questions: <strong>What worked?</strong> <strong>What needs refinement?</strong> <strong>What’s next?</strong> From there I timebox the coming week so Monday morning is pre-decided. This CEO meeting with myself is the reason nothing slips through the cracks and I head into the weekend with a clear head.</p>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                    <div class="best-practice-card">
+                        <h3 class="text-xl font-semibold text-[#1F4A6E] mb-2">Celebrate Momentum</h3>
+                        <p class="text-sm text-gray-600">Catalog small wins to reinforce the behaviors you want to repeat.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-xl font-semibold text-[#1F4A6E] mb-2">Diagnose Bottlenecks</h3>
+                        <p class="text-sm text-gray-600">Spot friction—calendar overload, missing resources, energy dips—and design one tweak to relieve it.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-xl font-semibold text-[#1F4A6E] mb-2">Pre-Load Timeboxes</h3>
+                        <p class="text-sm text-gray-600">Schedule the next week’s prime time blocks and key commitments before you log off.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="evolution" class="bg-[#F8FBFF] border border-[#D8E6FF] rounded-2xl p-6 md:p-8 shadow-inner">
+                <div class="text-center">
+                    <h2 class="text-3xl font-bold accent-text mb-4">The Evolution of Productivity</h2>
+                    <p class="text-gray-600 max-w-3xl mx-auto mb-8">Productivity has matured from rigid, task-first approaches to flexible, energy-aware systems. Instead of forcing ourselves into someone else’s workflow, we can combine proven frameworks and treat sustainability as the real metric.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="frameworksComparisonChart" aria-label="Comparison of traditional and modern productivity systems" role="img"></canvas>
+                </div>
+                <p class="text-center text-sm text-gray-500 mt-4">Holistic systems may not be perfect, but they outperform traditional playbooks on flexibility, energy focus, and long-term sustainability.</p>
+            </section>
+
+            <section id="framework-menu" class="space-y-8">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold accent-text mb-4">A Menu of Modern Frameworks</h2>
+                    <p class="text-gray-600">Think of these as modular ingredients. Mix what fits, ignore what doesn’t, and remix as your season of life changes.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="best-practice-card">
+                        <h3 class="text-xl font-semibold text-[#5F9EA0] mb-2">GTD (Getting Things Done)</h3>
+                        <p class="text-sm text-gray-600">Capture, clarify, organize, reflect, engage. Perfect for emptying your brain and getting commitments into a trusted system.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-xl font-semibold text-[#5F9EA0] mb-2">PARA Method</h3>
+                        <p class="text-sm text-gray-600">Sort everything by actionability. Essential for anyone drowning in digital assets or knowledge work.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-xl font-semibold text-[#5F9EA0] mb-2">Timeboxing</h3>
+                        <p class="text-sm text-gray-600">Block time on the calendar so commitments become real. Best for tackling procrastination and context switching.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-xl font-semibold text-[#5F9EA0] mb-2">MTR (Move/Think/Rest)</h3>
+                        <p class="text-sm text-gray-600">Design your day around energy: body first, then deep thinking, then intentional rest.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-xl font-semibold text-[#5F9EA0] mb-2">EASE Framework</h3>
+                        <p class="text-sm text-gray-600">Prioritize by Enjoyment, Expertise, and Effect so your calendar reflects both impact and alignment.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-xl font-semibold text-[#5F9EA0] mb-2">Biological Prime Time</h3>
+                        <p class="text-sm text-gray-600">Match your hardest work to your highest energy window. Ignore everyone else’s morning routines.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="rhythm" class="space-y-8">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold accent-text mb-4">The Rhythm of Routine: A Cadence for Life</h2>
+                    <p class="text-gray-600">Every time horizon has a purpose. Daily focus keeps momentum, weekly reflection ensures alignment, monthly reviews maintain systems, and quarterly resets reconnect me to the bigger story.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-[#5F9EA0]">
+                        <h3 class="text-xl font-bold mb-3 text-[#1F4A6E]">Daily</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong>2-Minute Rule:</strong> Execute micro tasks instantly.</li>
+                            <li><strong>Prime Time Block:</strong> Guard 1–2 hours of deep work.</li>
+                            <li><strong>Daily Highlight:</strong> Define the one win that matters most.</li>
+                            <li><strong>Evening Shutdown:</strong> Close loops and prep tomorrow.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-[#5F9EA0]">
+                        <h3 class="text-xl font-bold mb-3 text-[#1F4A6E]">Weekly</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong>Weekly Review:</strong> Reflect, clear, and timebox.</li>
+                            <li><strong>Goal Check-in:</strong> Align projects with Areas in PARA.</li>
+                            <li><strong>Social & Rest Planning:</strong> Schedule connection and recovery.</li>
+                            <li><strong>Financial Pulse:</strong> Scan spending and commitments.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-[#5F9EA0]">
+                        <h3 class="text-xl font-bold mb-3 text-[#1F4A6E]">Monthly</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong>Goal Review:</strong> Recommit to the next milestones.</li>
+                            <li><strong>Budget Review:</strong> Align money with priorities.</li>
+                            <li><strong>Area Maintenance:</strong> Health, relationships, home.</li>
+                            <li><strong>Digital Cleanup:</strong> Archive finished projects.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-lg shadow-md p-6 border-t-4 border-[#5F9EA0]">
+                        <h3 class="text-xl font-bold mb-3 text-[#1F4A6E]">Quarterly</h3>
+                        <ul class="list-disc list-inside space-y-2 text-gray-600">
+                            <li><strong>Life Vision Review:</strong> Reconnect to the big narrative.</li>
+                            <li><strong>Set 90-Day Goals:</strong> Pick 1–3 high-leverage outcomes.</li>
+                            <li><strong>Deep Rest:</strong> Plan a reset or off-grid day.</li>
+                            <li><strong>Systems Audit:</strong> Refine tools and automation.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="holistic-app" class="bg-[#F8FBFF] border border-[#D8E6FF] rounded-2xl p-6 md:p-8 shadow-inner">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold accent-text mb-4">Holistic Application: Balancing Life’s Domains</h2>
+                    <p class="text-gray-600">A true Life OS holds space for every meaningful domain—work, relationships, money, play, growth. PARA keeps them visible so nothing quietly erodes in the background.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="lifeBalanceRadarChart" aria-label="Radar chart showing life balance before and after building a holistic system" role="img"></canvas>
+                </div>
+                <p class="text-center text-sm text-gray-500 mt-4">The goal isn’t symmetry; it’s intentional distribution of energy so progress in one arena doesn’t require self-sabotage in another.</p>
+            </section>
+
+            <section id="best-practices" class="space-y-8">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold accent-text mb-4">Best Practices That Keep the OS Smooth</h2>
+                    <p class="text-gray-600">Small behaviors are the lubrication that keeps the whole system responsive. Here are the practices I revisit every month.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="best-practice-card">
+                        <h3 class="text-lg font-semibold text-[#1F4A6E] mb-2">Honor Timeboxes</h3>
+                        <p class="text-sm text-gray-600">Treat each block like a meeting with your future self. If it moves, reschedule it immediately, don’t let it vanish.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-lg font-semibold text-[#1F4A6E] mb-2">Keep Capture Frictionless</h3>
+                        <p class="text-sm text-gray-600">Use a single inbox for ideas, tasks, and inputs. Mine feeds PARA with zero copy-paste gymnastics.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-lg font-semibold text-[#1F4A6E] mb-2">Review Energy, Not Just Output</h3>
+                        <p class="text-sm text-gray-600">Log when you feel energized or drained. Adjust future timeboxes based on data, not guilt.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-lg font-semibold text-[#1F4A6E] mb-2">Automate Micro-Tasks</h3>
+                        <p class="text-sm text-gray-600">Templates, shortcuts, and automations keep the 2-minute rule easy to follow.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-lg font-semibold text-[#1F4A6E] mb-2">Archive Aggressively</h3>
+                        <p class="text-sm text-gray-600">When something leaves active focus, move it to Archives. Clarity beats sentimental clutter.</p>
+                    </div>
+                    <div class="best-practice-card">
+                        <h3 class="text-lg font-semibold text-[#1F4A6E] mb-2">Protect Recovery</h3>
+                        <p class="text-sm text-gray-600">Schedule rest like you schedule work. A resilient OS needs maintenance windows.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="build-system" class="space-y-8">
+                <div class="text-center max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold accent-text mb-4">Building Your Personal Life OS</h2>
+                    <p class="text-gray-600">You don’t need to rebuild your life overnight. Start with one module, prove it works, and then layer the next.</p>
+                </div>
+                <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8">
+                    <div class="flex flex-col md:flex-row items-stretch justify-center gap-4">
+                        <div class="flowchart-node">
+                            <h3 class="font-bold text-lg text-[#1F4A6E]">1. Capture</h3>
+                            <p class="text-sm text-gray-600">Choose a trusted inbox—Notion, Apple Notes, a paper notebook—and empty your head into it all week.</p>
+                        </div>
+                        <div class="flowchart-connector" aria-hidden="true"></div>
+                        <div class="flowchart-node">
+                            <h3 class="font-bold text-lg text-[#1F4A6E]">2. Organize</h3>
+                            <p class="text-sm text-gray-600">Sort captures into PARA so you always know what deserves attention and what can safely wait.</p>
+                        </div>
+                        <div class="flowchart-connector" aria-hidden="true"></div>
+                        <div class="flowchart-node">
+                            <h3 class="font-bold text-lg text-[#1F4A6E]">3. Plan</h3>
+                            <p class="text-sm text-gray-600">Timebox the next few days and reserve your biological prime time for deep work.</p>
+                        </div>
+                        <div class="flowchart-connector" aria-hidden="true"></div>
+                        <div class="flowchart-node">
+                            <h3 class="font-bold text-lg text-[#1F4A6E]">4. Review</h3>
+                            <p class="text-sm text-gray-600">Use weekly and monthly reviews to adjust, celebrate, and realign with your bigger goals.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm text-gray-600">
+                    <div class="bg-[#E6F2FF] border border-[#B0C4DE] rounded-xl p-5">
+                        <h3 class="text-base font-semibold text-[#1F4A6E] mb-2">Start Today</h3>
+                        <p>Clean one digital folder using PARA. The win is clarity, not perfection.</p>
+                    </div>
+                    <div class="bg-[#E6F2FF] border border-[#B0C4DE] rounded-xl p-5">
+                        <h3 class="text-base font-semibold text-[#1F4A6E] mb-2">Try Tomorrow</h3>
+                        <p>Block a 90-minute Timebox for your most important task and defend it like a contract.</p>
+                    </div>
+                    <div class="bg-[#E6F2FF] border border-[#B0C4DE] rounded-xl p-5">
+                        <h3 class="text-base font-semibold text-[#1F4A6E] mb-2">Experiment This Week</h3>
+                        <p>Schedule a 30-minute Friday Review and answer the three cornerstone questions.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="cta" class="text-center space-y-4">
+                <h2 class="text-2xl font-bold text-[#1F4A6E]">Your Turn</h2>
+                <p class="text-gray-600 max-w-2xl mx-auto">What habit or tool has been a game-changer inside your own Life OS? Drop it in the comments or reply via email—I’m always looking to refine this blueprint with ideas from fellow builders.</p>
+                <a href="../contact.html" class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-[#4682B4] text-white font-semibold shadow-md hover:bg-[#37648D] transition-colors">Share Your Best Practice →</a>
+            </section>
+
+        </article>
+    </main>
+
+    <footer class="text-center py-8 px-4 bg-[#B0C4DE] text-[#1F4A6E]">
+        <p>Infographic created to visualize a balanced and sustainable approach to modern productivity.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const wrapLabel = (label) => {
+                if (label.length > 16) {
+                    const words = label.split(' ');
+                    const lines = [];
+                    let currentLine = '';
+                    words.forEach(word => {
+                        if ((currentLine + ' ' + word).trim().length > 16) {
+                            lines.push(currentLine.trim());
+                            currentLine = word;
+                        } else {
+                            currentLine = (currentLine + ' ' + word).trim();
+                        }
+                    });
+                    lines.push(currentLine.trim());
+                    return lines;
+                }
+                return label;
+            };
+
+            const tooltipTitleCallback = (tooltipItems) => {
+                const item = tooltipItems[0];
+                const label = item.chart.data.labels[item.dataIndex];
+                if (Array.isArray(label)) {
+                    return label.join(' ');
+                }
+                return label;
+            };
+
+            const sharedChartOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+                plugins: {
+                    legend: {
+                        labels: {
+                            color: '#1F4A6E',
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: tooltipTitleCallback
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: {
+                            color: '#E0E7FF'
+                        },
+                        ticks: {
+                            color: '#1F4A6E'
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: '#1F4A6E'
+                        }
+                    }
+                }
+            };
+
+            const frameworksCanvas = document.getElementById('frameworksComparisonChart');
+            if (frameworksCanvas) {
+                const frameworksCtx = frameworksCanvas.getContext('2d');
+                new Chart(frameworksCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Flexibility', 'Energy Focus', 'Holistic Scope', 'Implementation Ease'],
+                        datasets: [
+                            {
+                                label: 'Traditional Systems',
+                                data: [4, 3, 5, 6],
+                                backgroundColor: '#ADD8E6',
+                                borderColor: '#ADD8E6',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Modular Life OS',
+                                data: [9, 8, 8, 7],
+                                backgroundColor: '#5F9EA0',
+                                borderColor: '#5F9EA0',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: sharedChartOptions
+                });
+            }
+
+            const lifeBalanceCanvas = document.getElementById('lifeBalanceRadarChart');
+            if (lifeBalanceCanvas) {
+                const lifeBalanceCtx = lifeBalanceCanvas.getContext('2d');
+                new Chart(lifeBalanceCtx, {
+                    type: 'radar',
+                    data: {
+                        labels: ['Work', wrapLabel('Personal Growth'), 'Finances', 'Relationships', wrapLabel('Social Life')],
+                        datasets: [
+                            {
+                                label: 'Before (Siloed Approach)',
+                                data: [9, 4, 5, 4, 3],
+                                fill: true,
+                                backgroundColor: 'rgba(173, 216, 230, 0.4)',
+                                borderColor: 'rgb(173, 216, 230)',
+                                pointBackgroundColor: 'rgb(173, 216, 230)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgb(173, 216, 230)'
+                            },
+                            {
+                                label: 'After (Holistic System)',
+                                data: [7, 8, 7, 8, 6],
+                                fill: true,
+                                backgroundColor: 'rgba(95, 158, 160, 0.4)',
+                                borderColor: 'rgb(95, 158, 160)',
+                                pointBackgroundColor: 'rgb(95, 158, 160)',
+                                pointBorderColor: '#fff',
+                                pointHoverBackgroundColor: '#fff',
+                                pointHoverBorderColor: 'rgb(95, 158, 160)'
+                            }
+                        ]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                labels: {
+                                    color: '#1F4A6E'
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    title: tooltipTitleCallback
+                                }
+                            }
+                        },
+                        scales: {
+                            r: {
+                                angleLines: {
+                                    color: '#E0E7FF'
+                                },
+                                grid: {
+                                    color: '#E0E7FF'
+                                },
+                                pointLabels: {
+                                    font: {
+                                        size: 14
+                                    },
+                                    color: '#1F4A6E'
+                                },
+                                ticks: {
+                                    backdropColor: '#F0F8FF',
+                                    color: '#1F4A6E'
+                                },
+                                suggestedMin: 0,
+                                suggestedMax: 10
+                            }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
