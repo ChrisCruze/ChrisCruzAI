@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todoist Project Planning</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+        }
+
+        .card-enter {
+            animation: slide-in-bottom 0.5s cubic-bezier(0.250, 0.460, 0.450, 0.940) both;
+        }
+        @keyframes slide-in-bottom {
+            0% {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            100% {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .btn-selected {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 2px white, 0 0 0 4px #2563eb; /* Ring effect */
+        }
+        .btn-loading {
+            cursor: wait;
+            opacity: 0.7;
+        }
+        #task-list li {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #task-list li:hover {
+            background-color: #f0f4ff; /* A light blue hover */
+        }
+        .dark #task-list li:hover {
+            background-color: #2d3748; /* A darker hover for dark mode */
+        }
+    
+        /* Project Planner Styles */
+
+        .eisenhower-quadrant {
+            min-height: 180px;
+            transition: background-color 0.3s ease;
+        }
+        .project-card {
+            cursor: grab;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .project-card.dragging {
+            opacity: 0.8;
+            background-color: #e0e7ff;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            transform: scale(1.05);
+            cursor: grabbing;
+        }
+        .drag-over {
+            background-color: #dbeafe !important;
+            border: 2px dashed #a5b4fc;
+        }
+        .view-toggle button.active {
+            background-color: #4f46e5;
+            color: white;
+        }
+        #project-details-modal .modal-content, #settings-modal .modal-content {
+            max-height: 90vh;
+        }
+        .modal-header {
+            position: sticky;
+            top: 0;
+            background-color: white;
+            z-index: 10;
+        }
+        .ai-button .fa-spinner, .create-task-btn .fa-spinner, .create-todoist-btn .fa-spinner { display: none; }
+        .ai-button.loading .fa-wand-magic-sparkles, .create-task-btn.loading .fa-bolt, .create-todoist-btn.loading .fa-plus { display: none; }
+        .ai-button.loading .fa-spinner, .create-task-btn.loading .fa-spinner, .create-todoist-btn.loading .fa-spinner { display: inline-block; }
+        .markdown-view, .settings-tab-content { @apply prose prose-sm sm:prose-base max-w-none; }
+        .markdown-view { @apply p-3 bg-gray-50 rounded-md border border-gray-200; }
+        .markdown-view h1, .markdown-view h2, .markdown-view h3, .settings-tab-content h1, .settings-tab-content h2, .settings-tab-content h3 { @apply border-b-0 pb-0; }
+        .markdown-view ul, .settings-tab-content ul { @apply list-disc pl-5; }
+        .markdown-view ol, .settings-tab-content ol { @apply list-decimal pl-5; }
+        .view-mode .edit-field, .view-mode .review-controls, .view-mode .status-edit-container { display: none; }
+        .edit-mode .markdown-view, .edit-mode .review-controls, .edit-mode .status-view-container { display: none; }
+        .review-mode .markdown-view, .review-mode .standard-controls, .review-mode .status-view-container { display: none; }
+        .view-mode .ai-button, .view-mode #add-hyperlink-form { display: none; }
+        .view-mode .delete-hyperlink-btn, .view-mode .save-hyperlink-btn { display: none; }
+        .edit-mode .hyperlink-view-details { display: none; }
+        .review-mode #review-nav-top { display: flex; }
+        .task-item.completed .task-name-view, .task-item.completed .task-name-edit { text-decoration: line-through; color: #9ca3af; }
+        #natural-planning-section .section-content { max-height: 1000px; transition: max-height 0.5s ease-in-out, opacity 0.3s ease-in-out, visibility 0.3s ease-in-out; opacity: 1; visibility: visible; overflow: hidden; }
+        #natural-planning-section.collapsed .section-content { max-height: 0; opacity: 0; visibility: hidden; }
+        #natural-planning-section .chevron-icon { transition: transform 0.3s ease; }
+        #natural-planning-section.collapsed .chevron-icon { transform: rotate(-90deg); }
+        .settings-tab-content.hidden { display: none; }
+    
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+
+    <div class="max-w-5xl mx-auto px-4 pt-10 pb-6">
+        <div class="bg-white/90 dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 rounded-3xl shadow-xl p-8 text-center">
+            <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 dark:text-white">Todoist Project Planning</h1>
+            <p class="mt-3 text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">Review, sort, and plan Todoist tasks while steering long-term projects in one streamlined workspace.</p>
+            <div class="mt-6 flex justify-center">
+                <div class="inline-flex bg-gray-100 dark:bg-gray-700 rounded-full p-1 shadow-inner">
+                    <button id="show-sorter-btn" data-section="sorter" class="px-5 py-2 text-sm font-semibold rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-transparent text-gray-600 dark:text-gray-300">Task Sorter</button>
+                    <button id="show-planner-btn" data-section="planner" class="px-5 py-2 text-sm font-semibold rounded-full transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 bg-transparent text-gray-600 dark:text-gray-300">Project Planner</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section id="task-sorter-section">
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <!-- Main Task List View -->
+        <div id="task-list-view" class="max-w-3xl mx-auto">
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+                    <div class="mb-4 sm:mb-0">
+                        <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Your Todoist Tasks</h1>
+                        <div class="flex space-x-4 mt-2 text-sm text-gray-500 dark:text-gray-400">
+                           <p id="kpi-task-count">Total: 0</p>
+                           <p id="kpi-reviewed-count">Reviewed: 0 (0%)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 w-full sm:w-auto">
+                        <button id="refresh-button" class="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-transform duration-300">
+                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h5M20 20v-5h-5M20 4h-5v5M4 20h5v-5" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9l-6 6m0-6l6 6" /></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Sorting and Filtering Controls -->
+                <div class="flex flex-col sm:flex-row gap-4 mb-4 p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex-1">
+                        <label for="sort-select" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Sort by</label>
+                        <select id="sort-select" class="w-full bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="default">Default</option>
+                            <option value="priority">Priority (High to Low)</option>
+                            <option value="duration">Duration (Low to High)</option>
+                            <option value="device_computer">Device (Computer First)</option>
+                            <option value="device_phone">Device (Phone First)</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <label for="completion-filter" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Filter by</label>
+                        <select id="completion-filter" class="w-full bg-white dark:bg-gray-600 border border-gray-300 dark:border-gray-500 rounded-md shadow-sm p-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="all">All Tasks</option>
+                            <option value="incomplete">Incomplete Tasks</option>
+                            <option value="complete">Complete Tasks</option>
+                        </select>
+                    </div>
+                    <div class="flex-1 flex flex-col justify-end">
+                         <button id="review-unrefined-button" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 disabled:bg-yellow-300 disabled:cursor-not-allowed">
+                            Review Unrefined
+                        </button>
+                    </div>
+                     <div class="flex-1 flex flex-col justify-end">
+                         <button id="start-sorting-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 disabled:bg-blue-400 disabled:cursor-not-allowed">
+                            Sort All
+                        </button>
+                    </div>
+                </div>
+
+
+                <div id="loading-indicator" class="text-center py-8">
+                    <p class="text-lg text-gray-500 dark:text-gray-400">Loading tasks...</p>
+                </div>
+                <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg relative mb-4" role="alert"></div>
+                <ul id="task-list" class="space-y-3 mb-6">
+                    <!-- Tasks will be dynamically inserted here -->
+                </ul>
+            </div>
+        </div>
+
+        <!-- Task Review/Editor View -->
+        <div id="task-editor-view" class="hidden max-w-2xl mx-auto">
+             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
+                <!-- Top Navigation -->
+                <div id="editor-top-nav" class="flex justify-between items-center mb-4">
+                    <button id="back-button" class="bg-gray-200 hover:bg-gray-300 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-800 dark:text-gray-200 font-bold py-2 px-4 rounded-lg transition duration-300">← Save & Back</button>
+                    <button id="next-button" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 hidden">Next Task →</button>
+                </div>
+
+                <div id="progress-container" class="mb-6">
+                    <div class="flex justify-between items-center mb-1">
+                        <span id="progress-title" class="text-sm font-medium text-gray-700 dark:text-gray-300">Review Progress</span>
+                        <span id="progress-text" class="text-sm font-medium text-gray-700 dark:text-gray-300">0/0 (0%)</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-600">
+                        <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div id="editor-loading" class="text-center py-8 hidden">
+                     <p class="text-lg text-gray-500 dark:text-gray-400">Loading task details...</p>
+                </div>
+
+                <div id="editor-content" class="space-y-6">
+                    <div>
+                        <label for="task-content-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Task</label>
+                        <textarea id="task-content-input" rows="3" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 text-lg font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+                    <div>
+                        <label for="task-description-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description</label>
+                        <textarea id="task-description-input" rows="4" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 text-center">Set Device</h3>
+                            <div id="device-selector" class="flex justify-center space-x-3 sm:space-x-4">
+                                <button data-label="Computer" class="label-btn font-medium py-2 px-5 rounded-full transition-all duration-200 bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300">Computer</button>
+                                <button data-label="Phone" class="label-btn font-medium py-2 px-5 rounded-full transition-all duration-200 bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300">Phone</button>
+                            </div>
+                        </div>
+                        <div>
+                            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 text-center">Set Duration</h3>
+                            <div id="duration-selector" class="flex justify-center space-x-2 sm:space-x-3">
+                                <button data-label="5min" class="label-btn font-medium py-2 px-4 rounded-full transition-all duration-200 bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300">5m</button>
+                                <button data-label="25min" class="label-btn font-medium py-2 px-4 rounded-full transition-all duration-200 bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300">25m</button>
+                                <button data-label="50min" class="label-btn font-medium py-2 px-4 rounded-full transition-all duration-200 bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300">50m</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 text-center">Set Priority</h3>
+                        <div id="priority-selector" class="flex justify-center space-x-3 sm:space-x-4">
+                            <button data-priority="4" class="priority-btn font-bold w-12 h-12 rounded-full transition-all duration-200 bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300">P1</button>
+                            <button data-priority="3" class="priority-btn font-bold w-12 h-12 rounded-full transition-all duration-200 bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300">P2</button>
+                            <button data-priority="2" class="priority-btn font-bold w-12 h-12 rounded-full transition-all duration-200 bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">P3</button>
+                            <button data-priority="1" class="priority-btn font-bold w-12 h-12 rounded-full transition-all duration-200 bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-300">P4</button>
+                        </div>
+                    </div>
+
+                    <!-- AI Assistant Section -->
+                    <div id="ai-assistant-container" class="hidden space-y-2 pt-4 border-t border-gray-200 dark:border-gray-700">
+                        <label for="ai-prompt-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Ask AI to help with this task (Press Enter to submit):</label>
+                        <input type="text" id="ai-prompt-input" placeholder="e.g., 'break this down into sub-tasks'" class="w-full bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                        <p id="ai-status" class="text-sm text-gray-500 dark:text-gray-400 h-5"></p> <!-- h-5 to prevent layout shift -->
+                    </div>
+
+                    <div id="editor-actions" class="flex flex-wrap justify-between items-center gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+                         <div class="flex flex-wrap gap-3">
+                             <a id="open-todoist-button" href="#" target="_blank" class="text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Open</a>
+                             <button id="timer-button" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 min-w-[110px]">Start Timer</button>
+                             <button id="ask-ai-button" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Ask AI</button>
+                         </div>
+                         <div class="flex flex-wrap gap-3">
+                             <button id="delete-button" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Delete</button>
+                             <button id="complete-button" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Complete</button>
+                             <button id="save-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Save</button>
+                         </div>
+                    </div>
+                 </div>
+
+                 <div id="sorter-complete" class="hidden text-center py-8">
+                    <p class="text-2xl font-semibold text-green-500">All tasks sorted!</p>
+                    <button id="back-to-list-button" class="mt-4 bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">Back to List</button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    
+    </section>
+    <section id="project-planner-section" class="hidden">
+
+
+    <div class="container mx-auto p-4 sm:p-6 lg:p-8">
+        <header class="mb-8 text-center">
+            <h1 class="text-5xl font-extrabold text-gray-900">Project Planner</h1>
+            <p class="text-gray-600 mt-3 text-lg">Organize, prioritize, and execute with clarity.</p>
+        </header>
+
+        <div class="flex justify-center mb-8">
+            <div class="view-toggle inline-flex bg-white rounded-lg p-1 shadow-sm border">
+                <button id="matrix-view-btn" class="px-6 py-2 text-sm font-semibold rounded-md transition-colors duration-300 active"><i class="fas fa-th-large mr-2"></i>Matrix</button>
+                <button id="table-view-btn" class="px-6 py-2 text-sm font-semibold rounded-md transition-colors duration-300"><i class="fas fa-list mr-2"></i>Table</button>
+            </div>
+             <button id="review-projects-btn" class="ml-4 bg-purple-600 text-white font-semibold py-2 px-6 rounded-lg hover:bg-purple-700 transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                <i class="fas fa-play-circle mr-2"></i> Review
+            </button>
+            <button id="settings-btn" class="ml-4 bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300 transition duration-300 ease-in-out shadow-md">
+                <i class="fas fa-cog"></i>
+            </button>
+        </div>
+
+        <div id="matrix-view" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-red-600 mb-3 border-b-2 border-red-200 pb-2">Urgent & Important (Do)</h3><div id="quadrant-do" class="eisenhower-quadrant p-2 space-y-3 bg-red-50 rounded-md" data-quadrant="do"></div></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-blue-600 mb-3 border-b-2 border-blue-200 pb-2">Important & Not Urgent (Schedule)</h3><div id="quadrant-schedule" class="eisenhower-quadrant p-2 space-y-3 bg-blue-50 rounded-md" data-quadrant="schedule"></div></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-yellow-600 mb-3 border-b-2 border-yellow-200 pb-2">Urgent & Not Important (Delegate)</h3><div id="quadrant-delegate" class="eisenhower-quadrant p-2 space-y-3 bg-yellow-50 rounded-md" data-quadrant="delegate"></div></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-green-600 mb-3 border-b-2 border-green-200 pb-2">Not Urgent & Not Important (Eliminate)</h3><div id="quadrant-eliminate" class="eisenhower-quadrant p-2 space-y-3 bg-green-50 rounded-md" data-quadrant="eliminate"></div></div>
+        </div>
+
+        <div id="table-view" class="hidden bg-white rounded-xl shadow-md p-6 overflow-x-auto">
+            <table class="w-full text-left">
+                <thead class="border-b-2 border-gray-200">
+                    <tr>
+                        <th class="p-3 text-sm font-semibold tracking-wide">Project Name</th>
+                        <th class="p-3 text-sm font-semibold tracking-wide">Status</th>
+                        <th class="p-3 text-sm font-semibold tracking-wide">Quadrant</th>
+                        <th class="p-3 text-sm font-semibold tracking-wide text-center">Minutes</th>
+                        <th class="p-3 text-sm font-semibold tracking-wide text-center">Links</th>
+                        <th class="p-3 text-sm font-semibold tracking-wide text-center">Todoist Tasks</th>
+                        <th class="p-3 text-sm font-semibold tracking-wide text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body"></tbody>
+            </table>
+        </div>
+        
+        <div class="bg-white p-6 rounded-xl shadow-md mt-8 max-w-2xl mx-auto">
+            <h2 class="text-xl font-semibold mb-4 text-center">Add a New Project</h2>
+            <div class="flex flex-col sm:flex-row gap-4">
+                <input type="text" id="new-project-name" placeholder="Enter new project name..." class="flex-grow p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 transition">
+                <button id="add-project-btn" class="bg-indigo-600 text-white font-semibold py-3 px-6 rounded-md hover:bg-indigo-700 transition duration-300 ease-in-out transform hover:scale-105 flex items-center justify-center">
+                    <i class="fas fa-plus mr-2"></i> Add Project
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="project-details-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-4xl modal-content view-mode flex flex-col">
+            <div class="modal-header p-6 border-b">
+                 <div id="review-nav-top" class="hidden justify-between items-center mb-4">
+                    <button id="back-review-btn" class="bg-gray-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition disabled:opacity-50 disabled:cursor-not-allowed"><i class="fas fa-arrow-left mr-2"></i> Back</button>
+                    <span id="review-progress" class="text-sm font-semibold text-gray-600"></span>
+                    <button id="forward-review-btn" class="bg-purple-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-purple-700 transition">Next <i class="fas fa-arrow-right ml-2"></i></button>
+                </div>
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h2 id="details-project-name-header" class="text-3xl font-bold text-gray-900"></h2>
+                        <div id="details-hyperlinks-display" class="mt-2"></div>
+                    </div>
+                    <div class="flex items-center gap-2 shrink-0 ml-4">
+                         <button id="quick-add-link-btn" class="bg-green-100 text-green-800 font-semibold py-2 px-4 rounded-md hover:bg-green-200 transition view-mode"><i class="fas fa-plus mr-2"></i>Link</button>
+                         <button id="details-mode-toggle" class="bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-md hover:bg-gray-300 transition"><i class="fas fa-pencil-alt mr-2"></i>Edit</button>
+                        <button id="close-details-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+                    </div>
+                </div>
+                <div id="quick-add-hyperlink-form" class="hidden space-y-2 bg-gray-100 p-4 rounded-md mt-4">
+                    <input type="text" id="quick-hyperlink-name" placeholder="Link Name" class="w-full p-2 border border-gray-300 rounded-md">
+                    <input type="url" id="quick-hyperlink-url" placeholder="https://example.com" class="w-full p-2 border border-gray-300 rounded-md">
+                    <div class="flex justify-end gap-2">
+                        <button id="cancel-quick-add-btn" class="text-sm bg-gray-300 text-gray-800 py-1 px-3 rounded-md">Cancel</button>
+                        <button id="confirm-quick-add-btn" class="text-sm bg-green-500 text-white py-1 px-3 rounded-md">Add</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-6 space-y-6 overflow-y-auto">
+                <input type="hidden" id="details-project-id">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="details-project-status" class="block text-sm font-medium text-gray-700">Status</label>
+                        <div class="status-view-container mt-1"><span id="details-project-status-view" class="px-3 py-1 text-sm font-semibold rounded-full"></span></div>
+                        <div class="status-edit-container mt-1"><select id="details-project-status" class="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"><option value="Not Started">Not Started</option><option value="In Progress">In Progress</option><option value="On Hold">On Hold</option><option value="Completed">Completed</option></select></div>
+                    </div>
+                    <div id="kpi-container" class="flex gap-x-6 gap-y-2 text-sm bg-slate-50 p-3 rounded-lg items-center">
+                        <div><span class="font-bold text-lg text-gray-800" id="kpi-completed-count">0</span><span class="text-gray-500 ml-1">Tasks Done</span></div>
+                        <div><span class="font-bold text-lg text-gray-800" id="kpi-total-minutes">0.00</span><span class="text-gray-500 ml-1">Mins Logged</span></div>
+                    </div>
+                </div>
+
+                <div class="edit-field">
+                    <label for="details-project-name" class="block text-sm font-medium text-gray-700 mb-1">Project Name</label>
+                    <input type="text" id="details-project-name" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div id="next-action-container">
+                    <label for="details-project-nextActions" class="block text-sm font-medium text-gray-700 mb-1">Next Action</label>
+                    <div class="markdown-view" id="details-project-nextActions-view"></div>
+                    <div class="edit-field relative"><textarea id="details-project-nextActions" rows="3" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-12" placeholder="Identify the immediate, physical next action to take."></textarea><button id="next-action-ai-button" class="ai-button absolute top-2 right-2 bg-indigo-100 text-indigo-600 hover:bg-indigo-200 rounded-full p-2 transition" data-field="nextActions" title="Get AI assistance for Next Action"><i class="fas fa-wand-magic-sparkles"></i><i class="fas fa-spinner fa-spin"></i></button><div class="mt-2 flex flex-col sm:flex-row gap-2 items-center"><select id="next-action-todoist-project-select" class="w-full sm:w-1/2 p-2 border border-gray-300 rounded-md text-sm"></select><button id="create-task-from-next-action-btn" class="create-task-btn w-full sm:w-auto flex-grow bg-red-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-600 transition flex items-center justify-center"><i class="fas fa-bolt mr-2"></i><i class="fas fa-spinner fa-spin"></i>Create Task</button></div></div>
+                </div>
+
+                <div id="current-tasks-section" class="hidden"><h3 class="text-xl font-semibold border-t pt-6">Current Todoist Tasks</h3><div id="current-todoist-tasks-list" class="space-y-2 mt-4 max-h-48 overflow-y-auto p-2 bg-gray-50 rounded-md"></div></div>
+                <div class="field-container"><label class="block text-sm font-medium text-gray-700 mb-1">Description</label><div class="markdown-view" id="details-project-description-view"></div><div class="edit-field relative"><textarea id="details-project-description" rows="3" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"></textarea></div></div>
+                <div id="natural-planning-section" class="border-t pt-6"><div id="natural-planning-header" class="flex justify-between items-center cursor-pointer"><h3 class="text-xl font-semibold">Natural Planning Model</h3><i class="fas fa-chevron-down chevron-icon"></i></div><div class="section-content mt-4 space-y-4"><div id="planning-fields" class="space-y-4"></div></div></div>
+                <h3 class="text-xl font-semibold border-t pt-6">Internal Tasks</h3><div id="task-list" class="space-y-3"></div><div id="add-task-form" class="flex gap-4 bg-gray-50 p-4 rounded-md"><input type="text" id="new-task-name" placeholder="Add a new task..." class="flex-grow p-2 border border-gray-300 rounded-md"><button id="add-task-btn" class="bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition">Add Task</button></div>
+                <h3 class="text-xl font-semibold border-t pt-6 edit-field">Hyperlinks</h3><div id="hyperlink-list" class="space-y-3 edit-field"></div><div id="add-hyperlink-form" class="edit-field space-y-3 bg-gray-50 p-4 rounded-md"><input type="text" id="new-hyperlink-name" placeholder="Link Name" class="w-full p-2 border border-gray-300 rounded-md"><input type="url" id="new-hyperlink-url" placeholder="https://example.com" class="w-full p-2 border border-gray-300 rounded-md"><textarea id="new-hyperlink-desc" placeholder="Link Description" rows="2" class="w-full p-2 border border-gray-300 rounded-md"></textarea><button id="add-hyperlink-btn" class="w-full sm:w-auto bg-green-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-green-600 transition">Add Link</button></div>
+                <div id="completed-tasks-section" class="hidden"><h3 class="text-xl font-semibold border-t pt-6">Completed Todoist Tasks</h3><div id="completed-todoist-tasks-list" class="space-y-2 mt-4 max-h-48 overflow-y-auto p-2 bg-gray-50 rounded-md"></div></div>
+            </div>
+            <div class="flex justify-end gap-4 mt-auto p-6 border-t bg-gray-50">
+                <div class="standard-controls"><button id="delete-project-btn" class="bg-red-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-700 transition"><i class="fas fa-trash-alt mr-2"></i>Delete Project</button><button id="save-details-btn" class="bg-indigo-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-indigo-700 transition edit-field"><i class="fas fa-save mr-2"></i>Save Changes</button></div>
+                <div class="review-controls"><button id="end-review-btn" class="bg-gray-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600 transition">End Review</button><button id="next-review-btn" class="bg-purple-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-purple-700 transition">Save & Next <i class="fas fa-arrow-right ml-2"></i></button></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-3xl flex flex-col modal-content">
+            <!-- Modal Header -->
+            <div class="p-6 border-b flex justify-between items-center">
+                <h2 class="text-2xl font-bold text-gray-900">Settings & Information</h2>
+                <button id="close-settings-btn" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+            </div>
+            <!-- Modal Body -->
+            <div class="p-6 flex-grow overflow-y-auto">
+                <!-- Tab Navigation -->
+                <div class="border-b border-gray-200">
+                    <nav id="settings-tabs" class="-mb-px flex space-x-8" aria-label="Tabs">
+                        <button class="settings-tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-indigo-500 text-indigo-600" data-tab="readme">Readme</button>
+                        <button class="settings-tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="changelog">Changelog</button>
+                        <button class="settings-tab-btn whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300" data-tab="schema">Data Schema</button>
+                    </nav>
+                </div>
+                <!-- Tab Content -->
+                <div class="mt-6">
+                    <div id="tab-content-readme" class="settings-tab-content">
+                        <h3>Welcome to the Project Planner!</h3>
+                        <p>This tool is designed to help you apply powerful productivity methodologies like the Eisenhower Matrix and David Allen's Natural Planning Model to your projects.</p>
+                        <h4>Key Features:</h4>
+                        <ul>
+                            <li><strong>Eisenhower Matrix:</strong> Prioritize your projects by urgency and importance into four distinct quadrants (Do, Schedule, Delegate, Eliminate).</li>
+                            <li><strong>Natural Planning Model:</strong> Break down complex projects by defining Purpose, Vision, Brainstorming Ideas, and Organizing Components.</li>
+                            <li><strong>Todoist Integration:</strong> Connect your projects to Todoist to manage active tasks, track time, and see completed items.</li>
+                            <li><strong>Weekly Review:</strong> A guided workflow to review all your active projects, ensuring nothing falls through the cracks.</li>
+                        </ul>
+                    </div>
+                    <div id="tab-content-changelog" class="settings-tab-content hidden">
+                        <h3>Changelog</h3>
+                        <p><strong>v1.1.0 (Latest)</strong></p>
+                        <ul>
+                            <li>Added settings modal with Readme, Changelog, and Data Schema tabs.</li>
+                        </ul>
+                        <p><strong>v1.0.0</strong></p>
+                        <ul>
+                            <li>Initial release.</li>
+                            <li>Features: Eisenhower Matrix, Table View, Project Details Modal with Natural Planning Model, Task Management, and Hyperlinks.</li>
+                            <li>Todoist integration for task tracking and time logging.</li>
+                        </ul>
+                    </div>
+                    <div id="tab-content-schema" class="settings-tab-content hidden">
+                         <h3>Firebase Data Schema</h3>
+                         <p class="text-sm text-gray-600 mb-4">The data is stored in Firebase Realtime Database under the <code>/projects</code> key. Each project has the following structure:</p>
+                         <pre class="bg-gray-100 p-4 rounded-md text-sm overflow-x-auto"><code>
+{
+  "PROJECT_ID": {
+    "name": "String",
+    "quadrant": "String ('do', 'schedule', 'delegate', 'eliminate')",
+    "status": "String ('Not Started', 'In Progress', 'On Hold', 'Completed')",
+    "order": "Number (for sorting within quadrants)",
+    "createdAt": "Timestamp",
+    "defaultTodoistProjectId": "String (Todoist Project ID)",
+
+    "description": "String (Markdown supported)",
+    "nextActions": "String (Markdown supported)",
+    "purpose": "String (Markdown supported)",
+    "vision": "String (Markdown supported)",
+    "ideas": "String (Markdown supported)",
+    "components": "String (Markdown supported)",
+
+    "tasks": {
+      "TASK_ID": {
+        "name": "String",
+        "completed": "Boolean",
+        "createdAt": "Timestamp"
+      }
+    },
+    "hyperlinks": {
+      "LINK_ID": {
+        "name": "String",
+        "url": "String",
+        "description": "String"
+      }
+    }
+  }
+}
+                         </code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center hidden z-50 p-4">
+        <div class="bg-white p-8 rounded-lg shadow-xl w-full max-w-md text-center">
+            <h2 class="text-2xl font-bold mb-4" id="confirm-title">Are you sure?</h2>
+            <p id="confirm-message" class="text-gray-600 mb-6"></p>
+            <div class="flex justify-center gap-4">
+                <button id="cancel-confirm-btn" class="bg-gray-300 text-gray-800 font-semibold py-2 px-6 rounded-md hover:bg-gray-400 transition">Cancel</button>
+                <button id="confirm-action-btn" class="bg-red-600 text-white font-semibold py-2 px-6 rounded-md hover:bg-red-700 transition">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = {
+                sorter: document.getElementById('task-sorter-section'),
+                planner: document.getElementById('project-planner-section')
+            };
+            const buttons = {
+                sorter: document.getElementById('show-sorter-btn'),
+                planner: document.getElementById('show-planner-btn')
+            };
+
+            function setActive(sectionKey) {
+                Object.entries(sections).forEach(([key, section]) => {
+                    section.classList.toggle('hidden', key !== sectionKey);
+                });
+                Object.entries(buttons).forEach(([key, button]) => {
+                    const isActive = key === sectionKey;
+                    button.setAttribute('aria-pressed', isActive);
+                    button.classList.toggle('bg-blue-600', isActive);
+                    button.classList.toggle('text-white', isActive);
+                    button.classList.toggle('shadow-md', isActive);
+                    button.classList.toggle('bg-transparent', !isActive);
+                    button.classList.toggle('text-gray-600', !isActive);
+                    button.classList.toggle('dark:text-gray-300', !isActive);
+                });
+            }
+
+            buttons.sorter.addEventListener('click', () => setActive('sorter'));
+            buttons.planner.addEventListener('click', () => setActive('planner'));
+
+            setActive('sorter');
+        });
+    </script>
+
+    <script type="module">
+        // Import Firebase modules
+        import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // --- Firebase Configuration ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+            measurementId: "G-LVHF0VP8RM"
+        };
+        const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+
+        // --- Global State & DOM Elements ---
+        const todoistApiToken = "a14f98a6b546b044dbb84bcd8eee47fbe3788671";
+        let allTasks = [];
+        let tasksToReview = []; // For sorting/filtering sessions
+        let currentTask = null;
+        let currentTaskIndex = 0;
+        let isSortingMode = false;
+        let currentSortMethod = 'default';
+        let currentCompletionFilter = 'all';
+
+        // Timer state
+        let timerInterval = null;
+        let timerStartTime = null;
+        let isTimerRunning = false;
+
+        const deviceLabels = ['Computer', 'Phone'];
+        const durationLabels = ['5min', '25min', '50min'];
+        const ACTIVE_TIMER_LABEL = 'active-timer';
+        const COMPLETION_LOG_PATTERN = /\[\d{1,2}:\d{2}:\d{2}(?:am|pm)-\d{1,2}:\d{2}:\d{2}(?:am|pm)\|\d+(?:\.\d+)?min]/i;
+
+        // Views
+        const taskListView = document.getElementById('task-list-view');
+        const taskEditorView = document.getElementById('task-editor-view');
+        
+        // List View Elements
+        const kpiTaskCount = document.getElementById('kpi-task-count');
+        const kpiReviewedCount = document.getElementById('kpi-reviewed-count');
+        const taskList = document.getElementById('task-list');
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const errorMessage = document.getElementById('error-message');
+        const refreshButton = document.getElementById('refresh-button');
+        const startSortingButton = document.getElementById('start-sorting-button');
+        const reviewUnrefinedButton = document.getElementById('review-unrefined-button');
+        const sortSelect = document.getElementById('sort-select');
+        const completionFilter = document.getElementById('completion-filter');
+        
+        // Editor View Elements
+        const backButton = document.getElementById('back-button');
+        const nextButton = document.getElementById('next-button');
+        const progressContainer = document.getElementById('progress-container');
+        const progressTitle = document.getElementById('progress-title');
+        const progressText = document.getElementById('progress-text');
+        const progressBar = document.getElementById('progress-bar');
+        const editorLoading = document.getElementById('editor-loading');
+        const editorContent = document.getElementById('editor-content');
+        const taskContentInput = document.getElementById('task-content-input');
+        const taskDescriptionInput = document.getElementById('task-description-input');
+        const deviceSelector = document.getElementById('device-selector');
+        const durationSelector = document.getElementById('duration-selector');
+        const prioritySelector = document.getElementById('priority-selector');
+        const editorActions = document.getElementById('editor-actions');
+        const openTodoistButton = document.getElementById('open-todoist-button');
+        const completeButton = document.getElementById('complete-button');
+        const timerButton = document.getElementById('timer-button');
+        const askAiButton = document.getElementById('ask-ai-button');
+        const deleteButton = document.getElementById('delete-button');
+        const saveButton = document.getElementById('save-button');
+        const sorterComplete = document.getElementById('sorter-complete');
+        const backToListButton = document.getElementById('back-to-list-button');
+        const aiAssistantContainer = document.getElementById('ai-assistant-container');
+        const aiPromptInput = document.getElementById('ai-prompt-input');
+        const aiStatus = document.getElementById('ai-status');
+
+        // --- API & Data Functions ---
+
+        async function apiCall(endpoint, method = 'GET', body = null) {
+            const headers = { 'Authorization': `Bearer ${todoistApiToken}` };
+            if (body) {
+                headers['Content-Type'] = 'application/json';
+            }
+            const config = { method, headers, body: body ? JSON.stringify(body) : null };
+            
+            try {
+                const response = await fetch(`https://api.todoist.com/rest/v2/${endpoint}`, config);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                }
+                return response.status === 204 ? null : response.json();
+            } catch (error) {
+                console.error(`API call failed: ${method} ${endpoint}`, error);
+                errorMessage.textContent = `API Error: ${error.message}`;
+                errorMessage.classList.remove('hidden');
+                throw error;
+            }
+        }
+
+        async function fetchAllTasks() {
+            loadingIndicator.classList.remove('hidden');
+            taskList.innerHTML = '';
+            errorMessage.classList.add('hidden');
+            refreshButton.classList.add('animate-spin');
+            startSortingButton.disabled = true;
+            reviewUnrefinedButton.disabled = true;
+
+            try {
+                allTasks = await apiCall('tasks');
+                updateKpis();
+                sortAndDisplayTasks();
+                const unrefinedCount = allTasks.filter(isTaskUnrefined).length;
+                reviewUnrefinedButton.disabled = unrefinedCount === 0;
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                refreshButton.classList.remove('animate-spin');
+            }
+        }
+
+        async function fetchTaskDetails(taskId) {
+            editorContent.classList.add('hidden');
+            editorLoading.classList.remove('hidden');
+            aiAssistantContainer.classList.add('hidden');
+            resetTimerUI(); 
+            try {
+                currentTask = await apiCall(`tasks/${taskId}`);
+                populateEditor();
+                checkAndResumeTimer();
+            } finally {
+                editorContent.classList.remove('hidden');
+                editorLoading.classList.add('hidden');
+            }
+        }
+        
+        async function saveTaskChanges() {
+            if (!currentTask) return false;
+            
+            saveButton.classList.add('btn-loading');
+            saveButton.disabled = true;
+
+            let payload;
+
+            // If timer is running, only save content and description
+            if (isTimerRunning) {
+                payload = {
+                    content: taskContentInput.value,
+                    description: taskDescriptionInput.value,
+                };
+            } else {
+                const newLabels = [];
+                document.querySelectorAll('#device-selector .btn-selected, #duration-selector .btn-selected').forEach(btn => {
+                    newLabels.push(btn.dataset.label);
+                });
+                const selectedPriority = parseInt(prioritySelector.querySelector('.btn-selected')?.dataset.priority || 1);
+                payload = {
+                    content: taskContentInput.value,
+                    description: taskDescriptionInput.value,
+                    priority: selectedPriority,
+                    labels: newLabels
+                };
+            }
+            
+            try {
+                const updatedTask = await apiCall(`tasks/${currentTask.id}`, 'POST', payload);
+                // Merge changes into the local task object
+                const taskInList = allTasks.find(t => t.id === currentTask.id);
+                if (taskInList) {
+                    Object.assign(taskInList, updatedTask);
+                }
+                currentTask = updatedTask;
+                return true;
+            } catch(error) {
+                console.error("Save failed", error);
+                return false;
+            } finally {
+                saveButton.classList.remove('btn-loading');
+                saveButton.disabled = false;
+            }
+        }
+
+        async function deleteTask() {
+            if (!currentTask) return false;
+            
+            deleteButton.disabled = true;
+            try {
+                await apiCall(`tasks/${currentTask.id}`, 'DELETE');
+                const deletedTasksRef = ref(database, 'deletedTasks');
+                push(deletedTasksRef, { ...currentTask, deletedAt: new Date().toISOString() });
+                allTasks = allTasks.filter(t => t.id !== currentTask.id);
+                return true;
+            } catch(error) {
+                return false;
+            } finally {
+                deleteButton.disabled = false;
+            }
+        }
+
+        async function callGemini(prompt) {
+            const fullPrompt = `Based on the following task, fulfill the user's request.\n\nTask Title: "${currentTask.content}"\nTask Description: "${taskDescriptionInput.value}"\n\nUser Request: ${prompt}\n\nResponse:`;
+            
+            const payload = { contents: [{ role: "user", parts: [{ text: fullPrompt }] }] };
+            const apiKey = ""; // Leave empty for automatic injection
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+
+                const result = await response.json();
+                if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error('Invalid response structure from AI.');
+                }
+            } catch (error) {
+                console.error("Gemini API call failed:", error);
+                throw error;
+            }
+        }
+
+        // --- UI, Sorting & View Management ---
+
+        function getSortedTasks(tasks, method) {
+            let sorted = [...tasks];
+            const getDurationValue = (task) => {
+                const durationLabel = task.labels.find(l => durationLabels.includes(l));
+                if (!durationLabel) return Infinity; // Put tasks without duration at the end
+                return parseInt(durationLabel.replace('min', ''));
+            };
+
+            switch (method) {
+                case 'priority':
+                    sorted.sort((a, b) => b.priority - a.priority);
+                    break;
+                case 'duration':
+                    sorted.sort((a, b) => getDurationValue(a) - getDurationValue(b));
+                    break;
+                case 'device_computer':
+                    sorted.sort((a, b) => (b.labels.includes('Computer') - a.labels.includes('Computer')));
+                    break;
+                case 'device_phone':
+                    sorted.sort((a, b) => (b.labels.includes('Phone') - a.labels.includes('Phone')));
+                    break;
+                case 'default':
+                default:
+                    // For display purposes, we always float active timers to the top.
+                    sorted.sort((a, b) => (b.labels.includes(ACTIVE_TIMER_LABEL) - a.labels.includes(ACTIVE_TIMER_LABEL)));
+                    break;
+            }
+            return sorted;
+        }
+
+        function isTaskMarkedComplete(task) {
+            if (!task || !task.content) return false;
+            return COMPLETION_LOG_PATTERN.test(task.content);
+        }
+
+        function applyCompletionFilter(tasks, filter) {
+            switch (filter) {
+                case 'complete':
+                    return tasks.filter(isTaskMarkedComplete);
+                case 'incomplete':
+                    return tasks.filter(task => !isTaskMarkedComplete(task));
+                case 'all':
+                default:
+                    return [...tasks];
+            }
+        }
+
+        function updateStartSortingButtonState(filteredTasks = null) {
+            const relevantTasks = filteredTasks ?? applyCompletionFilter(allTasks, currentCompletionFilter);
+            startSortingButton.disabled = relevantTasks.length === 0;
+        }
+
+        function sortAndDisplayTasks() {
+            const filteredTasks = applyCompletionFilter(allTasks, currentCompletionFilter);
+            const sortedTasks = getSortedTasks(filteredTasks, currentSortMethod);
+            displayTasks(sortedTasks);
+            updateStartSortingButtonState(filteredTasks);
+        }
+
+        function displayTasks(tasks) {
+            taskList.innerHTML = '';
+            if (tasks.length === 0) {
+                taskList.innerHTML = '<li class="text-center text-gray-500 dark:text-gray-400 py-4">No tasks match the current filters.</li>';
+                return;
+            }
+
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = 'bg-gray-50 dark:bg-gray-700 p-4 rounded-lg flex items-center justify-between shadow-sm flex-wrap';
+                li.dataset.taskId = task.id;
+
+                const getLabelHtml = (label) => {
+                    let classes = '';
+                    if (label === ACTIVE_TIMER_LABEL) classes = 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300 animate-pulse';
+                    else if (deviceLabels.includes(label)) classes = 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300';
+                    else if (durationLabels.includes(label)) classes = 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
+                    else return ''; // Don't render unknown labels
+                    return `<span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full ${classes}">${label}</span>`;
+                };
+                const labelsHtml = task.labels.map(getLabelHtml).join('');
+                const completionBadge = isTaskMarkedComplete(task)
+                    ? '<span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300">Complete</span>'
+                    : '<span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200">Incomplete</span>';
+
+                li.innerHTML = `
+                    <span class="flex-grow mr-4">${task.content}</span>
+                    <div class="flex items-center flex-shrink-0 mt-2 sm:mt-0">
+                        ${completionBadge}${labelsHtml}
+                        <span class="text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full ${getPriority(task.priority).classes}">${getPriority(task.priority).text}</span>
+                    </div>
+                `;
+                taskList.appendChild(li);
+            });
+        }
+
+        function populateEditor() {
+            if (!currentTask) return;
+            taskContentInput.value = currentTask.content;
+            taskDescriptionInput.value = currentTask.description;
+            openTodoistButton.href = currentTask.url;
+            
+            updateSelectorUI(prioritySelector, 'priority', currentTask.priority);
+            updateSelectorUI(deviceSelector, 'label', currentTask.labels);
+            updateSelectorUI(durationSelector, 'label', currentTask.labels);
+        }
+        
+        function updateSelectorUI(container, dataAttr, value) {
+            container.querySelectorAll('button').forEach(btn => {
+                const btnValue = dataAttr === 'priority' ? parseInt(btn.dataset[dataAttr]) : btn.dataset[dataAttr];
+                const isSelected = Array.isArray(value) ? value.includes(btnValue) : value === btnValue;
+                btn.classList.toggle('btn-selected', isSelected);
+            });
+        }
+        
+        function switchView(view) {
+            taskListView.classList.toggle('hidden', view !== 'list');
+            taskEditorView.classList.toggle('hidden', view !== 'editor');
+            if (view === 'list') {
+                resetTimerUI(); // Ensure timer is off when returning to list
+            }
+        }
+
+        // UPDATED: isTaskUnrefined now only checks for device and duration
+        function isTaskUnrefined(task) {
+            const hasDevice = task.labels.some(l => deviceLabels.includes(l));
+            const hasDuration = task.labels.some(l => durationLabels.includes(l));
+            return !hasDevice || !hasDuration;
+        }
+
+        function updateKpis() {
+            const total = allTasks.length;
+            kpiTaskCount.textContent = `Total: ${total}`;
+            if (total === 0) {
+                kpiReviewedCount.textContent = 'Reviewed: 0 (100%)';
+                return;
+            }
+            
+            const reviewedCount = allTasks.filter(t => !isTaskUnrefined(t)).length;
+            const percentage = Math.round((reviewedCount / total) * 100);
+            kpiReviewedCount.textContent = `Reviewed: ${reviewedCount} (${percentage}%)`;
+        }
+
+        function updateProgress() {
+            const total = tasksToReview.length;
+            const reviewed = currentTaskIndex;
+            const percentage = total > 0 ? Math.round((reviewed / total) * 100) : 0;
+            progressText.textContent = `${reviewed}/${total} (${percentage}%)`;
+            progressBar.style.width = `${percentage}%`;
+        }
+
+        function showNextTaskInSorter() {
+            updateProgress();
+            if (currentTaskIndex >= tasksToReview.length) {
+                editorContent.classList.add('hidden');
+                sorterComplete.classList.remove('hidden');
+                progressContainer.classList.add('hidden');
+                nextButton.classList.add('hidden');
+                resetTimerUI();
+                return;
+            }
+            fetchTaskDetails(tasksToReview[currentTaskIndex].id);
+        }
+        
+        async function proceedToNextStep() {
+            // Remove the processed task from the main list
+            allTasks = allTasks.filter(t => t.id !== currentTask.id);
+            
+            if (isSortingMode) {
+                // Also remove from the review list
+                tasksToReview = tasksToReview.filter(t => t.id !== currentTask.id);
+                // Don't increment currentTaskIndex because the array shrinks
+                showNextTaskInSorter();
+            } else {
+                switchView('list');
+                sortAndDisplayTasks();
+                updateKpis();
+            }
+        }
+        
+        // --- Timer Functions ---
+        
+        function formatTimeForDisplay(seconds) {
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${h}:${m}:${s}`;
+        }
+
+        function formatTimeForLog(date) {
+            if (!date) return '';
+            let hours = date.getHours();
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            const seconds = date.getSeconds().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            return `${hours}:${minutes}:${seconds}${ampm}`;
+        }
+
+        function resetTimerUI() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+            isTimerRunning = false;
+            timerStartTime = null;
+            timerButton.textContent = 'Start Timer';
+            timerButton.classList.remove('bg-red-500', 'hover:bg-red-600', 'btn-loading');
+            timerButton.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
+            timerButton.disabled = false;
+        }
+
+        function startTimerUI(startTime) {
+            isTimerRunning = true;
+            timerStartTime = startTime;
+            timerButton.textContent = 'Stop (00:00:00)';
+            timerButton.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
+            timerButton.classList.add('bg-red-500', 'hover:bg-red-600');
+
+            timerInterval = setInterval(() => {
+                const elapsedSeconds = Math.floor((new Date() - timerStartTime) / 1000);
+                timerButton.textContent = `Stop (${formatTimeForDisplay(elapsedSeconds)})`;
+            }, 1000);
+        }
+
+        async function handleStartTimer() {
+            if (!currentTask || isTimerRunning) return;
+            timerButton.disabled = true;
+            timerButton.classList.add('btn-loading');
+
+            const startTime = new Date();
+            timerStartTime = startTime; // Set local state immediately
+
+            const due_datetime = startTime.toISOString();
+            const labels = [...new Set([...currentTask.labels, ACTIVE_TIMER_LABEL])];
+
+            try {
+                const updatedTask = await apiCall(`tasks/${currentTask.id}`, 'POST', { labels, due_datetime });
+                currentTask.labels = updatedTask.labels;
+                currentTask.due = updatedTask.due;
+                startTimerUI(startTime);
+            } finally {
+                timerButton.disabled = false;
+                timerButton.classList.remove('btn-loading');
+            }
+        }
+
+        async function handleStopTimer() {
+            if (!currentTask || !isTimerRunning) return;
+            timerButton.disabled = true;
+            timerButton.classList.add('btn-loading');
+
+            try {
+                const startTime = timerStartTime;
+                const endTime = new Date();
+                const elapsedSeconds = (endTime - startTime) / 1000;
+                const elapsedMinutes = Math.max(1, Math.round(elapsedSeconds / 60)); // Ensure at least 1 minute
+                
+                const formattedStartTimeForLog = formatTimeForLog(startTime);
+                const formattedEndTimeForLog = formatTimeForLog(endTime);
+
+                const timeLog = ` [${formattedStartTimeForLog}-${formattedEndTimeForLog}|${(elapsedSeconds / 60).toFixed(2)}min]`;
+                
+                const newContent = taskContentInput.value.trim() + timeLog;
+                const currentDescription = taskDescriptionInput.value.trim();
+                const newDescription = currentDescription + (currentDescription ? '\n' : '') + timeLog.trim();
+                const newLabels = currentTask.labels.filter(l => l !== ACTIVE_TIMER_LABEL);
+                
+                const payload = {
+                    content: newContent,
+                    description: newDescription,
+                    labels: newLabels,
+                    due_datetime: startTime.toISOString(),
+                    duration: elapsedMinutes,
+                    duration_unit: 'minute'
+                };
+
+                const updatedTaskData = await apiCall(`tasks/${currentTask.id}`, 'POST', payload);
+
+                taskContentInput.value = newContent;
+                taskDescriptionInput.value = newDescription;
+                currentTask = { ...currentTask, ...updatedTaskData }; // Merge the full update
+                resetTimerUI();
+            } catch (error) {
+                console.error("Failed to stop timer:", error);
+                alert("Error stopping timer. Please check the console and try saving manually.");
+            } finally {
+                timerButton.disabled = false;
+                timerButton.classList.remove('btn-loading');
+            }
+        }
+        
+        function checkAndResumeTimer() {
+            if (currentTask && currentTask.labels.includes(ACTIVE_TIMER_LABEL) && currentTask.due?.datetime) {
+                const startTime = new Date(currentTask.due.datetime);
+                startTimerUI(startTime);
+            }
+        }
+
+        // --- Event Handlers ---
+        
+        function startSortingSession(tasks, title) {
+            tasksToReview = [...tasks];
+            isSortingMode = true;
+            currentTaskIndex = 0;
+            switchView('editor');
+            progressContainer.classList.remove('hidden');
+            progressTitle.textContent = title;
+            nextButton.classList.remove('hidden');
+            sorterComplete.classList.add('hidden');
+            editorContent.classList.remove('hidden');
+            showNextTaskInSorter();
+        }
+
+        async function handleNext() {
+            const saved = await saveTaskChanges();
+            if (saved) {
+                currentTaskIndex++;
+                showNextTaskInSorter();
+            }
+        }
+        
+        async function handleSaveAndBack() {
+            await saveTaskChanges();
+            switchView('list');
+            sortAndDisplayTasks();
+            updateKpis();
+        }
+        
+        async function handleDeleteAndProceed() {
+            const success = await deleteTask();
+            if (success) {
+                // If in a sorting session, update the review list
+                if (isSortingMode) {
+                    tasksToReview = tasksToReview.filter(t => t.id !== currentTask.id);
+                    // Don't increment index, just show the next one in the shrunken list
+                    showNextTaskInSorter();
+                } else {
+                    // Otherwise, just go back to the list
+                    switchView('list');
+                    sortAndDisplayTasks();
+                    updateKpis();
+                }
+            }
+        }
+
+        async function handleCompleteTask() {
+            if (!currentTask) return;
+            completeButton.disabled = true;
+            completeButton.classList.add('btn-loading');
+            try {
+                await apiCall(`tasks/${currentTask.id}/close`, 'POST');
+                allTasks = allTasks.filter(t => t.id !== currentTask.id);
+                if (isSortingMode) {
+                    tasksToReview = tasksToReview.filter(t => t.id !== currentTask.id);
+                    showNextTaskInSorter();
+                } else {
+                    switchView('list');
+                    sortAndDisplayTasks();
+                    updateKpis();
+                }
+            } finally {
+                completeButton.disabled = false;
+                completeButton.classList.remove('btn-loading');
+            }
+        }
+
+        async function handleAskAI() {
+            const prompt = aiPromptInput.value.trim();
+            if (!prompt) return;
+
+            aiStatus.textContent = 'Thinking...';
+            aiPromptInput.disabled = true;
+            try {
+                const responseText = await callGemini(prompt);
+                const currentDescription = taskDescriptionInput.value;
+                taskDescriptionInput.value = currentDescription + `\n\n--- AI Assistant ---\n${responseText}`;
+                aiStatus.textContent = 'Response added to description.';
+                aiPromptInput.value = '';
+            } catch (error) {
+                aiStatus.textContent = 'Error: Could not get AI response.';
+            } finally {
+                aiPromptInput.disabled = false;
+                setTimeout(() => { aiStatus.textContent = '' }, 3000);
+            }
+        }
+
+        function handleLabelToggle(button, exclusiveLabels) {
+            if (isTimerRunning) return; // Prevent changing labels while timer is running
+            const label = button.dataset.label;
+            const isSelected = button.classList.contains('btn-selected');
+            exclusiveLabels.forEach(l => {
+                if (l !== label) {
+                    const otherBtn = button.parentElement.querySelector(`[data-label="${l}"]`);
+                    if (otherBtn) otherBtn.classList.remove('btn-selected');
+                }
+            });
+            button.classList.toggle('btn-selected', !isSelected);
+        }
+
+        // --- Utility ---
+        function getPriority(level) {
+            const priorities = {
+                4: { text: 'P1', classes: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' },
+                3: { text: 'P2', classes: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300' },
+                2: { text: 'P3', classes: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
+                1: { text: 'P4', classes: 'bg-gray-200 text-gray-800 dark:bg-gray-600 dark:text-gray-300' }
+            };
+            return priorities[level] || priorities[1];
+        }
+
+        // --- Event Listeners ---
+        document.addEventListener('DOMContentLoaded', fetchAllTasks);
+        refreshButton.addEventListener('click', fetchAllTasks);
+        
+        startSortingButton.addEventListener('click', () => {
+            const filteredTasks = applyCompletionFilter(allTasks, currentCompletionFilter);
+            if (filteredTasks.length === 0) return;
+            const tasksForSession = getSortedTasks(filteredTasks, currentSortMethod);
+            startSortingSession(tasksForSession, 'Sorting All Tasks');
+        });
+
+        reviewUnrefinedButton.addEventListener('click', () => {
+            const unrefined = allTasks.filter(isTaskUnrefined);
+            startSortingSession(unrefined, 'Reviewing Unrefined Tasks');
+        });
+
+        sortSelect.addEventListener('change', (e) => {
+            currentSortMethod = e.target.value;
+            sortAndDisplayTasks();
+        });
+
+        completionFilter.addEventListener('change', (e) => {
+            currentCompletionFilter = e.target.value;
+            sortAndDisplayTasks();
+        });
+
+        nextButton.addEventListener('click', handleNext);
+        backButton.addEventListener('click', handleSaveAndBack);
+        saveButton.addEventListener('click', saveTaskChanges);
+        deleteButton.addEventListener('click', handleDeleteAndProceed);
+        completeButton.addEventListener('click', handleCompleteTask);
+        timerButton.addEventListener('click', () => {
+            if (isTimerRunning) {
+                handleStopTimer();
+            } else {
+                handleStartTimer();
+            }
+        });
+        
+        askAiButton.addEventListener('click', () => {
+            aiAssistantContainer.classList.toggle('hidden');
+            if (!aiAssistantContainer.classList.contains('hidden')) {
+                aiPromptInput.focus();
+            }
+        });
+
+        aiPromptInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleAskAI();
+            }
+        });
+
+        taskList.addEventListener('click', (e) => {
+            const taskLi = e.target.closest('li[data-task-id]');
+            if (taskLi) {
+                isSortingMode = false;
+                switchView('editor');
+                progressContainer.classList.add('hidden');
+                nextButton.classList.add('hidden');
+                editorContent.classList.remove('hidden');
+                sorterComplete.classList.add('hidden');
+                fetchTaskDetails(taskLi.dataset.taskId);
+            }
+        });
+
+        prioritySelector.addEventListener('click', (e) => {
+            if (isTimerRunning) return;
+            const btn = e.target.closest('.priority-btn');
+            if(btn) updateSelectorUI(prioritySelector, 'priority', parseInt(btn.dataset.priority));
+        });
+        
+        deviceSelector.addEventListener('click', (e) => {
+            const btn = e.target.closest('.label-btn');
+            if (btn) handleLabelToggle(btn, deviceLabels);
+        });
+
+        durationSelector.addEventListener('click', (e) => {
+            const btn = e.target.closest('.label-btn');
+            if (btn) handleLabelToggle(btn, durationLabels);
+        });
+        
+        backToListButton.addEventListener('click', () => {
+             switchView('list');
+             fetchAllTasks(); // Refetch to get the latest state
+        });
+
+    
+    </script>
+    <script type="module">
+        import { initializeApp, getApp, getApps } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue, push, update, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-database.js";
+
+        // --- Firebase and Global Variables ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCsT8RKgb9Ya4zW8SfMrUY4ovxLS6n39v8",
+            authDomain: "chriscruz-d62ea.firebaseapp.com",
+            databaseURL: "https://chriscruz-d62ea-default-rtdb.firebaseio.com",
+            projectId: "chriscruz-d62ea",
+            storageBucket: "chriscruz-d62ea.firebasestorage.app",
+            messagingSenderId: "817856028090",
+            appId: "1:817856028090:web:983d8c52bb3c7202dc5183",
+            measurementId: "G-LVHF0VP8RM"
+        };
+        
+        const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
+        const database = getDatabase(app);
+        const projectsRef = ref(database, 'projects');
+        let allProjects = {}; 
+        let allTodoistTasks = [];
+        let allCompletedTodoistTasks = [];
+        let reviewQueue = [];
+        let reviewIndex = -1;
+        let confirmationCallback = null;
+        let activeTimers = {};
+        let draggedElement = null;
+
+        const markdownConverter = new showdown.Converter();
+        const todoistAPIKey = "a14f98a6b546b044dbb84bcd8eee47fbe3788671";
+        const timerLabel = "@active-timer";
+
+        const planningModelFields = [
+            { id: 'purpose', label: 'Purpose', prompt: 'Define the project\'s core purpose and principles.' },
+            { id: 'vision', label: 'Vision', prompt: 'Envision the ideal outcome.' },
+            { id: 'ideas', label: 'Ideas', prompt: 'Brainstorm potential ideas and approaches.' },
+            { id: 'components', label: 'Components', prompt: 'Organize brainstormed ideas into logical components or phases.' },
+        ];
+        
+        const todoistProjects = {
+            "2159896038": "Inbox", "2277408834": "Career", "2159934072": "JP", "2168189199": "Finance",
+            "2160096908": "Life Engineering", "2159934063": "Entrepreneurship", "2159896039": "Homeostasis",
+            "2159934103": "Social", "2277408838": "Van", "2159935681": "Bnb", "2302758535": "Fitness"
+        };
+
+        // --- DOM Elements ---
+        const matrixView = document.getElementById('matrix-view');
+        const tableView = document.getElementById('table-view');
+        const quadrants = document.querySelectorAll('.eisenhower-quadrant');
+        const tableBody = document.getElementById('table-body');
+        const modal = document.getElementById('project-details-modal');
+        const modalContent = modal.querySelector('.modal-content');
+        const detailsProjectId = document.getElementById('details-project-id');
+        const planningFieldsContainer = document.getElementById('planning-fields');
+        const detailsProjectStatusSelect = document.getElementById('details-project-status');
+        const confirmModal = document.getElementById('confirm-modal');
+        const settingsModal = document.getElementById('settings-modal');
+        
+        // --- Todoist Integration & KPI Calculation ---
+        async function fetchTodoistTasks() {
+            try {
+                const response = await fetch("https://api.todoist.com/rest/v2/tasks", { headers: { 'Authorization': `Bearer ${todoistAPIKey}` } });
+                if (!response.ok) throw new Error('Failed to fetch active Todoist tasks');
+                allTodoistTasks = await response.json();
+                updateProjectTaskCounts();
+                const currentProjectId = detailsProjectId.value;
+                if (currentProjectId && allProjects[currentProjectId]) {
+                    renderCurrentTodoistTasks(allProjects[currentProjectId].name);
+                }
+            } catch (error) { console.error(error); }
+        }
+
+        async function fetchCompletedTodoistTasks() {
+            try {
+                const response = await fetch("https://api.todoist.com/sync/v9/completed/get_all", { headers: { 'Authorization': `Bearer ${todoistAPIKey}` } });
+                if (!response.ok) throw new Error('Failed to fetch completed Todoist tasks');
+                const completedData = await response.json();
+                allCompletedTodoistTasks = completedData.items || [];
+            } catch (error) { console.error(error); }
+        }
+
+        function updateProjectTaskCounts() {
+            if (!allProjects || !allTodoistTasks) return;
+            Object.values(allProjects).forEach(project => {
+                if (!project.name) return;
+                const projectNameLower = project.name.toLowerCase();
+                project.todoistCurrentCount = allTodoistTasks.filter(task => task.content.toLowerCase().includes(projectNameLower) && !task.is_completed).length;
+            });
+            renderAllViews();
+        }
+        
+        function calculateProjectKPIs(projectName) {
+            const kpi = { count: 0, minutes: 0 };
+            if (!projectName || !allCompletedTodoistTasks.length) return kpi;
+            const projectNameLower = projectName.toLowerCase();
+            const timeRegex = /\|(\d+\.?\d*)\s*min\]/i;
+            const relevantCompletedTasks = allCompletedTodoistTasks.filter(task => task.content.toLowerCase().includes(projectNameLower));
+            kpi.count = relevantCompletedTasks.length;
+            kpi.minutes = relevantCompletedTasks.reduce((total, task) => {
+                const match = task.content.match(timeRegex);
+                return total + (match && match[1] ? parseFloat(match[1]) : 0);
+            }, 0);
+            return kpi;
+        }
+
+        function updateAllProjectKPIs() {
+            Object.values(allProjects).forEach(project => {
+                if (project && project.name) {
+                    const kpi = calculateProjectKPIs(project.name);
+                    project.kpiCount = kpi.count;
+                    project.kpiMinutes = kpi.minutes;
+                }
+            });
+        }
+
+        function displayProjectKPIsInModal(project) {
+            document.getElementById('kpi-completed-count').textContent = project.kpiCount || 0;
+            document.getElementById('kpi-total-minutes').textContent = (project.kpiMinutes || 0).toFixed(2);
+        }
+
+        // --- Rendering Functions ---
+        function renderAllViews() {
+            document.querySelectorAll('.eisenhower-quadrant').forEach(q => q.innerHTML = '');
+            tableBody.innerHTML = '';
+            const projectsByQuadrant = { do: [], schedule: [], delegate: [], eliminate: [] };
+
+            Object.values(allProjects).forEach(project => {
+                const quadrantId = project.quadrant || 'do';
+                if (projectsByQuadrant[quadrantId]) projectsByQuadrant[quadrantId].push(project);
+                tableBody.appendChild(createTableRow(project));
+            });
+
+            for (const quadrantId in projectsByQuadrant) {
+                const quadrantEl = document.getElementById(`quadrant-${quadrantId}`);
+                if (quadrantEl) {
+                    projectsByQuadrant[quadrantId].sort((a, b) => (a.order || 0) - (b.order || 0));
+                    projectsByQuadrant[quadrantId].forEach(project => quadrantEl.appendChild(createMatrixCard(project)));
+                }
+            }
+        }
+
+        function createMatrixCard(project) {
+            const card = document.createElement('div');
+            card.className = 'project-card bg-white p-3 rounded-lg border border-gray-200 shadow-sm flex justify-between items-center';
+            card.dataset.id = project.id;
+            card.draggable = true;
+            
+            const hyperlinkCount = project.hyperlinks ? Object.keys(project.hyperlinks).length : 0;
+            const minutesHTML = `<span class="ml-3 bg-green-100 text-green-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1" title="Minutes Logged">${(project.kpiMinutes || 0).toFixed(0)} <i class="fas fa-clock"></i></span>`;
+            const hyperlinkCountHTML = hyperlinkCount > 0 ? `<span class="ml-3 bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1">${hyperlinkCount} <i class="fas fa-link"></i></span>` : '';
+            const taskCountHTML = `<span class="ml-3 bg-purple-100 text-purple-800 text-xs font-semibold px-2.5 py-0.5 rounded-full flex items-center gap-1" title="Active Todoist Tasks">${project.todoistCurrentCount || 0} <i class="fa-solid fa-list-check"></i></span>`;
+            
+            card.innerHTML = `<div class="flex-grow flex items-center flex-wrap"><span class="font-medium mr-2">${project.name}</span>${minutesHTML}${hyperlinkCountHTML}${taskCountHTML}</div><button class="details-btn text-gray-400 hover:text-indigo-600 p-2 rounded-full transition-colors duration-200 shrink-0" title="View Details"><i class="fas fa-eye"></i></button>`;
+            
+            card.addEventListener('dragstart', handleDragStart);
+            card.addEventListener('dragend', handleDragEnd);
+            card.addEventListener('touchstart', handleTouchStart, { passive: false });
+            card.addEventListener('touchmove', handleTouchMove, { passive: false });
+            card.addEventListener('touchend', handleTouchEnd);
+            card.querySelector('.details-btn').addEventListener('click', (e) => { e.stopPropagation(); openDetailsModal(project.id); });
+            return card;
+        }
+
+        function createTableRow(project) {
+            const row = document.createElement('tr');
+            row.className = 'border-b border-gray-200 hover:bg-gray-50';
+            row.dataset.id = project.id;
+            const quadrantMap = { do: 'Do', schedule: 'Schedule', delegate: 'Delegate', eliminate: 'Eliminate' };
+            const hyperlinkCount = project.hyperlinks ? Object.keys(project.hyperlinks).length : 0;
+            const status = project.status || 'Not Started';
+            row.innerHTML = `<td class="p-3">${project.name}</td><td class="p-3">${status}</td><td class="p-3">${quadrantMap[project.quadrant] || 'N/A'}</td><td class="p-3 text-center">${(project.kpiMinutes || 0).toFixed(2)}</td><td class="p-3 text-center">${hyperlinkCount}</td><td class="p-3 text-center">${project.todoistCurrentCount || 0}</td><td class="p-3 text-center"><button class="details-btn text-indigo-500 hover:text-indigo-700 mr-2" title="View Details"><i class="fas fa-edit"></i></button><button class="delete-row-btn text-red-500 hover:text-red-700" title="Delete Project"><i class="fas fa-trash-alt"></i></button></td>`;
+            row.querySelector('.details-btn').addEventListener('click', () => openDetailsModal(project.id));
+            row.querySelector('.delete-row-btn').addEventListener('click', () => confirmDelete(project.id));
+            return row;
+        }
+        
+        function renderCurrentTodoistTasks(projectName) {
+            const container = document.getElementById('current-todoist-tasks-list');
+            const section = document.getElementById('current-tasks-section');
+            container.innerHTML = '';
+            Object.values(activeTimers).forEach(clearInterval);
+            activeTimers = {};
+
+            if (!projectName) {
+                section.classList.add('hidden');
+                return;
+            }
+            const projectNameLower = projectName.toLowerCase();
+            const currentTasks = allTodoistTasks.filter(task => !task.is_completed && task.content.toLowerCase().includes(projectNameLower));
+
+            if (currentTasks.length > 0) {
+                currentTasks.forEach(task => {
+                    const isTimerActive = task.labels.includes(timerLabel);
+                    const el = document.createElement('div');
+                    el.className = 'p-2 bg-white rounded border border-gray-200 text-sm flex justify-between items-center';
+                    const startControls = `<button data-task-id="${task.id}" class="start-timer-btn text-xs bg-blue-500 text-white font-semibold py-1 px-2 rounded-md hover:bg-blue-600 transition"><i class="fas fa-play mr-1"></i>Start Timer</button>`;
+                    const stopControls = `<div class="flex items-center gap-2"><span id="timer-display-${task.id}" class="font-mono text-blue-600 font-semibold">00:00:00</span><button data-task-id="${task.id}" class="stop-timer-btn text-xs bg-yellow-500 text-white font-semibold py-1 px-2 rounded-md hover:bg-yellow-600 transition"><i class="fas fa-stop mr-1"></i>Stop</button><button data-task-id="${task.id}" class="stop-complete-btn text-xs bg-green-500 text-white font-semibold py-1 px-2 rounded-md hover:bg-green-600 transition"><i class="fas fa-check mr-1"></i>Complete</button></div>`;
+                    el.innerHTML = `<span>${task.content}</span><div class="timer-controls">${isTimerActive ? stopControls : startControls}</div>`;
+                    container.appendChild(el);
+
+                    if (isTimerActive && task.due?.datetime) {
+                        const timerDisplay = el.querySelector(`#timer-display-${task.id}`);
+                        const startTime = new Date(task.due.datetime);
+                        const updateDisplay = () => {
+                            const elapsed = new Date() - startTime;
+                            timerDisplay.textContent = formatDuration(elapsed);
+                        };
+                        updateDisplay();
+                        activeTimers[task.id] = setInterval(updateDisplay, 1000);
+                    }
+                    el.querySelector('.start-timer-btn')?.addEventListener('click', (e) => startTodoistTimer(e.currentTarget.dataset.taskId));
+                    el.querySelector('.stop-timer-btn')?.addEventListener('click', (e) => stopTodoistTimer(e.currentTarget.dataset.taskId, false));
+                    el.querySelector('.stop-complete-btn')?.addEventListener('click', (e) => stopTodoistTimer(e.currentTarget.dataset.taskId, true));
+                });
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+            }
+        }
+
+        function renderCompletedTodoistTasks(projectName) {
+            const container = document.getElementById('completed-todoist-tasks-list');
+            const section = document.getElementById('completed-tasks-section');
+            container.innerHTML = '';
+            if (!projectName) {
+                section.classList.add('hidden');
+                return;
+            }
+            const projectNameLower = projectName.toLowerCase();
+            const completedTasks = allCompletedTodoistTasks.filter(task => task.content.toLowerCase().includes(projectNameLower));
+
+            if (completedTasks.length > 0) {
+                completedTasks.sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at));
+                completedTasks.forEach(task => {
+                    const el = document.createElement('div');
+                    el.className = 'p-2 bg-white rounded border border-gray-200 text-sm';
+                    const completedDate = new Date(task.completed_at).toLocaleDateString();
+                    el.innerHTML = `<span class="text-gray-500 line-through">${task.content}</span><span class="text-xs text-gray-400 ml-2">(${completedDate})</span>`;
+                    container.appendChild(el);
+                });
+                section.classList.remove('hidden');
+            } else {
+                section.classList.add('hidden');
+            }
+        }
+
+        // --- Project CRUD & Modal Logic ---
+        function openDetailsModal(projectId) {
+            const project = allProjects[projectId];
+            if (!project) return;
+            detailsProjectId.value = projectId;
+            
+            document.getElementById('details-project-name-header').textContent = project.name || 'Project Details';
+            document.getElementById('details-project-name').value = project.name || '';
+            
+            const desc = project.description || '';
+            document.getElementById('details-project-description').value = desc;
+            document.getElementById('details-project-description-view').innerHTML = markdownConverter.makeHtml(desc || '*No description provided.*');
+
+            const nextActionsText = project.nextActions || '';
+            document.getElementById('details-project-nextActions').value = nextActionsText;
+            document.getElementById('details-project-nextActions-view').innerHTML = markdownConverter.makeHtml(nextActionsText || '*No next action defined.*');
+
+            planningModelFields.forEach(field => {
+                const text = project[field.id] || '';
+                const textarea = document.getElementById(`details-project-${field.id}`);
+                const viewDiv = document.getElementById(`details-project-${field.id}-view`);
+                if (textarea) textarea.value = text;
+                if(viewDiv) viewDiv.innerHTML = markdownConverter.makeHtml(text || `*No ${field.label.toLowerCase()} provided.*`);
+            });
+            
+            const status = project.status || 'Not Started';
+            detailsProjectStatusSelect.value = status;
+            document.getElementById('next-action-todoist-project-select').value = project.defaultTodoistProjectId || '';
+            updateModalBasedOnStatus(status);
+            
+            setDetailsMode('view');
+            renderQuickViewHyperlinks(project.hyperlinks);
+            renderTasks(projectId, project.tasks, false);
+            renderCurrentTodoistTasks(project.name);
+            renderCompletedTodoistTasks(project.name);
+            displayProjectKPIsInModal(project);
+            modal.classList.remove('hidden');
+        }
+
+        function updateModalBasedOnStatus(status) {
+            const statusView = document.getElementById('details-project-status-view');
+            statusView.textContent = status;
+            const statusColors = { 'Not Started': 'bg-gray-200 text-gray-800', 'In Progress': 'bg-blue-200 text-blue-800', 'On Hold': 'bg-yellow-200 text-yellow-800', 'Completed': 'bg-green-200 text-green-800' };
+            statusView.className = `px-3 py-1 text-sm font-semibold rounded-full ${statusColors[status] || statusColors['Not Started']}`;
+            document.getElementById('next-action-container').style.display = status === 'Completed' ? 'none' : 'block';
+        }
+        
+        function saveProjectDetails() {
+            const projectId = detailsProjectId.value;
+            if (!projectId) return;
+            const updatedProject = {
+                name: document.getElementById('details-project-name').value.trim(),
+                description: document.getElementById('details-project-description').value.trim(),
+                status: detailsProjectStatusSelect.value,
+                nextActions: document.getElementById('details-project-nextActions').value.trim(),
+                defaultTodoistProjectId: document.getElementById('next-action-todoist-project-select').value
+            };
+            planningModelFields.forEach(field => {
+                updatedProject[field.id] = document.getElementById(`details-project-${field.id}`).value.trim();
+            });
+            update(ref(database, 'projects/' + projectId), updatedProject);
+        }
+
+        function setDetailsMode(mode) {
+            modalContent.classList.remove('view-mode', 'edit-mode', 'review-mode');
+            const projectId = detailsProjectId.value;
+            const project = allProjects[projectId];
+            
+            if (reviewIndex > -1) modalContent.classList.add('review-mode');
+            else if (mode === 'edit') modalContent.classList.add('edit-mode');
+            else modalContent.classList.add('view-mode');
+            
+            if(project) {
+                const isEditOrReview = !modalContent.classList.contains('view-mode');
+                renderHyperlinks(projectId, project.hyperlinks, isEditOrReview);
+                renderTasks(projectId, project.tasks, isEditOrReview);
+            }
+        }
+        
+        // --- Review Mode Logic ---
+        function startReview() {
+            const quadrantOrder = ['do', 'schedule', 'delegate', 'eliminate'];
+            const sortedProjects = Object.values(allProjects).filter(p => p.status !== 'Completed').sort((a, b) => {
+                const quadA = quadrantOrder.indexOf(a.quadrant);
+                const quadB = quadrantOrder.indexOf(b.quadrant);
+                if (quadA !== quadB) return quadA - quadB;
+                return (a.order || 0) - (b.order || 0);
+            });
+            reviewQueue = sortedProjects.map(p => p.id);
+            if (reviewQueue.length > 0) {
+                reviewIndex = 0;
+                loadReviewProject();
+            } else {
+                showConfirmation('Review', 'No active projects to review.', null, true);
+            }
+        }
+
+        function loadReviewProject() {
+            const projectId = reviewQueue[reviewIndex];
+            openDetailsModal(projectId);
+            setDetailsMode('review');
+            setTimeout(() => document.getElementById('details-project-nextActions').focus(), 100);
+            document.getElementById('review-progress').textContent = `Project ${reviewIndex + 1} of ${reviewQueue.length}`;
+            document.getElementById('back-review-btn').disabled = reviewIndex === 0;
+            document.getElementById('forward-review-btn').disabled = reviewIndex === reviewQueue.length - 1;
+        }
+
+        function handleNextReviewProject() {
+            saveProjectDetails();
+            if (reviewIndex < reviewQueue.length - 1) {
+                reviewIndex++;
+                loadReviewProject();
+            } else {
+                endReview();
+                showConfirmation('Review Complete', 'You have reviewed all active projects.', null, true);
+            }
+        }
+
+        function handlePreviousReviewProject() {
+            saveProjectDetails();
+            if (reviewIndex > 0) {
+                reviewIndex--;
+                loadReviewProject();
+            }
+        }
+
+        function endReview() {
+            reviewQueue = [];
+            reviewIndex = -1;
+            setDetailsMode('view');
+            modal.classList.add('hidden');
+        }
+
+        async function createNextActionAsTodoistTask() {
+            const button = document.getElementById('create-task-from-next-action-btn');
+            const taskName = document.getElementById('details-project-nextActions').value.trim();
+            if (!taskName) return showConfirmation('Input Error', 'Next Action cannot be empty.', null, true);
+            
+            const projectName = document.getElementById('details-project-name-header').textContent;
+            const todoistProjectId = document.getElementById('next-action-todoist-project-select').value;
+            
+            button.disabled = true;
+            button.classList.add('loading');
+            try {
+                const response = await fetch("https://api.todoist.com/rest/v2/tasks", {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${todoistAPIKey}`, 'Content-Type': 'application/json', 'X-Request-Id': crypto.randomUUID() },
+                    body: JSON.stringify({ content: `${projectName} - ${taskName}`, project_id: todoistProjectId || undefined })
+                });
+                if (!response.ok) throw new Error(`API Error: ${response.statusText}`);
+                showConfirmation('Success', `Task "${taskName}" created in Todoist.`, null, true);
+                document.getElementById('details-project-nextActions').value = '';
+                await fetchTodoistTasks();
+                const projectId = detailsProjectId.value;
+                if (projectId) update(ref(database, `projects/${projectId}`), { nextActions: '' });
+            } catch (error) {
+                console.error('Failed to create Todoist task:', error);
+                showConfirmation('API Error', `Failed to create task. ${error.message}`, null, true);
+            } finally {
+                button.disabled = false;
+                button.classList.remove('loading');
+            }
+        }
+        
+        // --- Drag and Drop Handlers (Mouse & Touch) ---
+        function handleDragStart(e) {
+            draggedElement = e.currentTarget;
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', draggedElement.dataset.id || '');
+            }
+            setTimeout(() => draggedElement.classList.add('dragging'), 0);
+        }
+        function handleDragEnd(e) {
+            e.currentTarget.classList.remove('dragging');
+            draggedElement = null;
+        }
+        function getDragAfterElement(container, y) {
+            const draggableElements = [...container.querySelectorAll('.project-card:not(.dragging)')];
+            return draggableElements.reduce((closest, child) => {
+                const box = child.getBoundingClientRect();
+                const offset = y - box.top - box.height / 2;
+                if (offset < 0 && offset > closest.offset) return { offset: offset, element: child };
+                return closest;
+            }, { offset: Number.NEGATIVE_INFINITY }).element;
+        }
+        function handleDragOver(e) {
+            e.preventDefault();
+            if (e.dataTransfer) e.dataTransfer.dropEffect = 'move';
+            const quadrant = e.currentTarget;
+            quadrant.classList.add('drag-over');
+            const afterElement = getDragAfterElement(quadrant, e.clientY);
+            if (draggedElement) {
+                if (afterElement == null) quadrant.appendChild(draggedElement);
+                else quadrant.insertBefore(draggedElement, afterElement);
+            }
+        }
+        function handleDragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+        function handleDrop(e) {
+            e.preventDefault();
+            const quadrantEl = e.currentTarget;
+            quadrantEl.classList.remove('drag-over');
+            if (!draggedElement) return;
+            updateQuadrantAndOrder(quadrantEl);
+        }
+
+        function handleTouchStart(e) {
+            draggedElement = e.currentTarget;
+            draggedElement.classList.add('dragging');
+        }
+        function handleTouchMove(e) {
+            e.preventDefault();
+            if (!draggedElement) return;
+            const touch = e.touches[0];
+            const targetQuadrant = document.elementFromPoint(touch.clientX, touch.clientY).closest('.eisenhower-quadrant');
+            if (targetQuadrant) {
+                quadrants.forEach(q => q.classList.remove('drag-over'));
+                targetQuadrant.classList.add('drag-over');
+                const afterElement = getDragAfterElement(targetQuadrant, touch.clientY);
+                if (afterElement) targetQuadrant.insertBefore(draggedElement, afterElement);
+                else targetQuadrant.appendChild(draggedElement);
+            }
+        }
+        function handleTouchEnd(e) {
+            if (!draggedElement) return;
+            const finalQuadrant = draggedElement.closest('.eisenhower-quadrant');
+            quadrants.forEach(q => q.classList.remove('drag-over'));
+            draggedElement.classList.remove('dragging');
+            if (finalQuadrant) updateQuadrantAndOrder(finalQuadrant);
+            draggedElement = null;
+        }
+
+        function updateQuadrantAndOrder(quadrantEl) {
+            const targetQuadrant = quadrantEl.dataset.quadrant;
+            const projectElements = [...quadrantEl.querySelectorAll('.project-card')];
+            const updates = {};
+            projectElements.forEach((el, index) => {
+                const projectId = el.dataset.id;
+                updates[`/projects/${projectId}/order`] = index;
+                updates[`/projects/${projectId}/quadrant`] = targetQuadrant;
+            });
+            if (Object.keys(updates).length > 0) update(ref(database), updates);
+        }
+
+        // --- View Toggle ---
+        function toggleView(view) {
+            if (view === 'table') {
+                matrixView.classList.add('hidden');
+                tableView.classList.remove('hidden');
+                document.getElementById('table-view-btn').classList.add('active');
+                document.getElementById('matrix-view-btn').classList.remove('active');
+            } else {
+                tableView.classList.add('hidden');
+                matrixView.classList.remove('hidden');
+                document.getElementById('matrix-view-btn').classList.add('active');
+                document.getElementById('table-view-btn').classList.remove('active');
+            }
+        }
+
+        // --- Hyperlink & Task Management ---
+        function renderQuickViewHyperlinks(hyperlinks) {
+            const display = document.getElementById('details-hyperlinks-display');
+            display.innerHTML = '';
+            if (hyperlinks && Object.keys(hyperlinks).length > 0) {
+                const list = document.createElement('div');
+                list.className = 'flex flex-wrap gap-x-4 gap-y-2';
+                Object.values(hyperlinks).forEach(link => {
+                    list.innerHTML += `<a href="${link.url}" target="_blank" rel="noopener noreferrer" class="text-sm text-indigo-600 hover:underline bg-indigo-50 px-2 py-1 rounded-md transition"><i class="fas fa-link fa-xs mr-1"></i>${link.name}</a>`;
+                });
+                display.appendChild(list);
+            }
+        }
+
+        function handleQuickAddLink() {
+            const projectId = detailsProjectId.value;
+            const name = document.getElementById('quick-hyperlink-name').value.trim();
+            const url = document.getElementById('quick-hyperlink-url').value.trim();
+            if (!projectId || !name || !url) {
+                return showConfirmation('Input Error', 'Please provide both a name and a valid URL.', null, true);
+            }
+            const linkRef = ref(database, `projects/${projectId}/hyperlinks`);
+            push(linkRef, { name, url, description: '' });
+            document.getElementById('quick-hyperlink-name').value = '';
+            document.getElementById('quick-hyperlink-url').value = '';
+            document.getElementById('quick-add-hyperlink-form').classList.add('hidden');
+        }
+
+        function handleHyperlinkAction(e) {
+            const button = e.target.closest('button');
+            if (!button) return;
+            const projectId = detailsProjectId.value;
+            const linkId = button.dataset.linkId;
+            const linkContainer = button.closest('.hyperlink-item');
+
+            if (button.classList.contains('save-hyperlink-btn')) {
+                const name = linkContainer.querySelector('[data-field="name"]').value;
+                const url = linkContainer.querySelector('[data-field="url"]').value;
+                const description = linkContainer.querySelector('[data-field="description"]').value;
+                update(ref(database, `projects/${projectId}/hyperlinks/${linkId}`), { name, url, description });
+            } else if (button.classList.contains('delete-hyperlink-btn')) {
+                remove(ref(database, `projects/${projectId}/hyperlinks/${linkId}`));
+            }
+        }
+
+        function renderHyperlinks(projectId, hyperlinks, isEditMode) {
+            const container = document.getElementById('hyperlink-list');
+            container.innerHTML = '';
+            if (hyperlinks) {
+                Object.entries(hyperlinks).forEach(([linkId, linkData]) => {
+                    const linkEl = document.createElement('div');
+                    linkEl.className = 'hyperlink-item flex items-start justify-between bg-gray-50 p-3 rounded-md border';
+                    if (isEditMode) {
+                        linkEl.innerHTML = `<div class="flex-grow space-y-2 pr-4"><input type="text" value="${linkData.name || ''}" class="w-full p-2 border rounded-md" data-field="name" placeholder="Link Name"><input type="url" value="${linkData.url || ''}" class="w-full p-2 border rounded-md" data-field="url" placeholder="URL"><textarea class="w-full p-2 border rounded-md" placeholder="Description" rows="2" data-field="description">${linkData.description || ''}</textarea></div><div class="flex flex-col space-y-2"><button data-link-id="${linkId}" class="save-hyperlink-btn text-sm bg-green-500 text-white font-semibold py-1 px-3 rounded-md hover:bg-green-600 transition">Save</button><button data-link-id="${linkId}" class="delete-hyperlink-btn text-sm bg-red-500 text-white font-semibold py-1 px-3 rounded-md hover:bg-red-600 transition">Delete</button></div>`;
+                    }
+                    container.appendChild(linkEl);
+                });
+            }
+        }
+        
+        function renderTasks(projectId, tasks, isEditMode) {
+            const container = document.getElementById('task-list');
+            container.innerHTML = '';
+            if (tasks) {
+                const sortedTasks = Object.entries(tasks).sort(([, a], [, b]) => (a.completed ? 1 : -1) - (b.completed ? 1 : -1) || (a.createdAt || 0) - (b.createdAt || 0));
+                sortedTasks.forEach(([taskId, taskData]) => {
+                    const taskEl = document.createElement('div');
+                    taskEl.className = `task-item flex items-center gap-3 p-2 rounded-md hover:bg-gray-50 ${taskData.completed ? 'completed' : ''}`;
+                    taskEl.dataset.taskId = taskId;
+                    if (isEditMode) {
+                        taskEl.innerHTML = `<input type="checkbox" class="task-checkbox h-5 w-5 rounded shrink-0" ${taskData.completed ? 'checked' : ''}><input type="text" value="${taskData.name}" class="task-name-edit flex-grow bg-transparent p-1"><button class="delete-task-btn text-gray-400 hover:text-red-600 p-1"><i class="fas fa-trash-alt"></i></button>`;
+                    } else {
+                        taskEl.innerHTML = `<input type="checkbox" class="task-checkbox h-5 w-5 rounded shrink-0" ${taskData.completed ? 'checked' : ''}><span class="task-name-view flex-grow">${taskData.name}</span>`;
+                    }
+                    container.appendChild(taskEl);
+                });
+            }
+        }
+        
+        function handleTaskAction(e) {
+            const projectId = detailsProjectId.value;
+            if (!projectId) return;
+            const target = e.target;
+            const taskItem = target.closest('.task-item');
+            if (!taskItem) return;
+            const taskId = taskItem.dataset.taskId;
+
+            if (target.classList.contains('task-checkbox')) {
+                const isCompleted = target.checked;
+                update(ref(database, `projects/${projectId}/tasks/${taskId}`), { completed: isCompleted });
+            } else if (target.classList.contains('delete-task-btn') || target.closest('.delete-task-btn')) {
+                remove(ref(database, `projects/${projectId}/tasks/${taskId}`));
+            } else if (target.classList.contains('task-name-edit')) {
+                target.addEventListener('blur', () => {
+                    update(ref(database, `projects/${projectId}/tasks/${taskId}`), { name: target.value });
+                }, { once: true });
+            }
+        }
+
+        // --- AI, Timer, and Confirmation Functions ---
+        async function handleAIAssistance(e) { /* This function can be implemented later */ }
+        
+        async function startTodoistTimer(taskId) {
+            const task = allTodoistTasks.find(t => t.id.toString() === taskId);
+            if (!task) return;
+
+            const activeTaskEntry = Object.entries(activeTimers)[0];
+            if (activeTaskEntry && activeTaskEntry[0] !== taskId) {
+                await stopTodoistTimer(activeTaskEntry[0], false);
+            }
+
+            const updatedLabels = [...new Set([...task.labels, timerLabel])];
+            
+            try {
+                const response = await fetch(`https://api.todoist.com/rest/v2/tasks/${taskId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${todoistAPIKey}`, 'Content-Type': 'application/json', 'X-Request-Id': crypto.randomUUID() },
+                    body: JSON.stringify({ labels: updatedLabels, due_datetime: new Date().toISOString() })
+                });
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`API call to start timer failed: ${errorText}`);
+                }
+                await fetchTodoistTasks();
+            } catch (error) {
+                console.error(error);
+                showConfirmation('API Error', `Could not start timer. ${error.message}`, null, true);
+            }
+        }
+
+        async function stopTodoistTimer(taskId, shouldComplete) {
+            let task = allTodoistTasks.find(t => t.id.toString() === taskId);
+            
+            if (!task || !task.due || !task.due.datetime) {
+                await fetchTodoistTasks();
+                task = allTodoistTasks.find(t => t.id.toString() === taskId);
+                if (!task || !task.due || !task.due.datetime) {
+                    console.error(`Could not find start time for task ${taskId} even after refetch.`);
+                    if (activeTimers[taskId]) {
+                        clearInterval(activeTimers[taskId]);
+                        delete activeTimers[taskId];
+                    }
+                    const currentProjectId = detailsProjectId.value;
+                    if(currentProjectId && allProjects[currentProjectId]) {
+                        renderCurrentTodoistTasks(allProjects[currentProjectId].name);
+                    }
+                    return;
+                }
+            }
+
+            const startTime = new Date(task.due.datetime);
+            const endTime = new Date();
+            const elapsedMinutes = (endTime - startTime) / 60000;
+            
+            const formattedStartTime = formatTime12Hour(startTime);
+            const formattedEndTime = formatTime12Hour(endTime);
+            const formattedDuration = elapsedMinutes.toFixed(2);
+            const timeLog = `[${formattedStartTime}-${formattedEndTime}|${formattedDuration}min]`;
+            
+            const newContent = `${task.content} ${timeLog}`;
+            
+            const updatedLabels = task.labels.filter(l => l !== timerLabel);
+
+            try {
+                const updateResponse = await fetch(`https://api.todoist.com/rest/v2/tasks/${taskId}`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${todoistAPIKey}`, 'Content-Type': 'application/json', 'X-Request-Id': crypto.randomUUID() },
+                    body: JSON.stringify({ content: newContent, labels: updatedLabels, due_string: 'no date' })
+                });
+                if (!updateResponse.ok) {
+                    const errorText = await updateResponse.text();
+                    throw new Error(`API call to stop timer failed: ${errorText}`);
+                }
+
+                if (shouldComplete) {
+                    const completeResponse = await fetch(`https://api.todoist.com/rest/v2/tasks/${taskId}/close`, {
+                        method: 'POST',
+                        headers: { 'Authorization': `Bearer ${todoistAPIKey}` }
+                    });
+                    if (!completeResponse.ok) {
+                        const errorText = await completeResponse.text();
+                        throw new Error(`API call to complete task failed: ${errorText}`);
+                    }
+                }
+                
+                clearInterval(activeTimers[taskId]);
+                delete activeTimers[taskId];
+
+                await Promise.all([fetchTodoistTasks(), fetchCompletedTodoistTasks()]);
+                updateAllProjectKPIs();
+                
+                const currentProjectId = detailsProjectId.value;
+                if(currentProjectId && allProjects[currentProjectId]) {
+                    renderCompletedTodoistTasks(allProjects[currentProjectId].name);
+                    displayProjectKPIsInModal(allProjects[currentProjectId]);
+                }
+
+            } catch (error) {
+                console.error(error);
+                showConfirmation('API Error', `Could not stop timer or complete task. ${error.message}`, null, true);
+            }
+        }
+        
+        function formatTime12Hour(date) {
+            if (!(date instanceof Date)) return '';
+            let hours = date.getHours();
+            const minutes = date.getMinutes();
+            const ampm = hours >= 12 ? 'pm' : 'am';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            const minutesStr = minutes < 10 ? '0' + minutes : minutes;
+            return `${hours}:${minutesStr}${ampm}`;
+        }
+        
+        function formatDuration(ms) {
+            const totalSeconds = Math.floor(ms / 1000);
+            const hours = Math.floor(totalSeconds / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+            return [hours, minutes, seconds].map(v => v.toString().padStart(2, '0')).join(':');
+        }
+
+        function showConfirmation(title, message, callback, isAlert = false) {
+            document.getElementById('confirm-title').textContent = title;
+            document.getElementById('confirm-message').textContent = message;
+            confirmationCallback = callback;
+            const confirmBtn = document.getElementById('confirm-action-btn');
+            const cancelBtn = document.getElementById('cancel-confirm-btn');
+            confirmBtn.style.display = isAlert ? 'none' : 'inline-flex';
+            cancelBtn.textContent = isAlert ? 'OK' : 'Cancel';
+            confirmModal.classList.remove('hidden');
+        }
+        function confirmDelete(projectId) { showConfirmation('Confirm Deletion', 'Are you sure you want to permanently delete this project?', () => remove(ref(database, 'projects/' + projectId))); }
+        
+        // --- Initialization Functions ---
+        function initializePlanningFields() {
+            planningFieldsContainer.innerHTML = '';
+            planningModelFields.forEach(field => {
+                const fieldHTML = `<div class="field-container" data-field-id="${field.id}"><label class="block text-sm font-medium text-gray-700 mb-1">${field.label}</label><div class="markdown-view" id="details-project-${field.id}-view"></div><div class="edit-field relative"><textarea id="details-project-${field.id}" data-field-id="${field.id}" rows="4" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 pr-12" placeholder="${field.prompt}"></textarea><button class="ai-button absolute top-2 right-2 bg-indigo-100 text-indigo-600 hover:bg-indigo-200 rounded-full p-2 transition" data-field="${field.id}" title="Get AI assistance for ${field.label}"><i class="fas fa-wand-magic-sparkles"></i><i class="fas fa-spinner fa-spin"></i></button></div></div>`;
+                planningFieldsContainer.insertAdjacentHTML('beforeend', fieldHTML);
+            });
+        }
+        
+        function populateTodoistSelects() {
+            const selects = document.querySelectorAll('#next-action-todoist-project-select');
+            selects.forEach(select => {
+                select.innerHTML = '<option value="">Default (Inbox)</option>';
+                for (const id in todoistProjects) {
+                    const option = document.createElement('option');
+                    option.value = id;
+                    option.textContent = todoistProjects[id];
+                    select.appendChild(option);
+                }
+            });
+        }
+
+        function initializeAppAndListeners() {
+            onValue(projectsRef, (snapshot) => {
+                allProjects = snapshot.val() || {};
+                Object.keys(allProjects).forEach(key => allProjects[key].id = key);
+                updateAllProjectKPIs();
+                updateProjectTaskCounts();
+                if (!modal.classList.contains('hidden')) {
+                    const currentId = detailsProjectId.value;
+                    if (allProjects[currentId]) openDetailsModal(currentId);
+                    else endReview();
+                }
+            });
+
+            Promise.all([fetchTodoistTasks(), fetchCompletedTodoistTasks()]).then(() => {
+                updateAllProjectKPIs();
+                renderAllViews();
+            });
+
+            quadrants.forEach(quadrant => {
+                quadrant.addEventListener('dragenter', (e) => e.preventDefault());
+                quadrant.addEventListener('dragover', handleDragOver);
+                quadrant.addEventListener('dragleave', handleDragLeave);
+                quadrant.addEventListener('drop', handleDrop);
+            });
+
+            // View & Main Action Listeners
+            document.getElementById('matrix-view-btn').addEventListener('click', () => toggleView('matrix'));
+            document.getElementById('table-view-btn').addEventListener('click', () => toggleView('table'));
+            document.getElementById('review-projects-btn').addEventListener('click', startReview);
+            document.getElementById('add-project-btn').addEventListener('click', () => { const name = document.getElementById('new-project-name').value.trim(); if(name) push(projectsRef, { name, quadrant: 'do', status: 'Not Started', order: 999, createdAt: serverTimestamp() }); document.getElementById('new-project-name').value = ''; });
+            document.getElementById('settings-btn').addEventListener('click', () => settingsModal.classList.remove('hidden'));
+
+            // Modal General Listeners
+            document.getElementById('close-details-btn').addEventListener('click', endReview);
+            document.getElementById('details-mode-toggle').addEventListener('click', () => { const isViewMode = modalContent.classList.contains('view-mode'); setDetailsMode(isViewMode ? 'edit' : 'view'); });
+            document.getElementById('save-details-btn').addEventListener('click', () => { saveProjectDetails(); setDetailsMode('view'); });
+            document.getElementById('delete-project-btn').addEventListener('click', () => { const pid = detailsProjectId.value; if (pid) { endReview(); confirmDelete(pid); } });
+            document.getElementById('natural-planning-header').addEventListener('click', () => document.getElementById('natural-planning-section').classList.toggle('collapsed'));
+            
+            // Modal Review Listeners
+            document.getElementById('back-review-btn').addEventListener('click', handlePreviousReviewProject);
+            document.getElementById('forward-review-btn').addEventListener('click', handleNextReviewProject);
+            document.getElementById('next-review-btn').addEventListener('click', handleNextReviewProject);
+            document.getElementById('end-review-btn').addEventListener('click', endReview);
+
+            // Modal Form & Button Listeners
+            document.getElementById('quick-add-link-btn').addEventListener('click', () => document.getElementById('quick-add-hyperlink-form').classList.toggle('hidden'));
+            document.getElementById('cancel-quick-add-btn').addEventListener('click', () => document.getElementById('quick-add-hyperlink-form').classList.add('hidden'));
+            document.getElementById('confirm-quick-add-btn').addEventListener('click', handleQuickAddLink);
+            document.getElementById('create-task-from-next-action-btn').addEventListener('click', createNextActionAsTodoistTask);
+            document.getElementById('add-task-btn').addEventListener('click', () => { const name = document.getElementById('new-task-name').value.trim(); const pid = detailsProjectId.value; if(name && pid) push(ref(database, `projects/${pid}/tasks`), { name, completed: false, createdAt: serverTimestamp() }); document.getElementById('new-task-name').value = ''; });
+            document.getElementById('add-hyperlink-btn').addEventListener('click', () => { const name = document.getElementById('new-hyperlink-name').value.trim(); const url = document.getElementById('new-hyperlink-url').value.trim(); const desc = document.getElementById('new-hyperlink-desc').value.trim(); const pid = detailsProjectId.value; if(name && url && pid) push(ref(database, `projects/${pid}/hyperlinks`), { name, url, description: desc }); document.getElementById('new-hyperlink-name').value = ''; document.getElementById('new-hyperlink-url').value = ''; document.getElementById('new-hyperlink-desc').value = ''; });
+            
+            // Confirmation Modal Listeners
+            document.getElementById('confirm-action-btn').addEventListener('click', () => { if (confirmationCallback) confirmationCallback(); confirmModal.classList.add('hidden'); });
+            document.getElementById('cancel-confirm-btn').addEventListener('click', () => confirmModal.classList.add('hidden'));
+
+            // Settings Modal Listeners
+            document.getElementById('close-settings-btn').addEventListener('click', () => settingsModal.classList.add('hidden'));
+            document.getElementById('settings-tabs').addEventListener('click', (e) => {
+                if (e.target.classList.contains('settings-tab-btn')) {
+                    const selectedTab = e.target.dataset.tab;
+                    document.querySelectorAll('.settings-tab-btn').forEach(btn => {
+                        btn.classList.remove('border-indigo-500', 'text-indigo-600');
+                        btn.classList.add('border-transparent', 'text-gray-500', 'hover:text-gray-700', 'hover:border-gray-300');
+                    });
+                    e.target.classList.add('border-indigo-500', 'text-indigo-600');
+                    e.target.classList.remove('border-transparent', 'text-gray-500');
+
+                    document.querySelectorAll('.settings-tab-content').forEach(content => {
+                        content.classList.add('hidden');
+                    });
+                    document.getElementById(`tab-content-${selectedTab}`).classList.remove('hidden');
+                }
+            });
+
+            // Event Delegation for dynamic content
+            document.getElementById('hyperlink-list').addEventListener('click', handleHyperlinkAction);
+            document.getElementById('task-list').addEventListener('click', handleTaskAction);
+            document.querySelectorAll('.ai-button').forEach(btn => btn.addEventListener('click', handleAIAssistance));
+
+            initializePlanningFields();
+            populateTodoistSelects();
+        }
+        
+        initializeAppAndListeners();
+    
+    </script>
+</body>
+</html>
