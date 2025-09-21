@@ -202,6 +202,12 @@ a:hover {
     color: var(--primary);
 }
 
+.nav-link.active,
+.nav-link[aria-current="page"] {
+    color: var(--primary);
+    font-weight: 600;
+}
+
 .nav-toggle {
     display: none;
     flex-direction: column;
@@ -893,6 +899,196 @@ a:hover {
     
     .card-icon {
         font-size: 1.5rem;
+    }
+}
+
+/* Change Log Page */
+.changelog-page {
+    padding-top: 120px;
+    background: var(--white);
+}
+
+.changelog-hero {
+    padding: var(--space-3xl) 0;
+    background: var(--gray-50);
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.changelog-hero__content {
+    max-width: 760px;
+}
+
+.changelog-hero__badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.35rem 0.75rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    background: rgba(59, 130, 246, 0.12);
+    color: var(--primary);
+    margin-bottom: var(--space-sm);
+}
+
+.changelog-hero__title {
+    font-size: 2.5rem;
+    margin-bottom: var(--space-md);
+}
+
+.changelog-hero__subtitle {
+    font-size: 1.1rem;
+    color: var(--gray-600);
+    margin-bottom: var(--space-sm);
+}
+
+.changelog-hero__note {
+    font-size: 0.95rem;
+    color: var(--gray-500);
+}
+
+.changelog-hero__note a {
+    text-decoration: underline;
+}
+
+.changelog-content {
+    padding: var(--space-3xl) 0;
+}
+
+.changelog-guidelines {
+    background: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    margin-bottom: var(--space-2xl);
+}
+
+.changelog-guidelines h2 {
+    font-size: 1.5rem;
+    margin-bottom: var(--space-md);
+}
+
+.changelog-guidelines ul {
+    list-style: disc inside;
+    color: var(--gray-600);
+    line-height: 1.7;
+}
+
+.changelog-timeline {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+}
+
+.changelog-date__title {
+    font-size: 1.75rem;
+    margin-bottom: var(--space-lg);
+}
+
+.changelog-date__commits {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+}
+
+.changelog-entry {
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-lg);
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.changelog-entry__header {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    margin-bottom: var(--space-md);
+}
+
+.changelog-entry__title {
+    font-size: 1.35rem;
+}
+
+.changelog-entry__meta {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--gray-500);
+}
+
+.changelog-entry__description {
+    color: var(--gray-600);
+    margin-bottom: var(--space-md);
+}
+
+.changelog-entry__changes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.changelog-entry__change a {
+    font-family: var(--font-mono);
+    font-size: 0.95rem;
+    word-break: break-word;
+}
+
+.change-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-radius: 999px;
+    margin-right: var(--space-sm);
+}
+
+.change-badge--added {
+    background: rgba(16, 185, 129, 0.15);
+    color: var(--success);
+}
+
+.change-badge--updated {
+    background: rgba(59, 130, 246, 0.15);
+    color: var(--primary);
+}
+
+.change-badge--removed {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--error);
+}
+
+.change-badge--renamed {
+    background: rgba(245, 158, 11, 0.15);
+    color: var(--warning);
+}
+
+@media (max-width: 768px) {
+    .changelog-page {
+        padding-top: 100px;
+    }
+
+    .changelog-hero__title {
+        font-size: 2rem;
+    }
+
+    .changelog-hero__subtitle {
+        font-size: 1rem;
+    }
+
+    .changelog-entry {
+        padding: var(--space-lg);
+    }
+
+    .changelog-entry__title {
+        font-size: 1.2rem;
     }
 }
 
