@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How I Learn Faster by Organizing Text with an LLM Agent Workflow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --background: #f8fafc;
+            --surface: #ffffff;
+            --text-primary: #1f2933;
+            --text-secondary: #52606d;
+            --text-muted: #7b8794;
+            --accent: #2563eb;
+            --accent-soft: rgba(37, 99, 235, 0.1);
+            --border: #e4e7eb;
+            --success: #059669;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 920px;
+            margin: 0 auto;
+            padding: 48px 24px 96px;
+        }
+
+        header.hero {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 64px 48px;
+            margin-bottom: 56px;
+            box-shadow: 0 32px 80px rgba(15, 23, 42, 0.08);
+        }
+
+        .eyebrow {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        h1 {
+            font-size: clamp(2.6rem, 3vw + 1rem, 3.4rem);
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        .hero-insight {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 500;
+            margin-bottom: 24px;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-bottom: 28px;
+            max-width: 680px;
+        }
+
+        .meta {
+            display: flex;
+            gap: 18px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        section {
+            margin-bottom: 64px;
+        }
+
+        h2 {
+            font-size: 1.9rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+        }
+
+        h3 {
+            font-size: 1.35rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-primary);
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 1.02rem;
+            color: var(--text-secondary);
+        }
+
+        ul, ol {
+            margin: 0 0 24px 24px;
+            color: var(--text-secondary);
+        }
+
+        li {
+            margin-bottom: 12px;
+        }
+
+        .callout {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 28px;
+            margin: 32px 0;
+        }
+
+        .callout-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: var(--accent);
+            margin-bottom: 12px;
+        }
+
+        .progressive-disclosure {
+            display: grid;
+            gap: 18px;
+            margin-top: 32px;
+        }
+
+        .message {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px 24px;
+            position: relative;
+        }
+
+        .message::before {
+            content: attr(data-step);
+            position: absolute;
+            top: -12px;
+            left: 20px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #111827;
+            color: #f9fafb;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.08em;
+        }
+
+        .message strong {
+            color: var(--text-primary);
+        }
+
+        .workflow-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .agent-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+            transition: transform 0.2s ease;
+        }
+
+        .agent-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 18px 30px rgba(15, 23, 42, 0.08);
+        }
+
+        .agent-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--accent-soft);
+            color: var(--accent);
+            font-weight: 600;
+            border-radius: 999px;
+            padding: 6px 14px;
+            margin-bottom: 16px;
+        }
+
+        .prompt {
+            background: #0f172a;
+            color: #f8fafc;
+            border-radius: 16px;
+            padding: 18px;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            margin-top: 16px;
+            overflow-x: auto;
+        }
+
+        .two-column {
+            display: grid;
+            gap: 32px;
+        }
+
+        @media (min-width: 900px) {
+            .workflow-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            .two-column {
+                grid-template-columns: 1.2fr 0.8fr;
+            }
+        }
+
+        .metrics-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 24px;
+        }
+
+        .metrics-card h3 {
+            margin-bottom: 12px;
+        }
+
+        .closing {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.08), rgba(14, 116, 144, 0.08));
+            border-radius: 24px;
+            padding: 48px;
+            text-align: center;
+        }
+
+        .closing h2 {
+            margin-bottom: 16px;
+        }
+
+        .closing p {
+            color: var(--text-primary);
+            margin-bottom: 24px;
+        }
+
+        .closing a {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 22px;
+            background: #1d4ed8;
+            color: #f8fafc;
+            font-weight: 600;
+            border-radius: 12px;
+            text-decoration: none;
+        }
+
+        .list-reset {
+            list-style: none;
+            margin-left: 0;
+        }
+
+        .list-reset li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 18px;
+        }
+
+        .list-reset li::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 8px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="hero">
+            <div class="eyebrow">Learning Operating System</div>
+            <h1>How I Learn Faster by Organizing Text with an LLM Agent Workflow</h1>
+            <div class="hero-insight">Deep Insight: Structure is the throttle for my understanding.</div>
+            <p class="hero-subtitle">
+                I retain information by architecting it. Whenever I receive a messy brief, a meeting transcript, or a knowledge dump,
+                I run it through a six-agent workflow that transforms noise into a living knowledge map without losing nuance.
+            </p>
+            <div class="meta">
+                <span>📅 September 24, 2025</span>
+                <span>⏱️ 7 minute read</span>
+                <span>🎯 Audience: AI ops leaders & product strategists</span>
+            </div>
+
+            <div class="progressive-disclosure">
+                <div class="message" data-step="Message 1">
+                    <p><strong>Start with the promise:</strong> If the information matters, it deserves an architecture. The workflow below is how I protect every detail while still moving fast.</p>
+                </div>
+                <div class="message" data-step="Message 2">
+                    <p><strong>Then reveal the system:</strong> Six specialized LLM agents—Cleaner, Chunker, Grouper, Structurer, Refiner, and Cataloguer—pass context forward so I can interrogate any topic like a consultant, not a note-taker.</p>
+                </div>
+            </div>
+        </header>
+
+        <section>
+            <h2>The Beginning: Why Organizing Text Became My Learning Edge</h2>
+            <p>
+                Most people read, highlight, and hope memory does the rest. I tried that and forgot the details that mattered.
+                The turning point came after leading a cross-functional incident review: fifty pages of logs, emails, and transcripts were dumped on my desk.
+                I realized I only learn when I can see relationships—causes, decisions, guardrails. That meant I needed a repeatable way to restructure raw text into a decision-ready brief.
+            </p>
+            <div class="callout">
+                <div class="callout-title">Learning Principle</div>
+                <p>
+                    <strong>Information architecture precedes insight.</strong> My brain processes complex material once it’s broken into units, grouped by intent, and mapped into a hierarchy I can traverse.
+                </p>
+            </div>
+            <p>
+                Enter the multi-agent workflow. Each agent is specialized, knows its constraints, and hands off to the next role.
+                The stack doesn’t summarize prematurely; it safeguards detail until I decide how to deploy it—briefs, decks, automations, or code comments.
+            </p>
+        </section>
+
+        <section>
+            <h2>The Middle: Building the Six-Agent Restructuring Workflow</h2>
+            <p>
+                Progressive refinement is the backbone of every professional research firm. I borrowed that playbook and encoded it for LLM collaboration.
+                Here’s how each agent earns its seat at the table, complete with the precise prompt I use.
+            </p>
+
+            <div class="workflow-grid">
+                <div class="agent-card">
+                    <div class="agent-label">Agent 1 · Cleaner</div>
+                    <h3>Remove clutter, protect meaning</h3>
+                    <p>
+                        The Cleaner strips stray symbols, duplicated sentences, and partial thoughts. It keeps every meaningful detail and gives the next agent a coherent base layer.
+                    </p>
+                    <div class="prompt">
+"You are a text cleaning assistant. Your task is to process the following messy body of text and remove irrelevant fragments (e.g., stray symbols, incomplete sentences, repeated ideas). Keep all meaningful details that may be important later. Do not summarize—only delete clutter. Ensure the cleaned text is coherent and flows without gaps. Output the cleaned text in full."
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-label">Agent 2 · Chunker</div>
+                    <h3>Segment for focus</h3>
+                    <p>
+                        The Chunker divides the cleaned text into numbered, self-contained units. Each chunk expresses a single idea so I can reference it later without re-reading the entire document.
+                    </p>
+                    <div class="prompt">
+"You are a segmentation assistant. Take the cleaned text and divide it into coherent, self-contained chunks. A chunk may be a short paragraph, bullet point, or note that expresses a single idea. Each chunk should stand on its own, but preserve original meaning. Number each chunk for reference. Output only the list of numbered chunks."
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-label">Agent 3 · Grouper</div>
+                    <h3>Cluster by theme</h3>
+                    <p>
+                        The Grouper scans the chunks and organizes them by theme, topic, or timeline. It labels the emerging patterns and prepares the material for structural design.
+                    </p>
+                    <div class="prompt">
+"You are a clustering assistant. Your task is to take the list of numbered chunks and group related ideas together by theme, topic, or chronology. For each group, assign a tentative label that describes its theme. Output the groups with their labels, and list each chunk number inside the appropriate group. Do not delete or rewrite content—simply cluster."
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-label">Agent 4 · Structurer</div>
+                    <h3>Draft the architecture</h3>
+                    <p>
+                        The Structurer turns the groups into a rough Table of Contents. It preserves every cluster while defining headings and subheadings that respect chronology or conceptual flow.
+                    </p>
+                    <div class="prompt">
+"You are an organizational assistant. Based on the grouped clusters, create a high-level structure in the form of a rough Table of Contents. Assign appropriate section headings and subheadings. Arrange the categories into a logical hierarchy (chronology, conceptual order, or steps in a process). Preserve all clusters—do not discard. Output the draft Table of Contents only."
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-label">Agent 5 · Refiner</div>
+                    <h3>Rebuild section flow</h3>
+                    <p>
+                        The Refiner dives into each section, placing the original chunks into clean paragraphs, bullet sequences, or numbered steps. It’s where coherence replaces chaos.
+                    </p>
+                    <div class="prompt">
+"You are a refining assistant. For each section in the Table of Contents, take the original chunks that belong there and arrange them into a clean structure. Reorder within the section for logic and clarity. Use bullet points, numbered steps, and sub-headers if needed. Preserve the meaning and detail of each chunk—do not omit or summarize excessively. Output each section in order, fully restructured."
+                    </div>
+                </div>
+
+                <div class="agent-card">
+                    <div class="agent-label">Agent 6 · Cataloguer</div>
+                    <h3>Create the final navigation</h3>
+                    <p>
+                        The Cataloguer closes the loop: final Table of Contents, a map of detail depth, and a glossary of key terms. I can now delegate writing, build a dashboard, or generate training assets.
+                    </p>
+                    <div class="prompt">
+"You are the final organizing assistant. Create three deliverables from the refined material:
+1. A full Table of Contents (with sections, subsections, and page/section references if applicable).
+2. A description of the level of detail for each section (e.g., overview, detailed step-by-step, conceptual explanation).
+3. A glossary of concepts and terms found in the full text, with clear definitions based on context.
+Output should be neatly structured, ensuring no important term or idea is lost."
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>The Execution: Running the Workflow in Real Projects</h2>
+            <div class="two-column">
+                <div>
+                    <p>
+                        I plug this pipeline into everything from weekly executive updates to product teardown research. The key is keeping each agent honest about its constraints and outputs.
+                    </p>
+                    <ol>
+                        <li><strong>Intake:</strong> Drop raw notes, transcripts, or exported threads into the Cleaner. No pre-editing required.</li>
+                        <li><strong>Traceability:</strong> Keep chunk numbers visible in subsequent drafts. They become anchors when stakeholders ask, “Where did this insight come from?”</li>
+                        <li><strong>Iteration:</strong> If the Structurer outputs a hierarchy that doesn’t match the story I need, I adjust the Grouper labels and re-run downstream agents.</li>
+                        <li><strong>Distribution:</strong> The Cataloguer’s glossary doubles as metadata for my knowledge base, tagging reusable definitions across decks and dashboards.</li>
+                    </ol>
+                </div>
+                <div class="metrics-card">
+                    <h3>Operational Gains</h3>
+                    <ul class="list-reset">
+                        <li>50% faster ramp-up when onboarding analysts to a new dataset.</li>
+                        <li>Consistent executive briefs that surface decision-ready sections in minutes.</li>
+                        <li>Traceable knowledge base entries—every insight links back to original chunk IDs.</li>
+                        <li>Reusable prompts packaged for my team’s internal agent library.</li>
+                    </ul>
+                </div>
+            </div>
+            <p>
+                The outcome is a scannable, corporate-ready deliverable that still feels human. Leaders get the insight; operators get the detail; I get a feedback loop that reinforces how I learn.
+            </p>
+        </section>
+
+        <section>
+            <h2>The End: Turning Organized Text into Organizational Memory</h2>
+            <p>
+                Learning is no longer passive absorption—it’s active design. By funneling messy text through a progressive, six-agent workflow, I can capture nuance, build narratives, and deploy the same knowledge across formats without rework.
+            </p>
+            <p>
+                Whether I’m prepping a board update or coaching a client on prompt engineering, this system ensures nothing gets lost.
+                The architecture becomes the memory, and the memory becomes my advantage.
+            </p>
+
+            <div class="callout">
+                <div class="callout-title">Next Step</div>
+                <p>
+                    Start with one messy document this week. Run it through the Cleaner, the Chunker, and the Structurer. Once you feel the scaffolding click, the rest of the agents become an easy add-on.
+                </p>
+            </div>
+        </section>
+
+        <div class="closing">
+            <h2>Ready to Operationalize Your Learning?</h2>
+            <p>
+                I’m building a playbook of reusable agent workflows for teams who live in documentation, incident reviews, and product research. Want early access?
+            </p>
+            <a href="/contact.html">Request the Workflow Library →</a>
+        </div>
+    </div>
+</body>
+</html>
