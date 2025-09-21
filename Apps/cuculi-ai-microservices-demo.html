@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuculi AI Microservices Demo - Vector Recommendations Lab</title>
+    <meta name="description" content="Explore the Cuculi AI Microservices Demo to simulate user-to-event recommendations and event-to-user targeting with MongoDB vector search logic and AI-personalized messaging.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-button {
+            transition: all 0.2s ease;
+        }
+        .tab-button.active {
+            color: #2563eb;
+            border-bottom: 2px solid #2563eb;
+        }
+        .card-selectable {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .card-selectable:hover {
+            transform: translateY(-2px);
+        }
+        .card-selected {
+            border-color: #2563eb;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.15);
+        }
+        .hero-gradient {
+            background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+        }
+        .architecture-gradient {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(129, 140, 248, 0.15));
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <a href="/" class="text-xl font-bold text-gray-900">Chris Cruz</a>
+                    <span class="text-gray-400">/</span>
+                    <span class="text-gray-700">Cuculi AI Microservices Demo</span>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/" class="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
+                    <a href="/Apps/" class="text-gray-600 hover:text-gray-900 transition-colors">Apps</a>
+                    <a href="/blogs/" class="text-gray-600 hover:text-gray-900 transition-colors">Blog</a>
+                    <a href="/contact.html" class="text-gray-600 hover:text-gray-900 transition-colors">Contact</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <header class="hero-gradient text-white py-20">
+        <div class="max-w-5xl mx-auto px-6 text-center">
+            <p class="uppercase tracking-widest text-sm text-blue-100 mb-4">AI Microservices Lab</p>
+            <h1 class="text-4xl md:text-6xl font-extrabold mb-6">Vector Recommendations for Cuculi Social Dining</h1>
+            <p class="text-lg md:text-xl text-blue-100 max-w-3xl mx-auto mb-6">
+                Explore how Cuculi pairs diners with unforgettable events using MongoDB vector similarity and AI-personalized outreach. Toggle between the user-to-event recommender and the event-to-user targeting engine, then inspect the service architecture.
+            </p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm">
+                <a href="https://g.co/gemini/share/efcffb04c432" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 px-4 py-2 rounded-full hover:bg-white/25 transition">
+                    <span class="text-white font-medium">Gemini Concept Walkthrough</span>
+                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                </a>
+                <a href="https://claude.ai/public/artifacts/33df412f-8311-4c45-b675-0142f9ccc895" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-white/15 border border-white/30 px-4 py-2 rounded-full hover:bg-white/25 transition">
+                    <span class="text-white font-medium">Claude Narrative Prototype</span>
+                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                </a>
+                <a href="/blogs/cuculi-ai-microservices-blueprint.html" class="inline-flex items-center gap-2 bg-white text-indigo-600 px-4 py-2 rounded-full font-semibold hover:bg-indigo-50 transition">
+                    <span>Read the Architecture Brief</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="py-12">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-900">AI Services Control Center</h2>
+                    <p class="text-gray-600">Switch between the overview, user recommender, and event targeting flows. Toggle the architecture map to see how the services snap together.</p>
+                </div>
+                <button id="architectureToggle" class="inline-flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg shadow hover:bg-indigo-700 transition">
+                    <i data-lucide="brain" class="w-4 h-4"></i>
+                    <span id="architectureToggleText">Show Architecture</span>
+                </button>
+            </div>
+
+            <section id="architectureSection" class="architecture-gradient border border-indigo-100 rounded-2xl p-8 mb-8 hidden">
+                <div class="text-center mb-8">
+                    <h3 class="text-xl font-semibold text-indigo-800">Cuculi AI Microservices Architecture</h3>
+                    <p class="text-sm text-indigo-600 max-w-2xl mx-auto">API gateway orchestration, specialized microservices, and vector-first data storage combine to match diners with the perfect social experience.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow p-6 border border-indigo-100 text-center">
+                        <i data-lucide="bot" class="w-8 h-8 text-indigo-600 mx-auto mb-3"></i>
+                        <h4 class="font-semibold text-gray-900">Frontend Surfaces</h4>
+                        <p class="text-sm text-gray-600">Web and mobile clients orchestrate calls to the recommendation APIs while streaming personalization context.</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-6 border border-indigo-100 text-center">
+                        <i data-lucide="zap" class="w-8 h-8 text-indigo-600 mx-auto mb-3"></i>
+                        <h4 class="font-semibold text-gray-900">API Gateway</h4>
+                        <p class="text-sm text-gray-600">Handles auth, rate throttles, and funnels payloads into the dedicated user recommendation and event targeting services.</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-6 border border-indigo-100 text-center space-y-4">
+                        <div>
+                            <i data-lucide="target" class="w-6 h-6 text-green-600 mx-auto mb-2"></i>
+                            <p class="text-sm text-gray-700 font-medium">User Recommendation Service</p>
+                        </div>
+                        <div>
+                            <i data-lucide="users" class="w-6 h-6 text-orange-500 mx-auto mb-2"></i>
+                            <p class="text-sm text-gray-700 font-medium">Event Targeting Service</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
+                    <div class="bg-white rounded-xl shadow p-6 border border-indigo-100 text-center">
+                        <i data-lucide="database" class="w-8 h-8 text-indigo-600 mx-auto mb-3"></i>
+                        <h4 class="font-semibold text-gray-900">MongoDB Vector Layer</h4>
+                        <ul class="text-sm text-gray-600 space-y-1 mt-2">
+                            <li>• Personality embeddings for active diners</li>
+                            <li>• Event fingerprint vectors for every host</li>
+                            <li>• Cosine similarity search tuned for recall</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white rounded-xl shadow p-6 border border-indigo-100 text-center">
+                        <i data-lucide="activity" class="w-8 h-8 text-indigo-600 mx-auto mb-3"></i>
+                        <h4 class="font-semibold text-gray-900">OpenAI Enablement</h4>
+                        <ul class="text-sm text-gray-600 space-y-1 mt-2">
+                            <li>• Embedding generation and hydration</li>
+                            <li>• Contextual message writing for diners</li>
+                            <li>• Campaign optimization and testing</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="flex justify-center mt-8">
+                    <span class="inline-flex items-center gap-2 bg-indigo-100 text-indigo-700 text-sm font-semibold px-4 py-2 rounded-full">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                        Real-time vector similarity orchestration
+                    </span>
+                </div>
+            </section>
+
+            <section class="bg-white border border-gray-200 rounded-2xl shadow-sm">
+                <div class="flex flex-wrap">
+                    <button class="tab-button flex-1 px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-tab="overview">Overview</button>
+                    <button class="tab-button flex-1 px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-tab="user">User → Event Recommendations</button>
+                    <button class="tab-button flex-1 px-6 py-3 font-medium text-gray-600 hover:text-gray-900" data-tab="event">Event → User Targeting</button>
+                </div>
+                <div class="p-6 md:p-8">
+                    <div id="overviewTab" class="tab-panel space-y-10">
+                        <div class="text-center space-y-4">
+                            <h3 class="text-3xl font-bold text-gray-900">AI-Powered Recommendation Engine</h3>
+                            <p class="text-lg text-gray-600 max-w-3xl mx-auto">Two cooperating microservices keep Cuculi's community calendar vibrant. Feed in a diner profile to curate events with custom outreach, or start with a marquee event and assemble the perfect guest list.</p>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="rounded-2xl border border-green-200 bg-gradient-to-br from-green-50 to-emerald-100 p-6">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="bg-green-600 text-white rounded-lg p-2">
+                                        <i data-lucide="target" class="w-5 h-5"></i>
+                                    </div>
+                                    <h4 class="text-xl font-semibold text-green-900">User Recommendation Service</h4>
+                                </div>
+                                <p class="text-green-700 mb-4">Vector matching aligns diner personalities with open tables, while AI copywriters keep outreach human and inviting.</p>
+                                <ul class="text-sm text-green-700 space-y-2">
+                                    <li class="flex items-start gap-2"><i data-lucide="chevron-right" class="w-4 h-4 mt-0.5"></i><span>Cosine similarity across vectorized tastes and vibes</span></li>
+                                    <li class="flex items-start gap-2"><i data-lucide="chevron-right" class="w-4 h-4 mt-0.5"></i><span>OpenAI-tailored RSVP prompts based on context</span></li>
+                                    <li class="flex items-start gap-2"><i data-lucide="chevron-right" class="w-4 h-4 mt-0.5"></i><span>Compatibility scoring and reason tagging</span></li>
+                                </ul>
+                            </div>
+                            <div class="rounded-2xl border border-orange-200 bg-gradient-to-br from-orange-50 to-rose-100 p-6">
+                                <div class="flex items-center gap-3 mb-4">
+                                    <div class="bg-orange-600 text-white rounded-lg p-2">
+                                        <i data-lucide="users" class="w-5 h-5"></i>
+                                    </div>
+                                    <h4 class="text-xl font-semibold text-orange-900">Event Targeting Service</h4>
+                                </div>
+                                <p class="text-orange-700 mb-4">Reverse the lens: start with a headline event and summon the right mix of regulars, rising stars, and churn-risk diners.</p>
+                                <ul class="text-sm text-orange-700 space-y-2">
+                                    <li class="flex items-start gap-2"><i data-lucide="chevron-right" class="w-4 h-4 mt-0.5"></i><span>Dynamic segmentation across engagement tiers</span></li>
+                                    <li class="flex items-start gap-2"><i data-lucide="chevron-right" class="w-4 h-4 mt-0.5"></i><span>Retention-aware messaging for churn prevention</span></li>
+                                    <li class="flex items-start gap-2"><i data-lucide="chevron-right" class="w-4 h-4 mt-0.5"></i><span>Contextual targeting reasons surfaced for operators</span></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="rounded-2xl border border-blue-200 bg-blue-50 p-6">
+                            <h4 class="text-lg font-semibold text-blue-900 mb-4">How the Loop Runs</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm text-blue-800">
+                                <div class="text-center">
+                                    <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto mb-2 font-bold">1</div>
+                                    <p>Vector embeddings hydrate diner and event profiles.</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto mb-2 font-bold">2</div>
+                                    <p>MongoDB Atlas performs cosine similarity lookups.</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto mb-2 font-bold">3</div>
+                                    <p>OpenAI composes human-ready outreach copy.</p>
+                                </div>
+                                <div class="text-center">
+                                    <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center mx-auto mb-2 font-bold">4</div>
+                                    <p>Operators review ranked matches and launch campaigns.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="userRecommendationsTab" class="tab-panel hidden space-y-6">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                            <h3 class="text-2xl font-bold text-gray-900">Generate Event Recommendations for a Diner</h3>
+                            <p class="text-sm text-gray-500">API Reference: <code class="bg-gray-100 px-2 py-1 rounded">POST /api/users/{user_id}/recommendations</code></p>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-gray-900">Select a Diner</h4>
+                                <div id="userCards" class="space-y-3"></div>
+                                <button id="generateUserRecommendations" class="w-full bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 transition disabled:opacity-60 disabled:cursor-not-allowed" disabled>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <i data-lucide="target" class="w-4 h-4"></i>
+                                        <span>Generate Recommendations</span>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-gray-900">Personalized Event Lineup</h4>
+                                <div id="userRecommendationsPlaceholder" class="text-center text-gray-500 border border-dashed border-gray-300 rounded-xl py-10">
+                                    <i data-lucide="message-square" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
+                                    <p>Pick a diner and run the generator to see AI-curated invites.</p>
+                                </div>
+                                <div id="userLoader" class="hidden text-center py-10">
+                                    <div class="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full mx-auto animate-spin"></div>
+                                    <p class="mt-3 text-gray-600">Crunching compatibility scores…</p>
+                                </div>
+                                <div id="userRecommendationsList" class="space-y-4"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="eventTargetingTab" class="tab-panel hidden space-y-6">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                            <h3 class="text-2xl font-bold text-gray-900">Generate Target Guests for an Event</h3>
+                            <p class="text-sm text-gray-500">API Reference: <code class="bg-gray-100 px-2 py-1 rounded">POST /api/events/{event_id}/targeting</code></p>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-gray-900">Choose an Event</h4>
+                                <div id="eventCards" class="space-y-3"></div>
+                                <button id="generateEventTargeting" class="w-full bg-orange-600 text-white px-6 py-3 rounded-lg shadow hover:bg-orange-700 transition disabled:opacity-60 disabled:cursor-not-allowed" disabled>
+                                    <div class="flex items-center justify-center gap-2">
+                                        <i data-lucide="users" class="w-4 h-4"></i>
+                                        <span>Generate User Targeting</span>
+                                    </div>
+                                </button>
+                            </div>
+                            <div class="space-y-4">
+                                <h4 class="text-lg font-semibold text-gray-900">Audience Blueprint</h4>
+                                <div id="eventTargetingPlaceholder" class="text-center text-gray-500 border border-dashed border-gray-300 rounded-xl py-10">
+                                    <i data-lucide="users" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
+                                    <p>Select an event to assemble the perfect guest list.</p>
+                                </div>
+                                <div id="eventLoader" class="hidden text-center py-10">
+                                    <div class="w-10 h-10 border-4 border-orange-200 border-t-orange-600 rounded-full mx-auto animate-spin"></div>
+                                    <p class="mt-3 text-gray-600">Analyzing diner cohorts…</p>
+                                </div>
+                                <div id="eventTargetingList" class="space-y-4"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="mt-10 bg-gray-900 text-white rounded-2xl p-8 border border-gray-800">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">API Contracts</h4>
+                        <div class="bg-black/30 border border-white/10 rounded-xl p-5 text-sm space-y-4">
+                            <div>
+                                <p class="text-emerald-300 font-semibold mb-2">POST /api/users/{user_id}/recommendations</p>
+                                <pre class="bg-black/40 p-3 rounded text-emerald-100 overflow-auto text-xs">{
+  "limit": 10,
+  "filters": {
+    "neighborhood": "optional",
+    "price_range": "optional",
+    "cuisine_type": "optional"
+  }
+}</pre>
+                            </div>
+                            <div>
+                                <p class="text-emerald-300 font-semibold mb-2">Response</p>
+                                <pre class="bg-black/40 p-3 rounded text-emerald-100 overflow-auto text-xs">{
+  "recommendations": [
+    {
+      "event_id": "...",
+      "compatibility_score": 85,
+      "personalized_message": "...",
+      "reasons": ["..."]
+    }
+  ]
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h4 class="text-lg font-semibold mb-3">Campaign Targeting</h4>
+                        <div class="bg-black/30 border border-white/10 rounded-xl p-5 text-sm space-y-4">
+                            <div>
+                                <p class="text-orange-300 font-semibold mb-2">POST /api/events/{event_id}/targeting</p>
+                                <pre class="bg-black/40 p-3 rounded text-orange-100 overflow-auto text-xs">{
+  "limit": 20,
+  "segments": ["High-Value Active", "New Users"],
+  "min_compatibility": 70
+}</pre>
+                            </div>
+                            <div>
+                                <p class="text-orange-300 font-semibold mb-2">Response</p>
+                                <pre class="bg-black/40 p-3 rounded text-orange-100 overflow-auto text-xs">{
+  "target_users": [
+    {
+      "user_id": "...",
+      "compatibility_score": 92,
+      "personalized_message": "...",
+      "targeting_reasons": ["..."]
+    }
+  ]
+}</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 flex flex-wrap gap-4 items-center justify-between text-sm text-gray-300">
+                    <div class="flex flex-wrap gap-2 items-center">
+                        <span class="uppercase tracking-widest text-xs text-gray-500">Stack</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-full">MongoDB Vector Search</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-full">OpenAI GPT-4</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-full">Node.js</span>
+                        <span class="bg-white/10 px-3 py-1 rounded-full">React &amp; Native Clients</span>
+                    </div>
+                    <a href="/blogs/cuculi-ai-microservices-blueprint.html" class="inline-flex items-center gap-2 font-semibold text-indigo-300 hover:text-indigo-200">
+                        Dive into the full architecture brief
+                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </a>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer class="py-12">
+        <div class="max-w-4xl mx-auto px-6 text-center text-gray-500 text-sm">
+            Built as a flat HTML demo inspired by Cuculi's production AI services. Ready to plug into the real APIs when you are.
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            const state = {
+                activeTab: 'overview',
+                selectedUser: null,
+                selectedEvent: null,
+                isGenerating: false,
+                showArchitecture: false
+            };
+
+            const mockUsers = [
+                {
+                    user_id: '6888d185acb6ecf331584996',
+                    first_name: 'Sarah',
+                    last_name: 'Chen',
+                    email: 'sarah.chen@email.com',
+                    age: 28,
+                    occupation: 'Software Engineer',
+                    home_neighborhood: 'williamsburg',
+                    interests: ['Italian', 'Craft Beer', 'Networking'],
+                    total_events_attended: 12,
+                    avg_order_value: 75.5,
+                    segment: 'Regular User',
+                    advanced_segment: 'High-Value Active',
+                    clv_tier: 'CLV Tier 2 (Medium)',
+                    churn_risk: 'Low Risk - Active',
+                    personality_vector: [0.8, 0.6, 0.9, 0.4, 0.7]
+                },
+                {
+                    user_id: '6888d185acb6ecf331584997',
+                    first_name: 'Marcus',
+                    last_name: 'Rodriguez',
+                    email: 'marcus.r@email.com',
+                    age: 32,
+                    occupation: 'Marketing Manager',
+                    home_neighborhood: 'soho',
+                    interests: ['Wine', 'Fine Dining', 'Business Networking'],
+                    total_events_attended: 8,
+                    avg_order_value: 120.75,
+                    segment: 'Regular User',
+                    advanced_segment: 'Premium Socializer',
+                    clv_tier: 'CLV Tier 1 (High)',
+                    churn_risk: 'Medium Risk - Declining',
+                    personality_vector: [0.9, 0.8, 0.3, 0.9, 0.6]
+                },
+                {
+                    user_id: '6888d185acb6ecf331584998',
+                    first_name: 'Emma',
+                    last_name: 'Johnson',
+                    email: 'emma.j@email.com',
+                    age: 25,
+                    occupation: 'Graphic Designer',
+                    home_neighborhood: 'brooklyn-heights',
+                    interests: ['Vegetarian', 'Art', 'Casual Dining'],
+                    total_events_attended: 3,
+                    avg_order_value: 45.25,
+                    segment: 'New Users',
+                    advanced_segment: 'Budget-Conscious Explorer',
+                    clv_tier: 'CLV Tier 3 (Low)',
+                    churn_risk: 'High Risk - New',
+                    personality_vector: [0.5, 0.4, 0.8, 0.3, 0.9]
+                }
+            ];
+
+            const mockEvents = [
+                {
+                    event_id: '6637c9f8b31ba8b30e21f93c',
+                    title: 'Italian Wine & Pasta Night',
+                    description: 'Join us for an authentic Italian dining experience featuring regional wines paired with handmade pasta dishes.',
+                    neighborhood: 'little-italy',
+                    venue: "Nonna's Kitchen",
+                    base_price: 85,
+                    price_category: 'Premium',
+                    event_size_category: 'Medium',
+                    total_participants: 24,
+                    max_participants: 30,
+                    start_date: '2025-09-25T19:00:00.000Z',
+                    cuisine_type: 'Italian',
+                    dietary_options: ['Vegetarian', 'Gluten-Free'],
+                    atmosphere: 'Intimate',
+                    event_vector: [0.9, 0.7, 0.4, 0.8, 0.6]
+                },
+                {
+                    event_id: '6637c9f8b31ba8b30e21f93d',
+                    title: 'Rooftop Networking & Cocktails',
+                    description: 'Connect with fellow professionals while enjoying craft cocktails and small plates with Manhattan skyline views.',
+                    neighborhood: 'midtown',
+                    venue: 'Sky Lounge NYC',
+                    base_price: 65,
+                    price_category: 'Mid-Range',
+                    event_size_category: 'Large',
+                    total_participants: 42,
+                    max_participants: 60,
+                    start_date: '2025-09-28T18:30:00.000Z',
+                    cuisine_type: 'American',
+                    dietary_options: ['Vegetarian'],
+                    atmosphere: 'Professional',
+                    event_vector: [0.6, 0.9, 0.6, 0.7, 0.4]
+                },
+                {
+                    event_id: '6637c9f8b31ba8b30e21f93e',
+                    title: 'Vegan Cooking Workshop',
+                    description: 'Learn to create delicious plant-based dishes in this hands-on cooking class followed by a communal meal.',
+                    neighborhood: 'williamsburg',
+                    venue: 'Green Kitchen Studio',
+                    base_price: 45,
+                    price_category: 'Budget-Friendly',
+                    event_size_category: 'Small',
+                    total_participants: 8,
+                    max_participants: 16,
+                    start_date: '2025-09-30T15:00:00.000Z',
+                    cuisine_type: 'Vegan',
+                    dietary_options: ['Vegan', 'Gluten-Free'],
+                    atmosphere: 'Educational',
+                    event_vector: [0.7, 0.5, 0.9, 0.4, 0.8]
+                }
+            ];
+
+            const architectureToggle = document.getElementById('architectureToggle');
+            const architectureSection = document.getElementById('architectureSection');
+            const architectureToggleText = document.getElementById('architectureToggleText');
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const overviewTab = document.getElementById('overviewTab');
+            const userTab = document.getElementById('userRecommendationsTab');
+            const eventTab = document.getElementById('eventTargetingTab');
+
+            const userCards = document.getElementById('userCards');
+            const userButton = document.getElementById('generateUserRecommendations');
+            const userPlaceholder = document.getElementById('userRecommendationsPlaceholder');
+            const userLoader = document.getElementById('userLoader');
+            const userResults = document.getElementById('userRecommendationsList');
+
+            const eventCards = document.getElementById('eventCards');
+            const eventButton = document.getElementById('generateEventTargeting');
+            const eventPlaceholder = document.getElementById('eventTargetingPlaceholder');
+            const eventLoader = document.getElementById('eventLoader');
+            const eventResults = document.getElementById('eventTargetingList');
+
+            function calculateSimilarity(userVector, eventVector) {
+                const dotProduct = userVector.reduce((sum, value, index) => sum + value * eventVector[index], 0);
+                const userMagnitude = Math.sqrt(userVector.reduce((sum, value) => sum + value * value, 0));
+                const eventMagnitude = Math.sqrt(eventVector.reduce((sum, value) => sum + value * value, 0));
+                return dotProduct / (userMagnitude * eventMagnitude);
+            }
+
+            function setActiveTab(tab) {
+                state.activeTab = tab;
+                tabButtons.forEach((button) => {
+                    const target = button.getAttribute('data-tab');
+                    if (target === tab) {
+                        button.classList.add('active');
+                        button.classList.remove('text-gray-600');
+                    } else {
+                        button.classList.remove('active');
+                        button.classList.add('text-gray-600');
+                    }
+                });
+                overviewTab.classList.toggle('hidden', tab !== 'overview');
+                userTab.classList.toggle('hidden', tab !== 'user');
+                eventTab.classList.toggle('hidden', tab !== 'event');
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+
+            tabButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    setActiveTab(button.getAttribute('data-tab'));
+                });
+            });
+
+            architectureToggle.addEventListener('click', () => {
+                state.showArchitecture = !state.showArchitecture;
+                architectureSection.classList.toggle('hidden', !state.showArchitecture);
+                architectureToggleText.textContent = state.showArchitecture ? 'Hide Architecture' : 'Show Architecture';
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            });
+
+            function updateButtonContent(button, icon, text, loadingText, isLoading) {
+                if (!button) return;
+                if (isLoading) {
+                    button.innerHTML = `<div class="flex items-center justify-center gap-2"><div class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div><span>${loadingText}</span></div>`;
+                } else {
+                    button.innerHTML = `<div class="flex items-center justify-center gap-2"><i data-lucide="${icon}" class="w-4 h-4"></i><span>${text}</span></div>`;
+                    if (window.lucide) {
+                        setTimeout(() => lucide.createIcons(), 0);
+                    }
+                }
+            }
+
+            function setGenerating(value) {
+                state.isGenerating = value;
+                updateUserButtonState();
+                updateEventButtonState();
+            }
+
+            function updateUserButtonState() {
+                if (!userButton) return;
+                const disabled = state.isGenerating || !state.selectedUser;
+                userButton.disabled = disabled;
+                userButton.classList.toggle('opacity-60', disabled);
+                userButton.classList.toggle('cursor-not-allowed', disabled);
+                if (state.isGenerating && state.activeTab === 'user') {
+                    updateButtonContent(userButton, 'target', 'Generate Recommendations', 'Generating…', true);
+                } else {
+                    updateButtonContent(userButton, 'target', 'Generate Recommendations', 'Generating…', false);
+                }
+            }
+
+            function updateEventButtonState() {
+                if (!eventButton) return;
+                const disabled = state.isGenerating || !state.selectedEvent;
+                eventButton.disabled = disabled;
+                eventButton.classList.toggle('opacity-60', disabled);
+                eventButton.classList.toggle('cursor-not-allowed', disabled);
+                if (state.isGenerating && state.activeTab === 'event') {
+                    updateButtonContent(eventButton, 'users', 'Generate User Targeting', 'Generating…', true);
+                } else {
+                    updateButtonContent(eventButton, 'users', 'Generate User Targeting', 'Generating…', false);
+                }
+            }
+
+            function buildUserCards() {
+                userCards.innerHTML = '';
+                mockUsers.forEach((user) => {
+                    const card = document.createElement('div');
+                    card.className = 'card-selectable border border-gray-200 bg-white rounded-xl p-4 shadow-sm';
+                    if (state.selectedUser && state.selectedUser.user_id === user.user_id) {
+                        card.classList.add('card-selected');
+                        card.classList.add('bg-blue-50');
+                    }
+                    card.innerHTML = `
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h5 class="text-lg font-semibold text-gray-900">${user.first_name} ${user.last_name}</h5>
+                                <p class="text-sm text-gray-500">${user.occupation} • ${user.home_neighborhood}</p>
+                                <div class="flex flex-wrap gap-2 mt-3 text-xs">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-purple-100 text-purple-700">${user.advanced_segment}</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-green-100 text-green-700">${user.clv_tier}</span>
+                                </div>
+                            </div>
+                            <div class="text-right text-sm text-gray-500">
+                                <p class="font-medium text-gray-900">${user.total_events_attended} events</p>
+                                <p>$${user.avg_order_value.toFixed(2)} avg spend</p>
+                            </div>
+                        </div>
+                        <div class="mt-3 text-sm text-gray-600">
+                            <strong>Interests:</strong> ${user.interests.join(', ')}
+                        </div>
+                    `;
+                    card.addEventListener('click', () => {
+                        state.selectedUser = user;
+                        buildUserCards();
+                        updateUserButtonState();
+                    });
+                    userCards.appendChild(card);
+                });
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+
+            function buildEventCards() {
+                eventCards.innerHTML = '';
+                mockEvents.forEach((event) => {
+                    const card = document.createElement('div');
+                    card.className = 'card-selectable border border-gray-200 bg-white rounded-xl p-4 shadow-sm';
+                    if (state.selectedEvent && state.selectedEvent.event_id === event.event_id) {
+                        card.classList.add('card-selected');
+                        card.classList.add('bg-orange-50');
+                    }
+                    card.innerHTML = `
+                        <div class="space-y-3">
+                            <div>
+                                <h5 class="text-lg font-semibold text-gray-900">${event.title}</h5>
+                                <p class="text-sm text-gray-500">${event.venue} • ${event.neighborhood}</p>
+                            </div>
+                            <div class="flex items-center justify-between text-xs">
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-700">${event.price_category}</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-purple-100 text-purple-700">${event.event_size_category}</span>
+                                </div>
+                                <div class="text-right text-sm text-gray-500">
+                                    <p class="font-medium text-gray-900">$${event.base_price}</p>
+                                    <p>${event.total_participants} attending</p>
+                                </div>
+                            </div>
+                            <p class="text-sm text-gray-600">${event.description}</p>
+                            <div class="flex flex-wrap gap-4 text-xs text-gray-500">
+                                <span><strong>Cuisine:</strong> ${event.cuisine_type}</span>
+                                <span><strong>Atmosphere:</strong> ${event.atmosphere}</span>
+                                <span><strong>Dietary:</strong> ${event.dietary_options.join(', ')}</span>
+                            </div>
+                        </div>
+                    `;
+                    card.addEventListener('click', () => {
+                        state.selectedEvent = event;
+                        buildEventCards();
+                        updateEventButtonState();
+                    });
+                    eventCards.appendChild(card);
+                });
+            }
+
+            function generateUserRecommendations(user) {
+                return mockEvents.map((event) => {
+                    const similarity = calculateSimilarity(user.personality_vector, event.event_vector);
+                    const compatibility = Math.round(similarity * 100);
+                    let message = `Hi ${user.first_name}! `;
+                    const interestMatch = user.interests.find((interest) => event.title.toLowerCase().includes(interest.toLowerCase()));
+                    if (interestMatch) {
+                        message += `We noticed you love ${interestMatch} – `;
+                    }
+                    if (event.neighborhood === user.home_neighborhood) {
+                        message += `there's an amazing event happening right in your neighborhood! `;
+                    }
+                    message += `"${event.title}" on ${new Date(event.start_date).toLocaleDateString()} at ${event.venue}. `;
+                    if (user.segment === 'New Users') {
+                        message += `It's perfect for meeting like-minded people in a welcoming environment. `;
+                    } else if (user.advanced_segment.includes('Premium')) {
+                        message += `This premium experience aligns perfectly with your refined taste. `;
+                    }
+                    message += `${compatibility}% match based on your preferences!`;
+
+                    const reasons = [
+                        interestMatch ? `Matches your interest in ${interestMatch}` : null,
+                        event.neighborhood === user.home_neighborhood ? 'In your neighborhood' : null,
+                        event.price_category === 'Budget-Friendly' && user.clv_tier.includes('Low') ? 'Budget-friendly option' : null,
+                        event.atmosphere === 'Professional' && user.occupation ? 'Great for networking' : null
+                    ].filter(Boolean);
+
+                    return {
+                        ...event,
+                        compatibility_score: compatibility,
+                        personalized_message: message,
+                        reasons
+                    };
+                }).sort((a, b) => b.compatibility_score - a.compatibility_score);
+            }
+
+            function generateEventTargeting(event) {
+                return mockUsers.map((user) => {
+                    const similarity = calculateSimilarity(user.personality_vector, event.event_vector);
+                    const compatibility = Math.round(similarity * 100);
+                    let message = `Hey ${user.first_name}! `;
+                    const interestMatch = user.interests.find((interest) => event.title.toLowerCase().includes(interest.toLowerCase()));
+                    if (interestMatch) {
+                        message += `We know you're passionate about ${interestMatch}, `;
+                    }
+                    if (event.neighborhood === user.home_neighborhood) {
+                        message += `and this event is happening right in ${user.home_neighborhood}! `;
+                    } else {
+                        message += `and we found something special for you. `;
+                    }
+                    message += `"${event.title}" on ${new Date(event.start_date).toLocaleDateString()} `;
+                    if (user.churn_risk.includes('High')) {
+                        message += `- we'd love to see you back at Cuculi! `;
+                    } else if (user.advanced_segment.includes('Active')) {
+                        message += `- another great experience awaits! `;
+                    }
+                    if (user.total_events_attended < 5) {
+                        message += `Perfect for expanding your social circle. `;
+                    }
+                    message += `${compatibility}% compatibility based on your profile!`;
+
+                    const targeting_reasons = [
+                        interestMatch ? `Interest match: ${interestMatch}` : null,
+                        event.neighborhood === user.home_neighborhood ? 'Lives in event neighborhood' : null,
+                        user.churn_risk.includes('High') ? 'Re-engagement opportunity' : null,
+                        user.total_events_attended < 5 ? 'New user activation' : null,
+                        user.advanced_segment.includes('Active') ? 'Highly engaged user' : null
+                    ].filter(Boolean);
+
+                    return {
+                        ...user,
+                        compatibility_score: compatibility,
+                        personalized_message: message,
+                        targeting_reasons
+                    };
+                }).sort((a, b) => b.compatibility_score - a.compatibility_score);
+            }
+
+            async function handleGenerateUserRecommendations() {
+                if (!state.selectedUser || state.isGenerating) return;
+                setGenerating(true);
+                userPlaceholder.classList.add('hidden');
+                userResults.innerHTML = '';
+                userLoader.classList.remove('hidden');
+                updateButtonContent(userButton, 'target', 'Generate Recommendations', 'Generating…', true);
+                await new Promise((resolve) => setTimeout(resolve, 1200));
+                const recommendations = generateUserRecommendations(state.selectedUser);
+                userLoader.classList.add('hidden');
+                if (!recommendations.length) {
+                    userPlaceholder.classList.remove('hidden');
+                    userPlaceholder.innerHTML = '<p>No recommendations available. Adjust filters and try again.</p>';
+                } else {
+                    renderUserRecommendations(recommendations);
+                }
+                setGenerating(false);
+            }
+
+            async function handleGenerateEventTargeting() {
+                if (!state.selectedEvent || state.isGenerating) return;
+                setGenerating(true);
+                eventPlaceholder.classList.add('hidden');
+                eventResults.innerHTML = '';
+                eventLoader.classList.remove('hidden');
+                updateButtonContent(eventButton, 'users', 'Generate User Targeting', 'Generating…', true);
+                await new Promise((resolve) => setTimeout(resolve, 1200));
+                const targets = generateEventTargeting(state.selectedEvent);
+                eventLoader.classList.add('hidden');
+                if (!targets.length) {
+                    eventPlaceholder.classList.remove('hidden');
+                    eventPlaceholder.innerHTML = '<p>No matching diners were found. Try broadening the audience.</p>';
+                } else {
+                    renderEventTargeting(targets);
+                }
+                setGenerating(false);
+            }
+
+            function renderUserRecommendations(recommendations) {
+                userResults.innerHTML = '';
+                recommendations.forEach((rec) => {
+                    const card = document.createElement('div');
+                    card.className = 'border border-gray-200 rounded-xl bg-white shadow-sm p-5 space-y-4';
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h5 class="text-lg font-semibold text-gray-900">${rec.title}</h5>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-semibold">${rec.compatibility_score}% match</span>
+                                </div>
+                                <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                                    <span class="inline-flex items-center gap-1"><i data-lucide="map-pin" class="w-4 h-4"></i>${rec.venue} • ${rec.neighborhood}</span>
+                                    <span class="inline-flex items-center gap-1"><i data-lucide="dollar-sign" class="w-4 h-4"></i>$${rec.base_price}</span>
+                                    <span class="inline-flex items-center gap-1"><i data-lucide="users" class="w-4 h-4"></i>${rec.total_participants}/${rec.max_participants}</span>
+                                </div>
+                                <p class="mt-3 text-sm text-gray-600">${rec.description}</p>
+                            </div>
+                        </div>
+                        <div class="bg-green-50 border border-green-200 rounded-xl p-4">
+                            <h6 class="text-sm font-semibold text-green-800 mb-2">🤖 AI Message</h6>
+                            <p class="text-sm text-green-700 italic">"${rec.personalized_message}"</p>
+                        </div>
+                        <div>
+                            <h6 class="text-sm font-semibold text-gray-800 mb-2">Match Reasons</h6>
+                            <div class="flex flex-wrap gap-2 text-xs">
+                                ${rec.reasons.map((reason) => `<span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700">${reason}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                    userResults.appendChild(card);
+                });
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+
+            function renderEventTargeting(targets) {
+                eventResults.innerHTML = '';
+                targets.forEach((target) => {
+                    const card = document.createElement('div');
+                    card.className = 'border border-gray-200 rounded-xl bg-white shadow-sm p-5 space-y-4';
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between gap-3">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <h5 class="text-lg font-semibold text-gray-900">${target.first_name} ${target.last_name}</h5>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-semibold">${target.compatibility_score}% match</span>
+                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ${target.churn_risk.includes('High') ? 'bg-red-100 text-red-700' : target.churn_risk.includes('Medium') ? 'bg-yellow-100 text-yellow-700' : 'bg-emerald-100 text-emerald-700'}">${target.churn_risk}</span>
+                                </div>
+                                <div class="flex flex-wrap gap-4 text-sm text-gray-500">
+                                    <span>${target.occupation}</span>
+                                    <span>${target.home_neighborhood}</span>
+                                    <span>${target.total_events_attended} events attended</span>
+                                    <span>$${target.avg_order_value.toFixed(2)} avg spend</span>
+                                </div>
+                                <p class="mt-3 text-sm text-gray-600"><strong>Interests:</strong> ${target.interests.join(', ')}</p>
+                            </div>
+                        </div>
+                        <div class="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                            <h6 class="text-sm font-semibold text-orange-800 mb-2">🤖 AI Message</h6>
+                            <p class="text-sm text-orange-700 italic">"${target.personalized_message}"</p>
+                        </div>
+                        <div>
+                            <h6 class="text-sm font-semibold text-gray-800 mb-2">Targeting Reasons</h6>
+                            <div class="flex flex-wrap gap-2 text-xs">
+                                ${target.targeting_reasons.map((reason) => `<span class="inline-flex items-center px-2 py-1 rounded-full bg-gray-100 text-gray-700">${reason}</span>`).join('')}
+                            </div>
+                        </div>
+                    `;
+                    eventResults.appendChild(card);
+                });
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+
+            userButton.addEventListener('click', handleGenerateUserRecommendations);
+            eventButton.addEventListener('click', handleGenerateEventTargeting);
+
+            buildUserCards();
+            buildEventCards();
+            setActiveTab('overview');
+            updateUserButtonState();
+            updateEventButtonState();
+        });
+    </script>
+</body>
+</html>

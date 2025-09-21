@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cuculi AI Microservices Blueprint | ChrisCruz.ai</title>
+    <meta name="description" content="Deep dive into the Cuculi AI microservices architecture that powers vector-based dining recommendations, user targeting, and AI-personalized campaigns.">
+    <meta name="keywords" content="Cuculi AI, microservices, MongoDB vector search, OpenAI personalization, recommendation engine, event targeting">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="Cuculi AI Microservices Blueprint">
+    <meta property="og:description" content="Vector-first architecture, AI messaging, and operational loops behind Cuculi's social dining recommendations.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://chriscruz.ai/blogs/cuculi-ai-microservices-blueprint.html">
+    <meta property="og:image" content="https://chriscruz.ai/images/cuculi-ai-microservices.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Cuculi AI Microservices Blueprint">
+    <meta name="twitter:description" content="How Cuculi blends MongoDB vector search with OpenAI messaging for a magical dining marketplace.">
+    <meta name="article:published_time" content="2025-10-05T00:00:00Z">
+    <meta name="article:author" content="Christopher Manuel Cruz-Guzman">
+    <meta name="article:section" content="AI Integration">
+    <meta name="article:tag" content="Cuculi AI, Vector Search, OpenAI, Microservices Architecture">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #050505;
+            color: #f5f5f5;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #6366f1, #c026d3, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .blog-content {
+            background-color: rgba(15, 23, 42, 0.55);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 25px 60px rgba(76, 29, 149, 0.25);
+        }
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(236, 72, 153, 0.18));
+            border: 1px solid rgba(129, 140, 248, 0.35);
+        }
+        .callout-box {
+            background: rgba(15, 118, 110, 0.15);
+            border: 1px solid rgba(45, 212, 191, 0.4);
+        }
+        .checklist-bullet {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.4), rgba(244, 114, 182, 0.4));
+            border-radius: 9999px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black/40 backdrop-blur-xl border-b border-white/10">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="../brand-hub.html" class="text-xl font-bold tracking-tighter">ChrisCruz<span class="text-indigo-400">.ai</span></a>
+            <nav class="hidden md:flex space-x-8 text-sm">
+                <a href="../brand-hub.html" class="hover:text-indigo-400 transition-colors">Empire</a>
+                <a href="../manifesto.html" class="hover:text-indigo-400 transition-colors">Manifesto</a>
+                <a href="../brand-story.html" class="hover:text-indigo-400 transition-colors">Story</a>
+                <a href="../Apps/" class="hover:text-indigo-400 transition-colors">Apps</a>
+                <a href="../contact.html" class="hover:text-indigo-400 transition-colors">Contact</a>
+            </nav>
+            <span class="text-xs font-semibold py-1 px-3 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">AI Integration</span>
+        </div>
+    </header>
+
+    <main class="pt-24">
+        <section class="py-20 px-6">
+            <div class="container mx-auto max-w-4xl text-center">
+                <div class="flex items-center justify-center space-x-3 text-sm text-gray-400 mb-4">
+                    <span class="bg-indigo-600/20 border border-indigo-500/40 text-indigo-200 px-3 py-1 rounded-full">Vector Systems</span>
+                    <span>October 5, 2025</span>
+                    <span>•</span>
+                    <span>8 min read</span>
+                </div>
+                <h1 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight leading-tight mb-6">
+                    Cuculi AI Microservices <span class="gradient-text">Blueprint</span>
+                </h1>
+                <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                    We took Cuculi's social dining marketplace from idea to a vector-powered, AI-personalized experience. This blueprint captures the microservices, data flows, and operator rituals that make every invitation feel hand-crafted.
+                </p>
+                <div class="flex items-center justify-center gap-4 mt-10 flex-wrap text-sm">
+                    <a href="/Apps/cuculi-ai-microservices-demo.html" class="inline-flex items-center gap-2 bg-white text-slate-900 px-4 py-2 rounded-full font-semibold hover:bg-slate-100 transition">
+                        Launch the Flat Demo
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75L6.75 17.25M17.25 6.75H9.75M17.25 6.75V14.25" />
+                        </svg>
+                    </a>
+                    <a href="https://g.co/gemini/share/efcffb04c432" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-indigo-500/20 text-indigo-200 px-4 py-2 rounded-full border border-indigo-400/40 hover:bg-indigo-500/30 transition">
+                        Gemini Scenario Walkthrough
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5H21m0 0v7.5m0-7.5L12 13.5M10.5 6H6.75A2.25 2.25 0 004.5 8.25v9A2.25 2.25 0 006.75 19.5h9a2.25 2.25 0 002.25-2.25V13.5" />
+                        </svg>
+                    </a>
+                    <a href="https://claude.ai/public/artifacts/33df412f-8311-4c45-b675-0142f9ccc895" target="_blank" rel="noopener" class="inline-flex items-center gap-2 bg-rose-500/20 text-rose-200 px-4 py-2 rounded-full border border-rose-400/40 hover:bg-rose-500/30 transition">
+                        Claude Narrative Prototype
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-16 px-6">
+            <div class="container mx-auto max-w-4xl">
+                <article class="blog-content rounded-3xl p-8 md:p-12 space-y-12">
+                    <p class="text-lg text-gray-200 leading-relaxed">
+                        Operators asked for two things: fill every community table with the right mix of guests, and keep the outreach personal even at scale. We answered with a pair of cooperating microservices riding on MongoDB vector search, orchestrated through an API gateway, and fueled by OpenAI prompts fine-tuned for Cuculi's tone.
+                    </p>
+
+                    <div class="highlight-box rounded-2xl p-6 text-gray-100">
+                        <h2 class="text-2xl font-semibold mb-4 text-indigo-100">Blueprint Snapshot</h2>
+                        <ul class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-200">
+                            <li class="flex gap-3"><span class="checklist-bullet">1</span><div><strong>Vectorized Personas:</strong> embeddings crafted from dining history, spend, neighborhoods, and social goals.</div></li>
+                            <li class="flex gap-3"><span class="checklist-bullet">2</span><div><strong>Event Fingerprints:</strong> cuisine, vibe, atmosphere, and operations metadata collapsed into a cosine-friendly vector.</div></li>
+                            <li class="flex gap-3"><span class="checklist-bullet">3</span><div><strong>API Gateway:</strong> shared envelope for auth, throttling, and fan-out to the recommendation microservices.</div></li>
+                            <li class="flex gap-3"><span class="checklist-bullet">4</span><div><strong>AI Copy Studio:</strong> LLM prompts tuned for warmth, urgency, and segmentation-specific CTAs.</div></li>
+                        </ul>
+                    </div>
+
+                    <section class="space-y-6">
+                        <h2 class="text-3xl font-bold text-indigo-200">Vector-First Architecture</h2>
+                        <p class="text-gray-300 leading-relaxed">
+                            Every interaction starts with vectors. MongoDB Atlas hosts twin collections: <em>diner_embeddings</em> and <em>experience_embeddings</em>. Each record stores the dense vector, JSON metadata, and lightweight counters we use for scoring. Incoming payloads hydrate a <strong>VectorContext</strong> object that pushes through the API gateway and into the respective microservice.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="callout-box rounded-2xl p-6 text-teal-100">
+                                <h3 class="text-lg font-semibold mb-2 text-teal-50">Diner Context Pack</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Embedding derived from recency, spend, and interest taxonomy</li>
+                                    <li>• Journey markers: onboarding stage, churn risk, loyalty tier</li>
+                                    <li>• Social graph hints: crew affiliation, preferred group size</li>
+                                </ul>
+                            </div>
+                            <div class="callout-box rounded-2xl p-6 text-teal-100">
+                                <h3 class="text-lg font-semibold mb-2 text-teal-50">Experience Context Pack</h3>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Event fingerprint embedding with cuisine, vibe, price, host style</li>
+                                    <li>• Capacity &amp; pacing metadata for operations</li>
+                                    <li>• Sponsorship slots, upsell hooks, and dietary coverage</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="space-y-6">
+                        <h2 class="text-3xl font-bold text-indigo-200">Service Responsibilities</h2>
+                        <p class="text-gray-300 leading-relaxed">
+                            The engine is split into two services that share a vector utility library but maintain independent scaling policies. The <strong>User Recommendation Service</strong> focuses on active diners and high-value repeat guests. The <strong>Event Targeting Service</strong> scouts for audience pockets across the entire member base, prioritizing churn recovery and segment coverage.
+                        </p>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <div class="rounded-2xl border border-indigo-500/40 bg-indigo-500/10 p-6">
+                                <h3 class="text-xl font-semibold text-indigo-100 mb-3">User → Event Flow</h3>
+                                <ul class="space-y-3 text-sm text-indigo-50">
+                                    <li>1. Pull diner vector and nearest event candidates via Atlas vector search.</li>
+                                    <li>2. Score compatibility with contextual boosts (neighborhood, spend alignment).</li>
+                                    <li>3. Draft AI messages tuned to the diner's tone profile and risk status.</li>
+                                    <li>4. Return ranked list with justification tags for operator review.</li>
+                                </ul>
+                            </div>
+                            <div class="rounded-2xl border border-rose-500/40 bg-rose-500/10 p-6">
+                                <h3 class="text-xl font-semibold text-rose-100 mb-3">Event → User Flow</h3>
+                                <ul class="space-y-3 text-sm text-rose-50">
+                                    <li>1. Fetch event fingerprint and target compatibility threshold.</li>
+                                    <li>2. Query diners by cosine similarity with segment and churn filters.</li>
+                                    <li>3. Tailor AI outreach for re-engagement, upsell, or newcomer welcome.</li>
+                                    <li>4. Produce send-ready messaging with reasons to believe.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="space-y-6">
+                        <h2 class="text-3xl font-bold text-indigo-200">Lifecycle of a Recommendation</h2>
+                        <ol class="list-decimal list-inside space-y-4 text-gray-200 text-base leading-relaxed">
+                            <li><strong>Capture:</strong> Product surfaces send a request with the diner or event context, including lightweight analytics on recent sessions.</li>
+                            <li><strong>Vector Search:</strong> Atlas executes a cosine search with dynamic filters, capping latency under 120ms per query.</li>
+                            <li><strong>Scoring:</strong> We blend the similarity score with engagement heuristics and operator business rules.</li>
+                            <li><strong>Messaging:</strong> OpenAI generates two variants — conversational SMS and polished email — both logged for experimentation.</li>
+                            <li><strong>Feedback:</strong> RSVP actions stream back into the embeddings pipeline to keep future recommendations fresh.</li>
+                        </ol>
+                    </section>
+
+                    <section class="space-y-6">
+                        <h2 class="text-3xl font-bold text-indigo-200">Experiments and Instrumentation</h2>
+                        <p class="text-gray-300 leading-relaxed">
+                            Every campaign run becomes a data point. We log <em>match_reason</em> and <em>targeting_reason</em> tags for post-mortem analysis, track CTA performance by message variant, and pipe anonymized telemetry into Looker dashboards. The Gemini and Claude prototypes linked above shaped our copy strategy before writing a line of production code.
+                        </p>
+                        <ul class="space-y-3 text-sm text-gray-300">
+                            <li>• <strong>Campaign Studio:</strong> Operators preview AI copy, tweak CTA emphasis, and lock sends.</li>
+                            <li>• <strong>Feedback Loop:</strong> RSVP outcomes stream back into the vector store nightly.</li>
+                            <li>• <strong>Guardrails:</strong> Claude narratives stress-test tone, while Gemini scenarios validate event coverage.</li>
+                        </ul>
+                    </section>
+
+                    <section class="space-y-6">
+                        <h2 class="text-3xl font-bold text-indigo-200">30-Day Launch Playbook</h2>
+                        <p class="text-gray-300 leading-relaxed">
+                            Want to ship this stack in a month? Here's the sprint breakdown we used.
+                        </p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm text-gray-200">
+                            <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+                                <h3 class="font-semibold text-indigo-100 mb-3">Week 1-2: Foundations</h3>
+                                <ul class="space-y-2">
+                                    <li>• Instrument profile data exports and define embedding schema.</li>
+                                    <li>• Stand up API gateway with mocked service responses.</li>
+                                    <li>• Build prompt library for outreach templates.</li>
+                                </ul>
+                            </div>
+                            <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+                                <h3 class="font-semibold text-indigo-100 mb-3">Week 3: Vertical Slice</h3>
+                                <ul class="space-y-2">
+                                    <li>• Implement vector search queries and scoring formulas.</li>
+                                    <li>• Connect OpenAI for personalized copywriting.</li>
+                                    <li>• Ship the operator dashboard (see the flat demo above).</li>
+                                </ul>
+                            </div>
+                            <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+                                <h3 class="font-semibold text-indigo-100 mb-3">Week 4: Launch &amp; Iterate</h3>
+                                <ul class="space-y-2">
+                                    <li>• Run closed beta with high-touch hosts and concierge team.</li>
+                                    <li>• Measure conversion lift, calibrate message tone, and expand cohorts.</li>
+                                    <li>• Activate retention automations using targeting reasons.</li>
+                                </ul>
+                            </div>
+                            <div class="rounded-2xl border border-white/10 bg-white/5 p-5">
+                                <h3 class="font-semibold text-indigo-100 mb-3">Evergreen</h3>
+                                <ul class="space-y-2">
+                                    <li>• Quarterly prompt refresh with Claude narrative probes.</li>
+                                    <li>• Embed health dashboards into ops rituals.</li>
+                                    <li>• Refresh embeddings monthly with the latest RSVP signals.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div class="rounded-2xl bg-indigo-500/10 border border-indigo-400/30 p-6 text-center text-gray-200">
+                        <p class="text-base md:text-lg leading-relaxed">
+                            Ready to give the architecture a spin? Start with the <a href="/Apps/cuculi-ai-microservices-demo.html" class="text-indigo-200 underline decoration-dotted underline-offset-4">Cuculi AI Microservices Demo</a>, then layer in live data sources when you're ready to launch. Every component here was shaped by real operator interviews and real diner feedback.
+                        </p>
+                    </div>
+                </article>
+
+                <div class="mt-12 text-sm text-gray-500 text-center">
+                    © 2025 Christopher Manuel Cruz-Guzman. All rights reserved.
+                </div>
+            </div>
+        </section>
+    </main>
+</body>
+</html>
