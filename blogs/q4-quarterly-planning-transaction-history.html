@@ -165,9 +165,10 @@
             <div class="medium-prose blog-surface rounded-3xl p-10 space-y-12">
                 <div class="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em] text-slate-500">
                     <a href="#executive-summary" class="toc-link">Executive Summary</a>
+                    <a href="#strategic-narrative" class="toc-link">Strategic Narrative</a>
                     <a href="#key-insights" class="toc-link">Key Insights</a>
-                    <a href="#detailed-breakdown" class="toc-link">Detailed Breakdown</a>
-                    <a href="#implementation-guide" class="toc-link">Implementation Guide</a>
+                    <a href="#quarterly-artifacts" class="toc-link">Quarterly Planning Artifacts</a>
+                    <a href="#source-references" class="toc-link">Source References</a>
                     <a href="#reflection-questions" class="toc-link">Reflection Questions</a>
                     <a href="#atomic-notes" class="toc-link">Atomic Notes</a>
                 </div>
@@ -181,6 +182,144 @@
                         <li>BLR2 shoulders a <span class="font-semibold">300-point</span> quarter anchored in CDP decommissioning, AWS migration, and merchant tagging backfills—all under a critical timeline.</li>
                         <li>Cross-team friction points—API gateway decisions, alert fatigue, photon upgrades, and consumer onboarding—demand explicit owners and fast decisions.</li>
                     </ul>
+                </div>
+
+                <div class="space-y-8" id="strategic-narrative">
+                    <h2 class="text-3xl font-bold text-slate-900">Strategic Narrative</h2>
+                    <p class="text-slate-700">Q4 Planning: Transaction History V4 &amp; CDP Migration. As we enter the quarter, the focus sharpens on two mission-critical goals: maturing Transaction History V4 into a production-grade API and exiting the CDP data center to move fully onto AWS-native pipelines. These initiatives elevate performance, resilience, and customer trust—and the CDP exit needs to be complete by year end to protect the broader data center decommission.</p>
+
+                    <div class="grid gap-6 md:grid-cols-2">
+                        <div class="highlight-box rounded-2xl p-6 space-y-3">
+                            <h3 class="text-xl font-semibold text-slate-900">North Star</h3>
+                            <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                                <li>Mature THV4 into a scalable, production-ready API.</li>
+                                <li>Exit CDP and migrate to AWS-native data pipelines.</li>
+                                <li>Push reconciliation accuracy to 99%+.</li>
+                                <li>Enhance observability, performance, and consumer onboarding.</li>
+                            </ul>
+                            <p class="text-sm text-slate-600">These outcomes guide every epic, sprint, and decision this quarter.</p>
+                        </div>
+
+                        <div class="challenge-card rounded-2xl p-6 space-y-3">
+                            <h3 class="text-xl font-semibold text-slate-900">Current State &amp; Gaps</h3>
+                            <ul class="list-disc pl-5 space-y-2 text-slate-800">
+                                <li><span class="font-semibold">Reconciliation:</span> Accuracy sits at ~92% and demands tighter loops with SOR and CDP partners.</li>
+                                <li><span class="font-semibold">THV4:</span> Core development continues, but bugs, pagination tuning, and resilience improvements must be burned down quickly.</li>
+                                <li><span class="font-semibold">CDP Exit:</span> Migrating Spark jobs, redesigning ingestion flows, and enriching schemas are critical paths.</li>
+                                <li><span class="font-semibold">Operations:</span> Alert fatigue, delayed API gateway decisions, and photon upgrade dependencies threaten stability.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="framework-box rounded-2xl p-6 space-y-4">
+                        <h3 class="text-xl font-semibold text-slate-900">Strategic Priorities</h3>
+                        <div class="grid gap-6 md:grid-cols-2">
+                            <div class="space-y-2">
+                                <h4 class="text-base font-semibold text-emerald-700">Wil2 (~350 SP capacity)</h4>
+                                <ul class="list-disc pl-5 space-y-1 text-slate-700">
+                                    <li>THV4 development and bug fixes.</li>
+                                    <li>QA and performance testing at scale.</li>
+                                    <li>Consumer integration and onboarding.</li>
+                                    <li>Data quality reconciliation (92% → 99%).</li>
+                                    <li>Production readiness through FMEA, runbooks, and observability.</li>
+                                </ul>
+                            </div>
+                            <div class="space-y-2">
+                                <h4 class="text-base font-semibold text-emerald-700">BLR2 (~318 SP capacity)</h4>
+                                <ul class="list-disc pl-5 space-y-1 text-slate-700">
+                                    <li>CDP data center exit—Spark jobs and ingestion redesign.</li>
+                                    <li>Merchant tagging historical load.</li>
+                                    <li>Account breach validation and fixes.</li>
+                                    <li>Dynamic orchestration and schema enrichment.</li>
+                                    <li>Consumer testing and ingestion defect resolution.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="example-box rounded-2xl p-6 space-y-3">
+                        <h3 class="text-xl font-semibold text-slate-900">Roadmap</h3>
+                        <ol class="list-decimal pl-5 space-y-2 text-slate-700">
+                            <li><span class="font-semibold">Stabilize the Core</span> — API gateway decision, photon upgrades, recon war room.</li>
+                            <li><span class="font-semibold">Build &amp; Test</span> — Burn down backlog, BlazeMeter testing at 2× TPS, FMEA scenarios.</li>
+                            <li><span class="font-semibold">Harden &amp; Document</span> — Runbooks, calibrated alerts, onboarding materials, AI support agent prototype.</li>
+                            <li><span class="font-semibold">Migrate &amp; Monitor</span> — AWS cutovers, merchant tagging loads, reconciliation dashboards.</li>
+                        </ol>
+                        <p class="text-sm text-slate-600">This sequencing ensures stability before scale, documentation before migration.</p>
+                    </div>
+
+                    <div class="challenge-card rounded-2xl p-6 space-y-3">
+                        <h3 class="text-xl font-semibold text-slate-900">Risks &amp; Dependencies</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-rose-800">
+                            <li>API gateway decision remains open and risks downstream timelines.</li>
+                            <li>Alert noise continues to mask genuine issues.</li>
+                            <li>Consumer migrations may slip if onboarding isn’t accelerated.</li>
+                            <li>AWS/CDP migration capacity is constrained.</li>
+                            <li>Tight year-end deadlines require ruthless prioritization.</li>
+                        </ul>
+                    </div>
+
+                    <div class="highlight-box rounded-2xl p-6 space-y-3">
+                        <h3 class="text-xl font-semibold text-slate-900">Success Metrics</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                            <li>Reconciliation: ≥ 99% accuracy on a daily basis.</li>
+                            <li>Performance: THV4 parity or better with THV3 latency at 3–5k TPS.</li>
+                            <li>Adoption: All major consumers onboarded to ETD V3 and TH V3/V4.</li>
+                            <li>Infrastructure: Full CDP decommission achieved by year-end.</li>
+                        </ul>
+                    </div>
+
+                    <div class="framework-box rounded-2xl p-6 space-y-3">
+                        <h3 class="text-xl font-semibold text-slate-900">Call to Action</h3>
+                        <p class="text-slate-700">The most urgent unlocks are resolving the API gateway decision and closing reconciliation gaps. Clearing those blockers unlocks AWS migration velocity, consumer adoption, and production-ready scale. Q4 is our opportunity to prove that Transaction History can deliver not just functionality, but excellence.</p>
+                    </div>
+
+                    <div class="example-box rounded-2xl p-6 space-y-3" id="cdp-exit">
+                        <h3 class="text-xl font-semibold text-slate-900">CDP Exit: Necessity and Implementation</h3>
+                        <p class="text-slate-700">The CDP exit is a <strong>mandatory decommissioning</strong>, not just a migration. As Kiran underscored, <em>“AWS understood? Let’s understand one thing, right? We are actually migrating from existing CDP cluster to this new cluster... Don’t call it as AWS migration. Call it CDP DC. Exit, that’s the initiative driving this.”</em> The timeline is critical—teams cite a March 2026 target for shutting down the existing cluster, but the hard stop is completing the exit by year end so the data center shutdown remains on track.</p>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                            <li><span class="font-semibold">SOD ingestion redesign (~100 SP):</span> The heaviest lift, pairing analysis and architecture to migrate Spark jobs and establish AWS-native patterns.</li>
+                            <li><span class="font-semibold">Cascade and MMS follow-ons (~25 SP each):</span> Lean on SOD learnings to accelerate subsequent migrations while keeping March 2026 decommission dates safe.</li>
+                            <li><span class="font-semibold">AWS-native operations:</span> Move Spark jobs, monitoring, and dashboards off CDP to AWS infrastructure, ensuring full CDP decommission and knowledge transfer across ingestion and API teams.</li>
+                        </ul>
+                        <p class="text-sm text-slate-600">The initial SOD push alone consumes roughly a third of BLR2’s capacity, reinforcing the need for Delaware backfill and ruthless prioritization.</p>
+                    </div>
+
+                    <div class="framework-box rounded-2xl p-6 space-y-3" id="thv4-testing">
+                        <h3 class="text-xl font-semibold text-slate-900">TH V4 API Testing and Production Readiness</h3>
+                        <p class="text-slate-700">Performance testing must match or exceed THV3 benchmarks, targeting 3,000 TPS while stress testing toward 5,000 TPS where tooling allows. BlazeMeter ceilings around 3K TPS demand creative load strategies and documentation of observed limits.</p>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                            <li>FMEA coverage includes every integration point and validates system behavior under stress.</li>
+                            <li>Consumer integration testing addresses defects, supports new versions, and ensures pagination tuning doesn’t regress downstream journeys.</li>
+                            <li>Production readiness spans observability, monitoring, alerting, Deadpool integration, onboarding documentation, and runbooks.</li>
+                            <li>API gateway alignment remains the key dependency—<em>“Envoy is our the first selection... if we don’t have a solution for Envoy we have a second solution, API Gateway.”</em></li>
+                        </ul>
+                    </div>
+
+                    <div class="highlight-box rounded-2xl p-6 space-y-3" id="data-recon">
+                        <h3 class="text-xl font-semibold text-slate-900">Data Recon and Reconciliation</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                            <li>Lift reconciliation accuracy from 92% to 99% by gathering SOR/ODS data and tightening daily metrics.</li>
+                            <li>Coordinate with SOR teams on field discrepancies and validate API fixes—90% of requested changes are already complete after analyzing four to five months of data and isolating two remaining defects.</li>
+                            <li>Stand up dedicated epics for event reconciliation and ingestion latency dashboards.</li>
+                            <li>Maintain Q3 commitments to data recon regardless of API surface—it’s a platform obligation, not an API-specific task.</li>
+                        </ul>
+                    </div>
+
+                    <div class="example-box rounded-2xl p-6 space-y-3" id="monitoring-observability">
+                        <h3 class="text-xl font-semibold text-slate-900">Monitoring and Observability</h3>
+                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
+                            <li>Two of three critical dashboards remain outstanding; migrate legacy monitoring from CDP to AWS alongside the platform move.</li>
+                            <li>Track event reconciliation and ingestion latency as first-class dashboards.</li>
+                            <li>Drive enrichment latency from two minutes toward one minute after card swipe.</li>
+                            <li>Engage the platform observability team to integrate frameworks and reduce Splunk-driven alert fatigue.</li>
+                        </ul>
+                    </div>
+
+                    <div class="challenge-card rounded-2xl p-6 space-y-3" id="capacity-challenges">
+                        <h3 class="text-xl font-semibold text-slate-900">Capacity Challenges</h3>
+                        <p class="text-rose-800">Resource constraints remain the underlying friction. As one lead put it, <em>“I feel like we’re in a good place, planning wise... but the CDP exit has to be complete by the end of the year, and it takes so much work— we can’t focus on that and also run friends and family testing.”</em> Another reiterated that <em>“BLR2 [is] so over capacity... everything’s so important that I genuinely don’t know what we would de-prioritize.”</em> BLR2 is already stretched, with every epic mission-critical and little room for stretch goals without additional MSA support.</p>
+                    </div>
                 </div>
 
                 <div class="space-y-6" id="key-insights">
