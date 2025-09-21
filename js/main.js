@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize all functionality
     initNavigation();
     initSmoothScrolling();
+    initWritingLinks();
     initScrollEffects();
     initFormHandling();
     initAnimations();
@@ -49,23 +50,39 @@ function initNavigation() {
 // Smooth scrolling for anchor links
 function initSmoothScrolling() {
     const links = document.querySelectorAll('a[href^="#"]');
-    
+
     links.forEach(link => {
         link.addEventListener('click', function(e) {
             e.preventDefault();
-            
+
             const targetId = this.getAttribute('href');
             const targetElement = document.querySelector(targetId);
-            
+
             if (targetElement) {
                 const offsetTop = targetElement.offsetTop - 80; // Account for fixed navbar
-                
+
                 window.scrollTo({
                     top: offsetTop,
                     behavior: 'smooth'
                 });
             }
         });
+    });
+}
+
+// Ensure writing section links open in new tabs
+function initWritingLinks() {
+    const writingLinks = document.querySelectorAll('#writing a');
+
+    writingLinks.forEach(link => {
+        link.setAttribute('target', '_blank');
+
+        if (link.relList) {
+            link.relList.add('noopener');
+        } else {
+            const existingRel = link.getAttribute('rel');
+            link.setAttribute('rel', existingRel ? `${existingRel} noopener`.trim() : 'noopener');
+        }
     });
 }
 
