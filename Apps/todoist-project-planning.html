@@ -101,6 +101,72 @@
         #natural-planning-section .chevron-icon { transition: transform 0.3s ease; }
         #natural-planning-section.collapsed .chevron-icon { transform: rotate(-90deg); }
         .settings-tab-content.hidden { display: none; }
+
+        /* Dark mode adjustments for Project Planner */
+        .dark #project-planner-section {
+            color: #f9fafb;
+        }
+        .dark #project-planner-section .text-gray-300 {
+            color: #d1d5db !important;
+        }
+        .dark #project-planner-section .text-gray-400 {
+            color: #9ca3af !important;
+        }
+        .dark #project-planner-section .text-gray-500,
+        .dark #project-planner-section .text-gray-600,
+        .dark #project-planner-section .text-gray-700 {
+            color: #d1d5db !important;
+        }
+        .dark #project-planner-section .text-gray-800,
+        .dark #project-planner-section .text-gray-900 {
+            color: #f9fafb !important;
+        }
+        .dark #project-planner-section .bg-white {
+            background-color: #1f2937 !important;
+        }
+        .dark #project-planner-section .bg-gray-50,
+        .dark #project-planner-section .bg-gray-100,
+        .dark #project-planner-section .bg-gray-200 {
+            background-color: #374151 !important;
+        }
+        .dark #project-planner-section .bg-gray-300 {
+            background-color: #4b5563 !important;
+        }
+        .dark #project-planner-section .bg-slate-50 {
+            background-color: #1e293b !important;
+        }
+        .dark #project-planner-section .border-gray-200,
+        .dark #project-planner-section .border-gray-300 {
+            border-color: #4b5563 !important;
+        }
+        .dark #project-planner-section .view-toggle {
+            background-color: #1f2937 !important;
+            border-color: #4b5563 !important;
+        }
+        .dark #project-planner-section .view-toggle button {
+            color: #d1d5db;
+        }
+        .dark #project-planner-section .view-toggle button.active {
+            color: #ffffff;
+        }
+        .dark #project-planner-section input,
+        .dark #project-planner-section textarea,
+        .dark #project-planner-section select {
+            background-color: #111827;
+            color: #f9fafb;
+            border-color: #4b5563;
+        }
+        .dark #project-planner-section ::placeholder {
+            color: #9ca3af;
+        }
+        .dark #project-planner-section .modal-header {
+            background-color: #111827;
+            border-color: #374151;
+        }
+        .dark #project-planner-section .markdown-view {
+            background-color: #1f2937;
+            border-color: #374151;
+        }
     
     </style>
 </head>
@@ -298,10 +364,10 @@
         </div>
 
         <div id="matrix-view" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-red-600 mb-3 border-b-2 border-red-200 pb-2">Urgent & Important (Do)</h3><div id="quadrant-do" class="eisenhower-quadrant p-2 space-y-3 bg-red-50 rounded-md" data-quadrant="do"></div></div>
-            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-blue-600 mb-3 border-b-2 border-blue-200 pb-2">Important & Not Urgent (Schedule)</h3><div id="quadrant-schedule" class="eisenhower-quadrant p-2 space-y-3 bg-blue-50 rounded-md" data-quadrant="schedule"></div></div>
-            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-yellow-600 mb-3 border-b-2 border-yellow-200 pb-2">Urgent & Not Important (Delegate)</h3><div id="quadrant-delegate" class="eisenhower-quadrant p-2 space-y-3 bg-yellow-50 rounded-md" data-quadrant="delegate"></div></div>
-            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-green-600 mb-3 border-b-2 border-green-200 pb-2">Not Urgent & Not Important (Eliminate)</h3><div id="quadrant-eliminate" class="eisenhower-quadrant p-2 space-y-3 bg-green-50 rounded-md" data-quadrant="eliminate"></div></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-red-600 mb-3 border-b-2 border-red-200 pb-2">Urgent & Important (Do)</h3><div id="quadrant-do" class="eisenhower-quadrant p-2 space-y-3 bg-red-50 dark:bg-red-900/30 rounded-md" data-quadrant="do"></div></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-blue-600 mb-3 border-b-2 border-blue-200 pb-2">Important & Not Urgent (Schedule)</h3><div id="quadrant-schedule" class="eisenhower-quadrant p-2 space-y-3 bg-blue-50 dark:bg-blue-900/30 rounded-md" data-quadrant="schedule"></div></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-yellow-600 mb-3 border-b-2 border-yellow-200 pb-2">Urgent & Not Important (Delegate)</h3><div id="quadrant-delegate" class="eisenhower-quadrant p-2 space-y-3 bg-yellow-50 dark:bg-yellow-900/30 rounded-md" data-quadrant="delegate"></div></div>
+            <div class="bg-white rounded-xl shadow-md p-4"><h3 class="text-lg font-bold text-green-600 mb-3 border-b-2 border-green-200 pb-2">Not Urgent & Not Important (Eliminate)</h3><div id="quadrant-eliminate" class="eisenhower-quadrant p-2 space-y-3 bg-green-50 dark:bg-green-900/30 rounded-md" data-quadrant="eliminate"></div></div>
         </div>
 
         <div id="table-view" class="hidden bg-white rounded-xl shadow-md p-6 overflow-x-auto">
