@@ -97,6 +97,47 @@
             text-decoration: none;
             color: #2563eb;
         }
+        .message-engine-section {
+            background: radial-gradient(circle at top left, rgba(79, 70, 229, 0.25), transparent 55%),
+                        radial-gradient(circle at bottom right, rgba(236, 72, 153, 0.2), transparent 60%),
+                        #111827;
+            border-radius: 2rem;
+            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);
+            color: #f3f4f6;
+        }
+        .message-engine-section .section-inner {
+            max-width: 64rem;
+            margin: 0 auto;
+            padding: 3rem 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .message-engine-section .section-inner {
+                padding: 4rem 3rem;
+            }
+        }
+        .message-engine-section .gradient-text {
+            background: linear-gradient(to right, #a78bfa, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .message-engine-section .glassmorphism {
+            background: rgba(31, 41, 55, 0.6);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .message-engine-section .diagram-bg {
+            background-color: #1f2937;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+        }
+        .message-engine-section .code-block {
+            background-color: #1e293b;
+            border-left: 4px solid #f472b6;
+        }
+        .message-engine-section .pill {
+            background-color: #374151;
+            border: 1px solid #4b5563;
+            color: #f9fafb;
+        }
     </style>
 </head>
 <body class="antialiased">
@@ -597,6 +638,166 @@ Goal: Drive the next RSVP within 24 hours.</code></pre>
                 <p>
                     The outcome is an elegant, modular notification stack that feels personal, scales responsibly, and keeps cross-functional teams in sync.
                 </p>
+            </section>
+
+            <section class="mt-16" id="message-engine-deep-dive">
+                <div class="message-engine-section">
+                    <div class="section-inner">
+                        <header class="text-center mb-12 md:mb-20">
+                            <h2 class="text-4xl md:text-5xl font-bold tracking-tight mb-3">
+                                <span class="gradient-text">Cuculi Message Engine</span>
+                            </h2>
+                            <p class="text-lg md:text-xl text-gray-300 max-w-3xl mx-auto">
+                                A deep dive into the AI microservice that crafts personalized, psychologically-driven nudges.
+                            </p>
+                        </header>
+
+                        <div>
+                            <h3 class="text-3xl font-bold text-center mb-8">The AI Content Generation Workflow</h3>
+
+                            <div class="diagram-bg rounded-2xl shadow-2xl p-6 md:p-10 border border-gray-700 mb-12 max-w-5xl mx-auto">
+                                <svg viewBox="0 0 1000 450" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto">
+                                     <defs>
+                                        <linearGradient id="arrowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" style="stop-color:#A78BFA;stop-opacity:1" />
+                                            <stop offset="100%" style="stop-color:#F472B6;stop-opacity:1" />
+                                        </linearGradient>
+                                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="0" refY="3.5" orient="auto">
+                                            <polygon points="0 0, 10 3.5, 0 7" fill="url(#arrowGradient)" />
+                                        </marker>
+                                    </defs>
+                                    
+                                    <text x="500" y="30" font-family="Inter, sans-serif" font-size="22" font-weight="bold" fill="#F3F4F6" text-anchor="middle">Retrieval-Augmented Generation (RAG) Process</text>
+
+                                    <g id="inputs">
+                                        <text x="150" y="80" font-size="16" font-weight="bold" fill="#D1D5DB" text-anchor="middle">1. Contextual Data Sources</text>
+                                        
+                                        <rect x="50" y="120" width="200" height="60" rx="10" fill="#374151" stroke="#4B5563"/>
+                                        <text x="150" y="145" font-size="14" font-weight="bold" fill="#A78BFA" text-anchor="middle">User Profile</text>
+                                        <text x="150" y="165" font-size="12" fill="#D1D5DB" text-anchor="middle">Interests, Behavior, Name</text>
+
+                                        <rect x="50" y="220" width="200" height="60" rx="10" fill="#374151" stroke="#4B5563"/>
+                                        <text x="150" y="245" font-size="14" font-weight="bold" fill="#A78BFA" text-anchor="middle">Event Details</text>
+                                        <text x="150" y="265" font-size="12" fill="#D1D5DB" text-anchor="middle">Cuisine, Venue, Scarcity</text>
+
+                                        <rect x="50" y="320" width="200" height="60" rx="10" fill="#374151" stroke="#4B5563"/>
+                                        <text x="150" y="345" font-size="14" font-weight="bold" fill="#A78BFA" text-anchor="middle">Social Proof</text>
+                                        <text x="150" y="365" font-size="12" fill="#D1D5DB" text-anchor="middle">Friends interested, RSVPs</text>
+                                    </g>
+                                    
+                                    <path d="M 260 150 H 340" stroke="url(#arrowGradient)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                    <path d="M 260 250 H 340" stroke="url(#arrowGradient)" stroke-width="2" marker-end="url(#arrowhead)"/>
+                                    <path d="M 260 350 H 340" stroke="url(#arrowGradient)" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                                    <g id="prompt-assembly">
+                                        <rect x="350" y="180" width="220" height="140" rx="15" fill="#1E293B" stroke="#4B5563"/>
+                                        <text x="460" y="210" font-size="16" font-weight="bold" fill="#D1D5DB" text-anchor="middle">2. Dynamic Prompt</text>
+                                        <text x="460" y="230" font-size="16" font-weight="bold" fill="#D1D5DB" text-anchor="middle">Assembly</text>
+                                        <text x="460" y="260" font-size="12" fill="#D1D5DB" text-anchor="middle">Context is structured into a</text>
+                                        <text x="460" y="275" font-size="12" fill="#D1D5DB" text-anchor="middle">detailed prompt for the AI.</text>
+                                    </g>
+
+                                    <path d="M 580 250 H 660" stroke="url(#arrowGradient)" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                                    <g id="openai">
+                                        <rect x="670" y="200" width="200" height="100" rx="10" fill="#374151" stroke="#4B5563"/>
+                                        <text x="770" y="235" font-size="16" font-weight="bold" fill="#F472B6" text-anchor="middle">3. AI Generation</text>
+                                        <text x="770" y="265" font-size="14" fill="#D1D5DB" text-anchor="middle">OpenAI GPT-4o</text>
+                                    </g>
+
+                                    <path d="M 770 310 V 360" stroke="url(#arrowGradient)" stroke-width="2" marker-end="url(#arrowhead)"/>
+
+                                    <g id="output">
+                                        <text x="770" y="390" font-size="16" font-weight="bold" fill="#D1D5DB" text-anchor="middle">4. Personalized Nudge</text>
+                                        <text x="770" y="415" font-style="italic" font-size="12" fill="#F472B6" text-anchor="middle">"Hey Alex! 2 spots left at Pasta Palace."</text>
+                                        <text x="770" y="430" font-style="italic" font-size="12" fill="#F472B6" text-anchor="middle">"Your friend Chloe is interested too!"</text>
+                                    </g>
+                                </svg>
+                            </div>
+
+                            <div class="max-w-4xl mx-auto space-y-8">
+                                <div class="glassmorphism rounded-xl p-6 md:p-8">
+                                    <h4 class="text-2xl font-bold mb-4">The Brain of the Operation</h4>
+                                    <p class="text-gray-300">
+                                        If a user is eligible for a nudge, the Message Engine microservice—an AWS Lambda function—is invoked. Its sole purpose is to craft the perfect message to inspire action. This isn't just a simple template; it's a sophisticated process that combines data retrieval, prompt engineering, and cutting-edge AI to generate content that feels personal and relevant.
+                                    </p>
+                                </div>
+                                
+                                <div class="glassmorphism rounded-xl p-6 md:p-8">
+                                    <h4 class="text-xl font-bold mb-4">Core Logic: From Data to Delivery</h4>
+                                    <p class="text-gray-300 mb-4">The engine's logic follows a three-step process:</p>
+                                    <ol class="list-decimal list-inside space-y-3 text-gray-300">
+                                        <li><strong>Retrieval-Augmented Generation (RAG):</strong> The first step is to gather all available context. The engine queries our MongoDB database to retrieve a rich dataset, including the user's name and known interests, specific event details like cuisine and remaining spots, and powerful social proof data, such as which of their friends are also interested in the event.</li>
+                                        <li><strong>Dynamic Prompt Engineering:</strong> This raw data is then dynamically assembled into a highly-detailed, goal-oriented prompt. We don't just ask the AI to "write a message." We provide it with the full context, the psychological principle we want to use (e.g., scarcity, social proof), and a clear objective (e.g., "Create FOMO and encourage an immediate RSVP").</li>
+                                        <li><strong>AI-Powered Generation:</strong> The final, context-rich prompt is sent to OpenAI's GPT-4o model. The AI uses the provided information to generate a creative, human-like, and persuasive message that is tailored specifically to that user and that moment.</li>
+                                    </ol>
+                                </div>
+
+                                <div class="glassmorphism rounded-xl p-6 md:p-8">
+                                    <h4 class="text-xl font-bold mb-4">Code in Action</h4>
+                                    <p class="text-gray-300 mb-6">Below is a conceptual Python snippet illustrating how the Message Engine assembles its prompt and calls the OpenAI API.</p>
+                                    <div class="code-block rounded-lg p-4 overflow-x-auto">
+                                        <pre><code class="language-python text-sm text-gray-200"># Conceptual Python for the Message Engine
+import openai
+
+async def generate_nudge_message(user, event, nudge_type, friends_interested):
+    # 1. Assemble context via RAG (Data is pre-fetched and passed in)
+    context = {
+        "user_name": user.get("name"),
+        "event_title": event.get("title"),
+        "spots_left": event.get("total_participants") - len(event.get("rsvps")),
+        "friend_names": ", ".join(friends_interested)
+    }
+
+    # 2. Dynamically build the prompt based on nudge type
+    prompt = f"""
+    You are an expert copywriter for a social dining app. Your goal is to convert interest into RSVPs.
+    
+    Nudge Type: "{nudge_type}"
+    User Name: {context['user_name']}
+    Event: {context['event_title']}
+    
+    Context:
+    - There are only {context['spots_left']} spots remaining for this event.
+    - The user's friend(s) {context['friend_names']} are also interested.
+
+    Task:
+    Write a short, exciting, and friendly push notification (max 160 characters).
+    Use the provided context to create a sense of urgency and social proof.
+    Address the user by their first name.
+    """
+
+    # 3. Call OpenAI API
+    response = await openai.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    return response.choices[0].message.content.strip()
+</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="glassmorphism rounded-xl p-6 md:p-8">
+                                    <h4 class="text-xl font-bold mb-4">Sample Generated Nudges</h4>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <span class="text-sm font-semibold pill px-3 py-1 rounded-full">Scarcity Alert</span>
+                                            <p class="mt-2 pl-2 border-l-2 border-pink-400 text-gray-300 italic">"Hey Maya! Heads up - only 3 spots left for the Taco Tuesday Fiesta at La Condesa. Grab yours before they're gone!"</p>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm font-semibold pill px-3 py-1 rounded-full">Social Proof</span>
+                                            <p class="mt-2 pl-2 border-l-2 border-pink-400 text-gray-300 italic">"Looks like you and Ben have great taste! You both checked out the Sushi Making Class. Why not go together?"</p>
+                                        </div>
+                                        <div>
+                                            <span class="text-sm font-semibold pill px-3 py-1 rounded-full">New Match</span>
+                                            <p class="mt-2 pl-2 border-l-2 border-pink-400 text-gray-300 italic">"Hi Sam! Based on your love for Italian, we think you'll be a big fan of the new Gnocchi Night at Giovanni's. Check it out!"</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <section class="mt-12" id="roadmap">
