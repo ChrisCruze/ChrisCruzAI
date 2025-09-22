@@ -1,797 +1,276 @@
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Q4 Planning Playbook for Transaction History & CDP Migration | ChrisCruz.ai</title>
-    <meta name="description" content="Executive briefing on Q4 priorities for the Transaction History API and BLR2 data platforms. Includes strategic focus, execution framework, implementation guide, risks, and atomic notes for leaders."/>
-    <meta name="keywords" content="Q4 planning, Transaction History API, CDP migration, data reconciliation, THV4, AWS migration, performance optimization"/>
-    <meta name="author" content="Christopher Manuel Cruz-Guzman"/>
-    <meta property="og:title" content="Q4 Planning Playbook for Transaction History & CDP Migration"/>
-    <meta property="og:description" content="Executive summary, key insights, and implementation guardrails for Wil2 and BLR2 teams heading into Q4."/>
-    <meta property="og:type" content="article"/>
-    <meta property="og:url" content="https://chriscruz.ai/blogs/q4-quarterly-planning-transaction-history.html"/>
-    <meta property="og:image" content="https://chriscruz.ai/images/q4-planning.jpg"/>
-    <meta name="twitter:card" content="summary_large_image"/>
-    <meta name="twitter:title" content="Q4 Planning Playbook for Transaction History & CDP Migration"/>
-    <meta name="twitter:description" content="Strategic focus, delivery framework, and implementation guardrails for Wil2 and BLR2 teams heading into Q4."/>
-    <meta name="article:published_time" content="2025-09-20T00:00:00Z"/>
-    <meta name="article:author" content="Christopher Manuel Cruz-Guzman"/>
-    <meta name="article:section" content="Quarterly Planning"/>
-    <meta name="article:tag" content="Q4 planning, Transaction History, AWS migration, data reconciliation"/>
-
+    <title>Q4 2025 Engineering Plan Infographic (Enhanced)</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: #0f172a;
+            background-color: #f0f2f5; /* A slightly cooler gray */
         }
-        .medium-prose {
-            max-width: 820px;
-            margin: 0 auto;
-            line-height: 1.7;
+        .card {
+            background-color: white;
+            border-radius: 0.75rem; /* rounded-xl */
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid #e5e7eb;
         }
-        .blog-surface {
-            background: rgba(255, 255, 255, 0.96);
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 25px 60px rgba(15, 23, 42, 0.12);
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
-        .gradient-text {
-            background: linear-gradient(120deg, #38bdf8, #6366f1, #f97316);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .icon-bg {
+            width: 56px;
+            height: 56px;
+            border-radius: 0.5rem; /* rounded-lg */
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-        .toc-link {
-            color: #475569;
+        /* Timeline styles */
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2.5rem;
+            padding-left: 2.5rem;
         }
-        .toc-link:hover {
-            color: #0ea5e9;
+        .timeline-item:last-child {
+            padding-bottom: 0;
         }
-        .highlight-box {
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.18), rgba(56, 189, 248, 0.14));
-            border: 1px solid rgba(99, 102, 241, 0.35);
-            box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.1);
-        }
-        .challenge-card {
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.16), rgba(244, 114, 182, 0.12));
-            border: 1px solid rgba(248, 113, 113, 0.4);
-        }
-        .framework-box {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.14), rgba(45, 212, 191, 0.1));
-            border: 1px solid rgba(16, 185, 129, 0.35);
-        }
-        .example-box {
-            background: linear-gradient(135deg, rgba(59, 130, 246, 0.16), rgba(147, 51, 234, 0.12));
-            border: 1px solid rgba(59, 130, 246, 0.35);
-        }
-        .reflection-box {
-            background: linear-gradient(135deg, rgba(251, 191, 36, 0.16), rgba(234, 179, 8, 0.12));
-            border: 1px solid rgba(250, 204, 21, 0.35);
-        }
-        .section-divider {
-            height: 1px;
-            background: linear-gradient(90deg, rgba(148, 163, 184, 0), rgba(148, 163, 184, 0.45), rgba(148, 163, 184, 0));
-        }
-        .quote {
-            border-left: 4px solid #38bdf8;
-            padding-left: 1.25rem;
-            color: #1e293b;
-        }
-        .tag-pill {
-            background: rgba(148, 163, 184, 0.18);
-            border: 1px solid rgba(148, 163, 184, 0.4);
+        .timeline-marker {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 24px;
+            height: 24px;
             border-radius: 9999px;
-            padding: 0.35rem 0.9rem;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translateX(-50%);
+            left: 1px;
         }
-        a.inline-link {
-            color: #0284c7;
+        .timeline-line {
+            position: absolute;
+            left: 0;
+            top: 24px;
+            bottom: 0;
+            width: 2px;
+            background-color: #e5e7eb; /* gray-200 */
         }
-        a.inline-link:hover {
-            color: #0f172a;
+         .timeline-item:last-child .timeline-line {
+            display: none;
         }
-        .highlight-box,
-        .challenge-card,
-        .framework-box,
-        .example-box,
-        .reflection-box {
-            color: #0f172a;
-        }
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .data-table th {
-            background-color: #f1f5f9;
-            color: #0f172a;
-            font-weight: 600;
-            padding: 0.75rem;
-            border-bottom: 1px solid #e2e8f0;
-            text-align: left;
-        }
-        .data-table td {
-            padding: 0.75rem;
-            border-bottom: 1px solid #e2e8f0;
-            color: #1f2937;
-            vertical-align: top;
-        }
-        .data-table tr:nth-child(even) {
-            background-color: #f8fafc;
-        }
-        .table-caption {
-            color: #475569;
-            font-size: 0.875rem;
-            margin-top: 0.5rem;
-        }
+
     </style>
 </head>
-<body class="antialiased">
-    <header class="fixed top-0 left-0 right-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
-        <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
-            <a href="../brand-hub.html" class="text-xl font-bold tracking-tight text-slate-900">ChrisCruz<span class="text-sky-600">.ai</span></a>
-            <nav class="hidden md:flex space-x-8 text-sm text-slate-600">
-                <a href="../brand-hub.html" class="hover:text-sky-600 transition">Empire</a>
-                <a href="../projects" class="hover:text-sky-600 transition">Projects</a>
-                <a href="../manifesto.html" class="hover:text-sky-600 transition">Manifesto</a>
-                <a href="../blogs/index.html" class="hover:text-sky-600 transition">All Writing</a>
-            </nav>
-            <span class="tag-pill text-slate-700">Quarterly Planning</span>
+<body class="p-4 md:p-8">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-gray-900">Q4-25 Engineering Plan</h1>
+            <p class="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">An interactive overview of key initiatives for WIL2 & BLR2 teams, totaling <span class="font-bold text-indigo-600">854 points</span>.</p>
+        </header>
+
+        <!-- Key Metrics & Timeline -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
+            <!-- Team Workload Distribution -->
+            <div class="lg:col-span-2 card p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Workload Distribution</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <div class="md:col-span-1 h-48 w-48 mx-auto md:h-full md:w-full">
+                        <canvas id="workloadChart"></canvas>
+                    </div>
+                    <div class="md:col-span-2 flex flex-col justify-center space-y-4 text-center md:text-left">
+                        <div class="p-4 bg-gray-50 rounded-lg">
+                            <p class="text-gray-500 text-sm">Total Story Points</p>
+                            <p class="text-3xl font-bold text-indigo-600">854</p>
+                        </div>
+                         <div class="flex space-x-4">
+                            <div class="w-1/2 p-4 bg-sky-50 rounded-lg">
+                                <p class="text-gray-500 text-sm">WIL2 Team</p>
+                                <p class="text-2xl font-bold text-sky-600">350 pts</p>
+                            </div>
+                            <div class="w-1/2 p-4 bg-emerald-50 rounded-lg">
+                                <p class="text-gray-500 text-sm">BLR2 Team</p>
+                                <p class="text-2xl font-bold text-emerald-600">504 pts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Q4 Timeline -->
+            <div class="card p-6">
+                 <h3 class="text-xl font-bold text-gray-800 mb-6">Q4 Critical Path</h3>
+                 <div class="relative">
+                    <div class="timeline-line"></div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-gray-200">
+                             <svg class="w-4 h-4 text-gray-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"></path></svg>
+                        </div>
+                        <p class="font-semibold text-gray-700">October 1st</p>
+                        <p class="text-sm text-gray-500">Q4 Kickoff</p>
+                    </div>
+                     <div class="timeline-item">
+                        <div class="timeline-marker bg-red-500 text-white">
+                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M8.257 3.099a.75.75 0 01.942-.533l7.25 4.5a.75.75 0 010 .968l-7.25 4.5a.75.75 0 01-.942-.533V3.099z" clip-rule="evenodd"></path><path d="M2.25 3.75A1.5 1.5 0 013.75 2.25h1.5a.75.75 0 010 1.5h-1.5a.75.75 0 00-.75.75v10.5a.75.75 0 00.75.75h1.5a.75.75 0 010 1.5h-1.5A1.5 1.5 0 012.25 16.5V3.75z"></path></svg>
+                        </div>
+                        <p class="font-semibold text-gray-700">Mid-December</p>
+                        <p class="text-sm text-gray-500">CDP Data Center Exit Migration Freeze</p>
+                    </div>
+                     <div class="timeline-item">
+                        <div class="timeline-marker bg-red-500 text-white">
+                           <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z"></path><path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z"></path></svg>
+                        </div>
+                        <p class="font-semibold text-gray-700">End of December</p>
+                        <p class="text-sm text-gray-500">Merchant Tagging Historical Load Deadline</p>
+                    </div>
+                 </div>
+            </div>
         </div>
-    </header>
-
-    <main class="pt-24 pb-24">
-        <section class="px-6 py-16">
-            <div class="medium-prose text-center">
-                <p class="text-slate-500 text-sm uppercase tracking-[0.35em] mb-4">Q4 Planning Memo</p>
-                <h1 class="text-4xl md:text-5xl font-extrabold tracking-tight text-slate-900 mb-6">Q4 Planning Playbook for <span class="gradient-text">Transaction History &amp; CDP Migration</span></h1>
-                <p class="text-lg text-slate-600 mb-8">A unified narrative for Wil2 and BLR2 leaders to execute on data reconciliation, THV4 delivery, and CDP decommissioning while protecting performance, observability, and consumer trust.</p>
-                <div class="flex flex-wrap justify-center gap-4 text-sm text-slate-500">
-                    <span>September 20, 2025</span>
-                    <span class="text-slate-400">•</span>
-                    <span>8 minute read</span>
-                    <span class="text-slate-400">•</span>
-                    <span>By Christopher Manuel Cruz-Guzman</span>
+        
+        <!-- Epic Categories -->
+        <h2 class="text-3xl font-bold text-gray-900 text-center mb-8">Key Initiative Breakdown</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Card 1: Transaction History V4 -->
+            <div class="card p-6 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <div class="icon-bg bg-indigo-100"><svg class="w-8 h-8 text-indigo-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m5.231 13.5h-3.045A2.25 2.25 0 017.5 15.75V10.5a2.25 2.25 0 012.25-2.25h3.045m-7.5-3H4.5A2.25 2.25 0 002.25 7.5v10.5A2.25 2.25 0 004.5 20.25h10.5A2.25 2.25 0 0017.25 18v-2.25" /></svg></div>
+                    <span class="ml-4 text-2xl font-bold text-gray-700">255 <span class="text-base font-medium">pts</span></span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Transaction History V4 & Going Primary</h3>
+                <p class="text-gray-600 flex-grow text-sm">Next-gen API development to establish Utilities as the primary data source, a foundational shift for Chase's data architecture.</p>
+                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <p class="text-xs font-semibold uppercase text-indigo-600">HIGH PRIORITY</p>
+                    <div><span class="inline-block bg-sky-100 text-sky-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">WIL2</span> <span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">BLR2</span></div>
                 </div>
             </div>
-        </section>
 
-        <section class="px-6 pb-16">
-            <div class="medium-prose blog-surface rounded-3xl p-10 space-y-12">
-                <div class="flex flex-wrap gap-3 text-xs uppercase tracking-[0.2em] text-slate-500">
-                    <a href="#executive-summary" class="toc-link">Executive Summary</a>
-                    <a href="#strategic-narrative" class="toc-link">Strategic Narrative</a>
-                    <a href="#key-insights" class="toc-link">Key Insights</a>
-                    <a href="#quarterly-artifacts" class="toc-link">Quarterly Planning Artifacts</a>
-                    <a href="#source-references" class="toc-link">Source References</a>
-                    <a href="#reflection-questions" class="toc-link">Reflection Questions</a>
-                    <a href="#atomic-notes" class="toc-link">Atomic Notes</a>
+            <!-- Card 2: CDP Data Center Exit -->
+            <div class="card p-6 flex flex-col">
+                <div class="flex items-center mb-4">
+                    <div class="icon-bg bg-rose-100"><svg class="w-8 h-8 text-rose-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9.75v6.75m0 0l-3-3m3 3l3-3m-8.25 6a4.5 4.5 0 01-1.41-8.775 5.25 5.25 0 0110.233-2.33 3 3 0 013.758 3.848A3.752 3.752 0 0118 19.5H6.75z" /></svg></div>
+                    <span class="ml-4 text-2xl font-bold text-gray-700">175 <span class="text-base font-medium">pts</span></span>
                 </div>
-
-                <div class="highlight-box rounded-2xl p-8" id="executive-summary">
-                    <h2 class="text-2xl font-bold text-slate-900 mb-4">Executive Summary</h2>
-                    <p class="text-slate-700 mb-4">Wil2 and BLR2 enter Q4 with a dual mandate: mature Transaction History Version 4 into a production-grade experience while exiting the CDP data center through AWS-native pipelines. The north star is simple—achieve <span class="font-semibold text-sky-600">99%+ reconciliation</span>, land THV4 with consumer-ready resilience, and harden observability before scaling traffic.</p>
-                    <ul class="list-disc pl-6 space-y-2 text-slate-700">
-                        <li>Data quality is the lead domino: reconciliation sits at <span class="font-semibold">92%</span>, driving a quarter-long push with SOR, ODS, and FCDP partners to close gaps.</li>
-                        <li>THV4 represents a <span class="font-semibold">100-point</span> engineering investment spanning bug fixes, QA, pagination tuning, Cassandra resiliency, FMEA, and runbook creation.</li>
-                        <li>BLR2 shoulders a <span class="font-semibold">300-point</span> quarter anchored in CDP decommissioning, AWS migration, and merchant tagging backfills—all under a critical timeline.</li>
-                        <li>Cross-team friction points—API gateway decisions, alert fatigue, photon upgrades, and consumer onboarding—demand explicit owners and fast decisions.</li>
-                    </ul>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">CDP Data Center Exit Migration</h3>
+                <p class="text-gray-600 flex-grow text-sm">Strategic and mandatory migration of critical Spark jobs from the CDP cluster to AWS with a hard EOY deadline.</p>
+                <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <p class="text-xs font-semibold uppercase text-red-600">CRITICAL DEADLINE</p>
+                    <div><span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">BLR2</span></div>
                 </div>
-
-                <div class="space-y-8" id="strategic-narrative">
-                    <h2 class="text-3xl font-bold text-slate-900">Strategic Narrative</h2>
-                    <p class="text-slate-700">Q4 Planning: Transaction History V4 &amp; CDP Migration. As we enter the quarter, the focus sharpens on two mission-critical goals: maturing Transaction History V4 into a production-grade API and exiting the CDP data center to move fully onto AWS-native pipelines. These initiatives elevate performance, resilience, and customer trust—and the CDP exit needs to be complete by year end to protect the broader data center decommission.</p>
-
-                    <div class="grid gap-6 md:grid-cols-2">
-                        <div class="highlight-box rounded-2xl p-6 space-y-3">
-                            <h3 class="text-xl font-semibold text-slate-900">North Star</h3>
-                            <ul class="list-disc pl-5 space-y-2 text-slate-700">
-                                <li>Mature THV4 into a scalable, production-ready API.</li>
-                                <li>Exit CDP and migrate to AWS-native data pipelines.</li>
-                                <li>Push reconciliation accuracy to 99%+.</li>
-                                <li>Enhance observability, performance, and consumer onboarding.</li>
-                            </ul>
-                            <p class="text-sm text-slate-600">These outcomes guide every epic, sprint, and decision this quarter.</p>
-                        </div>
-
-                        <div class="challenge-card rounded-2xl p-6 space-y-3">
-                            <h3 class="text-xl font-semibold text-slate-900">Current State &amp; Gaps</h3>
-                            <ul class="list-disc pl-5 space-y-2 text-slate-800">
-                                <li><span class="font-semibold">Reconciliation:</span> Accuracy sits at ~92% and demands tighter loops with SOR and CDP partners.</li>
-                                <li><span class="font-semibold">THV4:</span> Core development continues, but bugs, pagination tuning, and resilience improvements must be burned down quickly.</li>
-                                <li><span class="font-semibold">CDP Exit:</span> Migrating Spark jobs, redesigning ingestion flows, and enriching schemas are critical paths.</li>
-                                <li><span class="font-semibold">Operations:</span> Alert fatigue, delayed API gateway decisions, and photon upgrade dependencies threaten stability.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="framework-box rounded-2xl p-6 space-y-4">
-                        <h3 class="text-xl font-semibold text-slate-900">Strategic Priorities</h3>
-                        <div class="grid gap-6 md:grid-cols-2">
-                            <div class="space-y-2">
-                                <h4 class="text-base font-semibold text-emerald-700">Wil2 (~350 SP capacity)</h4>
-                                <ul class="list-disc pl-5 space-y-1 text-slate-700">
-                                    <li>THV4 development and bug fixes.</li>
-                                    <li>QA and performance testing at scale.</li>
-                                    <li>Consumer integration and onboarding.</li>
-                                    <li>Data quality reconciliation (92% → 99%).</li>
-                                    <li>Production readiness through FMEA, runbooks, and observability.</li>
-                                </ul>
-                            </div>
-                            <div class="space-y-2">
-                                <h4 class="text-base font-semibold text-emerald-700">BLR2 (~318 SP capacity)</h4>
-                                <ul class="list-disc pl-5 space-y-1 text-slate-700">
-                                    <li>CDP data center exit—Spark jobs and ingestion redesign.</li>
-                                    <li>Merchant tagging historical load.</li>
-                                    <li>Account breach validation and fixes.</li>
-                                    <li>Dynamic orchestration and schema enrichment.</li>
-                                    <li>Consumer testing and ingestion defect resolution.</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="example-box rounded-2xl p-6 space-y-3">
-                        <h3 class="text-xl font-semibold text-slate-900">Roadmap</h3>
-                        <ol class="list-decimal pl-5 space-y-2 text-slate-700">
-                            <li><span class="font-semibold">Stabilize the Core</span> — API gateway decision, photon upgrades, recon war room.</li>
-                            <li><span class="font-semibold">Build &amp; Test</span> — Burn down backlog, BlazeMeter testing at 2× TPS, FMEA scenarios.</li>
-                            <li><span class="font-semibold">Harden &amp; Document</span> — Runbooks, calibrated alerts, onboarding materials, AI support agent prototype.</li>
-                            <li><span class="font-semibold">Migrate &amp; Monitor</span> — AWS cutovers, merchant tagging loads, reconciliation dashboards.</li>
-                        </ol>
-                        <p class="text-sm text-slate-600">This sequencing ensures stability before scale, documentation before migration.</p>
-                    </div>
-
-                    <div class="challenge-card rounded-2xl p-6 space-y-3">
-                        <h3 class="text-xl font-semibold text-slate-900">Risks &amp; Dependencies</h3>
-                        <ul class="list-disc pl-5 space-y-2 text-rose-800">
-                            <li>API gateway decision remains open and risks downstream timelines.</li>
-                            <li>Alert noise continues to mask genuine issues.</li>
-                            <li>Consumer migrations may slip if onboarding isn’t accelerated.</li>
-                            <li>AWS/CDP migration capacity is constrained.</li>
-                            <li>Tight year-end deadlines require ruthless prioritization.</li>
-                        </ul>
-                    </div>
-
-                    <div class="highlight-box rounded-2xl p-6 space-y-3">
-                        <h3 class="text-xl font-semibold text-slate-900">Success Metrics</h3>
-                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
-                            <li>Reconciliation: ≥ 99% accuracy on a daily basis.</li>
-                            <li>Performance: THV4 parity or better with THV3 latency at 3–5k TPS.</li>
-                            <li>Adoption: All major consumers onboarded to ETD V3 and TH V3/V4.</li>
-                            <li>Infrastructure: Full CDP decommission achieved by year-end.</li>
-                        </ul>
-                    </div>
-
-                    <div class="framework-box rounded-2xl p-6 space-y-3">
-                        <h3 class="text-xl font-semibold text-slate-900">Call to Action</h3>
-                        <p class="text-slate-700">The most urgent unlocks are resolving the API gateway decision and closing reconciliation gaps. Clearing those blockers unlocks AWS migration velocity, consumer adoption, and production-ready scale. Q4 is our opportunity to prove that Transaction History can deliver not just functionality, but excellence.</p>
-                    </div>
-
-                    <div class="example-box rounded-2xl p-6 space-y-3" id="cdp-exit">
-                        <h3 class="text-xl font-semibold text-slate-900">CDP Exit: Necessity and Implementation</h3>
-                        <p class="text-slate-700">The CDP exit is a <strong>mandatory decommissioning</strong>, not just a migration. As Kiran underscored, <em>“AWS understood? Let’s understand one thing, right? We are actually migrating from existing CDP cluster to this new cluster... Don’t call it as AWS migration. Call it CDP DC. Exit, that’s the initiative driving this.”</em> The timeline is critical—teams cite a March 2026 target for shutting down the existing cluster, but the hard stop is completing the exit by year end so the data center shutdown remains on track.</p>
-                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
-                            <li><span class="font-semibold">SOD ingestion redesign (~100 SP):</span> The heaviest lift, pairing analysis and architecture to migrate Spark jobs and establish AWS-native patterns.</li>
-                            <li><span class="font-semibold">Cascade and MMS follow-ons (~25 SP each):</span> Lean on SOD learnings to accelerate subsequent migrations while keeping March 2026 decommission dates safe.</li>
-                            <li><span class="font-semibold">AWS-native operations:</span> Move Spark jobs, monitoring, and dashboards off CDP to AWS infrastructure, ensuring full CDP decommission and knowledge transfer across ingestion and API teams.</li>
-                        </ul>
-                        <p class="text-sm text-slate-600">The initial SOD push alone consumes roughly a third of BLR2’s capacity, reinforcing the need for Delaware backfill and ruthless prioritization.</p>
-                    </div>
-
-                    <div class="framework-box rounded-2xl p-6 space-y-3" id="thv4-testing">
-                        <h3 class="text-xl font-semibold text-slate-900">TH V4 API Testing and Production Readiness</h3>
-                        <p class="text-slate-700">Performance testing must match or exceed THV3 benchmarks, targeting 3,000 TPS while stress testing toward 5,000 TPS where tooling allows. BlazeMeter ceilings around 3K TPS demand creative load strategies and documentation of observed limits.</p>
-                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
-                            <li>FMEA coverage includes every integration point and validates system behavior under stress.</li>
-                            <li>Consumer integration testing addresses defects, supports new versions, and ensures pagination tuning doesn’t regress downstream journeys.</li>
-                            <li>Production readiness spans observability, monitoring, alerting, Deadpool integration, onboarding documentation, and runbooks.</li>
-                            <li>API gateway alignment remains the key dependency—<em>“Envoy is our the first selection... if we don’t have a solution for Envoy we have a second solution, API Gateway.”</em></li>
-                        </ul>
-                    </div>
-
-                    <div class="highlight-box rounded-2xl p-6 space-y-3" id="data-recon">
-                        <h3 class="text-xl font-semibold text-slate-900">Data Recon and Reconciliation</h3>
-                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
-                            <li>Lift reconciliation accuracy from 92% to 99% by gathering SOR/ODS data and tightening daily metrics.</li>
-                            <li>Coordinate with SOR teams on field discrepancies and validate API fixes—90% of requested changes are already complete after analyzing four to five months of data and isolating two remaining defects.</li>
-                            <li>Stand up dedicated epics for event reconciliation and ingestion latency dashboards.</li>
-                            <li>Maintain Q3 commitments to data recon regardless of API surface—it’s a platform obligation, not an API-specific task.</li>
-                        </ul>
-                    </div>
-
-                    <div class="example-box rounded-2xl p-6 space-y-3" id="monitoring-observability">
-                        <h3 class="text-xl font-semibold text-slate-900">Monitoring and Observability</h3>
-                        <ul class="list-disc pl-5 space-y-2 text-slate-700">
-                            <li>Two of three critical dashboards remain outstanding; migrate legacy monitoring from CDP to AWS alongside the platform move.</li>
-                            <li>Track event reconciliation and ingestion latency as first-class dashboards.</li>
-                            <li>Drive enrichment latency from two minutes toward one minute after card swipe.</li>
-                            <li>Engage the platform observability team to integrate frameworks and reduce Splunk-driven alert fatigue.</li>
-                        </ul>
-                    </div>
-
-                    <div class="challenge-card rounded-2xl p-6 space-y-3" id="capacity-challenges">
-                        <h3 class="text-xl font-semibold text-slate-900">Capacity Challenges</h3>
-                        <p class="text-rose-800">Resource constraints remain the underlying friction. As one lead put it, <em>“I feel like we’re in a good place, planning wise... but the CDP exit has to be complete by the end of the year, and it takes so much work— we can’t focus on that and also run friends and family testing.”</em> Another reiterated that <em>“BLR2 [is] so over capacity... everything’s so important that I genuinely don’t know what we would de-prioritize.”</em> BLR2 is already stretched, with every epic mission-critical and little room for stretch goals without additional MSA support.</p>
-                    </div>
-                </div>
-
-                <div class="space-y-6" id="key-insights">
-                    <h2 class="text-3xl font-bold text-slate-900">Key Insights</h2>
-                    <div class="grid gap-6 md:grid-cols-2">
-                        <div class="challenge-card rounded-2xl p-6">
-                            <h3 class="text-xl font-semibold text-rose-700 mb-3">Critical Decisions</h3>
-                            <p class="text-rose-800 mb-3">“We need to make a quick decision… we’ve been sitting on this for a very long time.” — Kiran on the API gateway direction. Envoy remains aspirational; Q4 requires a call to unblock GLB creation and production readiness.</p>
-                            <ul class="list-disc pl-5 text-rose-800 space-y-1 text-sm">
-                                <li>Decide between Envoy and existing gateway before sprint 2.</li>
-                                <li>Align alerting scope so production signals stay actionable.</li>
-                                <li>Stand up photon upgrade tracker for every API touchpoint.</li>
-                            </ul>
-                        </div>
-                        <div class="framework-box rounded-2xl p-6">
-                            <h3 class="text-xl font-semibold text-emerald-700 mb-3">Performance Expectations</h3>
-                            <p class="text-emerald-800 mb-3">THV4 must meet or beat V3 latency at heavy load. Targets call for <span class="font-semibold">3K–5K TPS</span> sustained throughput while tuning memory and CPU. BlazeMeter limits may cap perf env tests at ~3K TPS; the team will stress 2x expected load.</p>
-                            <ul class="list-disc pl-5 text-emerald-800 space-y-1 text-sm">
-                                <li>Document perf ceilings alongside mitigations.</li>
-                                <li>Pair FMEA scenarios with telemetry validation.</li>
-                                <li>Capture runbooks for incident hand-off prior to go-live.</li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div class="example-box rounded-2xl p-6">
-                        <h3 class="text-xl font-semibold text-indigo-700 mb-3">Consumer Momentum</h3>
-                        <p class="text-indigo-800 mb-4">Wil2 is juggling V2 ➜ V3 migrations, digital channel onboarding, and aggregator education. An AI-powered onboarding agent is planned to parse documentation, videos, and FAQs—reducing support toil and accelerating adoption.</p>
-                        <div class="flex flex-wrap gap-3 text-xs text-indigo-700">
-                            <span class="tag-pill bg-indigo-500/10 border-indigo-400/40">AI Onboarding Agent</span>
-                            <span class="tag-pill bg-indigo-500/10 border-indigo-400/40">Swagger &amp; API Store Alignment</span>
-                            <span class="tag-pill bg-indigo-500/10 border-indigo-400/40">Cross-Product Consistency</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="space-y-8" id="quarterly-artifacts">
-                    <h2 class="text-3xl font-bold text-slate-900">Quarterly Planning Artifacts</h2>
-                    <p class="text-slate-700">The following artifacts capture the full backlog planning inputs for Wil2 and BLR2 heading into Q4, including capacity guardrails, epic sizing, and priority alignments supplied during the working session.</p>
-
-                    <div class="space-y-4">
-                        <h3 class="text-2xl font-semibold text-slate-800">WIL2 Q4 Epics <span class="text-base font-normal text-slate-600">(Capacity: 350 SP)</span></h3>
-                        <div class="overflow-x-auto">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Epic Num</th>
-                                        <th>Epic Name</th>
-                                        <th>Objective</th>
-                                        <th>Tasks</th>
-                                        <th>Size (SP)</th>
-                                        <th>Priority</th>
-                                        <th>Comment</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>ETUDE-45311</td>
-                                        <td>ETU - DDA Primary: TH V4 Development &amp; Bug Fixes</td>
-                                        <td>Enable “Going Primary” workstream, implement DDA Transaction History V4 API, fix bugs, enhance customer experience</td>
-                                        <td>Cassandra retry resiliency, Create GLBs, Breached Accounts Logic, TH V4 Bug Fixes, Onboarding to API Gateway/Envoy</td>
-                                        <td>50</td>
-                                        <td>3</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45312</td>
-                                        <td>ETU - TH V4 QA Testing</td>
-                                        <td>Thoroughly test DDA Transaction History V4 API, TrueCD adoption, Sonar coverage, full QA scope</td>
-                                        <td>TrueCD, QA Testing, TH V4 Pagination testing, Sonar Coverage, Query Parameters</td>
-                                        <td>50</td>
-                                        <td>&mdash;</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45021</td>
-                                        <td>ETU - DDA Primary: Consumer Integration Testing - ETD</td>
-                                        <td>Test Debit Pending and Posted enrichment enhancements of Merchant Tagging 3.0 to ETD API V3</td>
-                                        <td>Defects Submitted during Prod Testing, Consumer Support Stories, Edge Case Business Reqs, Regression Testing</td>
-                                        <td>25</td>
-                                        <td>1</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45403</td>
-                                        <td>DDA Primary: Consumer Integration Testing - TH</td>
-                                        <td>Support onboarding to newer Transaction History API versions, troubleshooting</td>
-                                        <td>Consumer Support Stories, API Gateway/Envoy Onboarding, Support Aggregators Onboarding to TH V3/V4 QA</td>
-                                        <td>5</td>
-                                        <td>&mdash;</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45405</td>
-                                        <td>CDP DC Exit Support</td>
-                                        <td>Support CDP DC exit, knowledge sharing across API and Ingestion teams</td>
-                                        <td>Support BLR2 work</td>
-                                        <td>25</td>
-                                        <td>6</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45324</td>
-                                        <td>DDA Primary: DQ Recon</td>
-                                        <td>Ensure ETU provides all data previously provided by SOR, increase recon percentage from 92% to 99%</td>
-                                        <td>SOR/ODS Data Recon Metrics, Coordinating with SOR/Ingestion team, Validating fixes, Recon fixes/deployment</td>
-                                        <td>50</td>
-                                        <td>2</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45325</td>
-                                        <td>DDA Primary: TH V4 Performance Testing</td>
-                                        <td>Tune performance to match/surpass V3, improve memory/CPU utilization, perf test with 2x TPS</td>
-                                        <td>Perf Test, Document testing evidence and metrics</td>
-                                        <td>50</td>
-                                        <td>7</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45326</td>
-                                        <td>DDA Primary: TH V4 FMEA Testing</td>
-                                        <td>FMEA Testing Work for TH V4</td>
-                                        <td>&mdash;</td>
-                                        <td>50</td>
-                                        <td>8</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45019</td>
-                                        <td>TH V4 - Prod Readiness - WIL2</td>
-                                        <td>Production readiness for TH V4</td>
-                                        <td>Observability/Monitoring/Alerting, Deadpool Integration, TH V4 Onboarding Agent, Documentation, Runbook</td>
-                                        <td>50</td>
-                                        <td>9</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45404</td>
-                                        <td>Photon Upgrade</td>
-                                        <td>Upgrade to 3.4.5</td>
-                                        <td>ETD V3, TH V2, TH V3, Wire ETD</td>
-                                        <td>25</td>
-                                        <td>Due Mar 2026</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-44413</td>
-                                        <td>TU - You Build It Your Run It - DEL2 – Q425</td>
-                                        <td>You Build It You Run It</td>
-                                        <td>&mdash;</td>
-                                        <td>4</td>
-                                        <td>&mdash;</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45022</td>
-                                        <td>Quarterly Maintenance - WIL2</td>
-                                        <td>Quarterly Maintenance</td>
-                                        <td>SR Events, MEPC Events, FARM/IT Breaks</td>
-                                        <td>25</td>
-                                        <td>&mdash;</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <p class="table-caption">Total (so far): 350 SP</p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <h3 class="text-2xl font-semibold text-slate-800">BLR2 Q4 Epics <span class="text-base font-normal text-slate-600">(Capacity: 318 SP)</span></h3>
-                        <div class="overflow-x-auto">
-                            <table class="data-table">
-                                <thead>
-                                    <tr>
-                                        <th>Epic Num</th>
-                                        <th>Epic Name</th>
-                                        <th>Objective</th>
-                                        <th>Tasks</th>
-                                        <th>Size (SP)</th>
-                                        <th>Priority</th>
-                                        <th>Comment</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>ETUDE-45402</td>
-                                        <td>DDA Primary: Account Breach</td>
-                                        <td>Validate account breach logic and functionality in Prod</td>
-                                        <td>Production Validation, Perf Testing, Production Fixes</td>
-                                        <td>30</td>
-                                        <td>7</td>
-                                        <td>Need new DST for team testing support in Q4</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45375</td>
-                                        <td>Quarterly Maintenance</td>
-                                        <td>Quarterly Maintenance</td>
-                                        <td>SR Events, MEPC Events, Risk breaks, Uploading runbooks, Log FMEA/Observability reqs, AD Prod Access</td>
-                                        <td>25</td>
-                                        <td>10</td>
-                                        <td>You Build It You Run It</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45391</td>
-                                        <td>DDA Primary: Merchant Tagging Historical Load</td>
-                                        <td>Load 24 months of Historical Merchant Tagging data, monitor process</td>
-                                        <td>Ensuring files, Load data files, Daily audit mail monitoring</td>
-                                        <td>10</td>
-                                        <td>1</td>
-                                        <td>Hard Deadline Q4 EOY</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45388</td>
-                                        <td>DDA Primary: ETD V3 Consumer Integration Testing</td>
-                                        <td>Investigate ingestion related defects</td>
-                                        <td>&mdash;</td>
-                                        <td>25</td>
-                                        <td>6</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45389</td>
-                                        <td>DDA Primary: Dynamic Orchestration</td>
-                                        <td>Implement finalized schema and logic, continue application implementation</td>
-                                        <td>Primary Switch, Stand In Status, Dev &amp; QA testing, Integration Testing, Prod Deployment, Monitoring</td>
-                                        <td>30</td>
-                                        <td>&mdash;</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45385</td>
-                                        <td>CDP DC Exit: Move Spark Jobs from CDP Cluster to AWS - SOD</td>
-                                        <td>Move SOD File Ingestions to AWS</td>
-                                        <td>Analysis story, Moving Spark Jobs, Monitoring, Redesign SOD ingestion, Implement Redesigned arch</td>
-                                        <td>100</td>
-                                        <td>3</td>
-                                        <td>Hard Deadline Q4 EOY</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45390</td>
-                                        <td>DDA Primary: DQ Recon</td>
-                                        <td>Increase recon percentage from 92% to 99%</td>
-                                        <td>Coordinating with SOR/API teams, Validating fixes</td>
-                                        <td>75</td>
-                                        <td>2</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45392</td>
-                                        <td>DDA Primary: MT Retag Support</td>
-                                        <td>Monitor real time retag process, possibly redesign ingestion</td>
-                                        <td>Redesign retag ingestion, Implement new app, Verify retag data load</td>
-                                        <td>50</td>
-                                        <td>8</td>
-                                        <td>Possible design change if new topic</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45386</td>
-                                        <td>CDP DC Exit: Move Spark Jobs from CDP Cluster to AWS - Cascade</td>
-                                        <td>Move MT 2.0/2.5 file ingestions to AWS</td>
-                                        <td>Redesign Cascade, Implement Redesigned arch</td>
-                                        <td>50</td>
-                                        <td>4</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>ETUDE-45387</td>
-                                        <td>CDP DC Exit: Move Spark Jobs from CDP Cluster to AWS - MMS</td>
-                                        <td>Move Money movement services file ingestions to AWS</td>
-                                        <td>Redesign MMS, Implement Redesigned arch</td>
-                                        <td>25</td>
-                                        <td>5</td>
-                                        <td>Reduce ingestion latency</td>
-                                    </tr>
-                                    <tr>
-                                        <td>STRETCH</td>
-                                        <td>Discovery: Obtaining New OCS Needed Fields From CDP</td>
-                                        <td>Obtain CDP fields needed to fulfill OCS dependencies</td>
-                                        <td>Investigate validity, Network ID, Work required for field ingestion</td>
-                                        <td>25</td>
-                                        <td>&mdash;</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                    <tr>
-                                        <td>STRETCH</td>
-                                        <td>Discovery: Obtaining New CDFO Needed Fields From CDP</td>
-                                        <td>Obtain CDP fields needed to fulfill CDFO dependencies</td>
-                                        <td>Investigate validity, Token ID</td>
-                                        <td>25</td>
-                                        <td>&mdash;</td>
-                                        <td>&mdash;</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <p class="table-caption">Total (so far): 380 SP</p>
-                    </div>
-
-                    <div class="highlight-box rounded-2xl p-6">
-                        <h3 class="text-xl font-semibold text-slate-900 mb-3">Planning Notes</h3>
-                        <ul class="list-disc pl-6 space-y-2 text-slate-700">
-                            <li><strong>SP</strong> = Story Points.</li>
-                            <li><strong>Priority</strong>: Lower number indicates higher priority.</li>
-                            <li>Some epics carry hard deadlines (e.g., Q4 EOY, March 2026) that dictate sequencing.</li>
-                            <li>Comments call out special requirements, dependencies, or contextual watch-outs.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="space-y-8" id="detailed-breakdown">
-                    <h2 class="text-3xl font-bold text-slate-900">Detailed Breakdown</h2>
-                    <div class="space-y-6">
-                        <h3 class="text-2xl font-semibold text-slate-800">Wil2 &mdash; Transaction History API</h3>
-                        <div class="space-y-4 text-slate-700">
-                            <p class="quote">“It’s not about showing the numbers… identify each of the issues, fix the differences, work with the CDP team.” — Kiran on reconciliation discipline.</p>
-                            <ul class="list-disc pl-6 space-y-2">
-                                <li><span class="font-semibold text-slate-900">Data Reconciliation (Priority #1):</span> Current metrics hover at <span class="font-semibold">92%</span>. The end-of-quarter target is <span class="font-semibold">99%+</span>, requiring sustained analysis of SOR vs. ODS discrepancies, validation of SOR fixes, and tighter loops with ingestion teams.</li>
-                                <li><span class="font-semibold text-slate-900">THV4 Development &amp; Stabilization:</span> Estimated at <span class="font-semibold">~100 story points</span>, covering pagination QA, defect burn-down, Cassandra retry resiliency, GLB creation, true CI/CD, breached-account routing strategies, and cross-product consistency validation.</li>
-                                <li><span class="font-semibold text-slate-900">Performance &amp; FMEA Tracks:</span> Performance testing breaks out as its own epic to tune latency and resource usage, while FMEA scenarios stress profile table dependencies and downstream integrations to confirm graceful degradation.</li>
-                                <li><span class="font-semibold text-slate-900">Consumer Integration Testing:</span> Digital channels and aggregators are queued for ETD V3 testing; support stories remain open to triage defects and educate teams transitioning from V2.</li>
-                                <li><span class="font-semibold text-slate-900">Production Readiness:</span> Observability, monitoring, alert tuning, Deadpool integration, runbooks, and swagger/API store parity are bundled together to reduce post-launch friction.</li>
-                                <li><span class="font-semibold text-slate-900">Operational Friction:</span> Alert fatigue continues—“We’re getting hundreds of alerts… becoming numb to them,” Chris flagged. Photon upgrades need a centralized tracker, and the Envoy vs. existing gateway decision blocks routing design.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="space-y-6">
-                        <h3 class="text-2xl font-semibold text-slate-800">BLR2 &mdash; CDP Exit &amp; AWS Migration</h3>
-                        <div class="space-y-4 text-slate-700">
-                            <p class="quote">“CDP DC exit is a driving factor. AWS migration is a solution we came up with to do the CDP DC exit.” — Kiran</p>
-                            <ul class="list-disc pl-6 space-y-2">
-                                <li><span class="font-semibold text-slate-900">Migration Imperative:</span> Decommission CDP and land workloads on AWS by year-end. Success promises faster processing and aligns with enterprise data strategy.</li>
-                                <li><span class="font-semibold text-slate-900">Data Quality Lift:</span> Recon sits at <span class="font-semibold">92%</span>; leadership insists it is “unacceptable” to show externally. The goal mirrors Wil2 at 99%, with iterative back-and-forth validation alongside FCDP counterparts.</li>
-                                <li><span class="font-semibold text-slate-900">Major Workstreams:</span> Merchant tagging historical loads, dynamic orchestration, consumer integration testing, account breach validation, CDP exit migrations, and SOD ingestion redesign (100 pts) all compete for focus.</li>
-                                <li><span class="font-semibold text-slate-900">Capacity &amp; Resourcing:</span> Q4 plan totals <span class="font-semibold">~300 story points</span>. A new AWS-experienced engineer joins October 1 to absorb migration load.</li>
-                                <li><span class="font-semibold text-slate-900">Risk Landscape:</span> Tight timelines, monitoring readiness, data inconsistencies, and cross-team coordination top the list. Incremental migration and proactive comms anchor the mitigation plan.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="space-y-6" id="implementation-guide">
-                    <h2 class="text-3xl font-bold text-slate-900">Implementation Guide</h2>
-                    <div class="framework-box rounded-2xl p-6 space-y-4">
-                        <h3 class="text-xl font-semibold text-emerald-700">4-Phase Q4 Execution Framework</h3>
-                        <ol class="list-decimal pl-6 space-y-3 text-emerald-800">
-                            <li><span class="font-semibold">Stabilize the Core (Weeks 1-3):</span> Lock the API gateway decision, formalize photon tracker, stand up reconciliation war room, and confirm perf environment limits.</li>
-                            <li><span class="font-semibold">Build &amp; Test (Weeks 2-6):</span> Burn down THV4 backlog, execute BlazeMeter runs to 2x TPS, and complete FMEA scripts targeting profile table, downstream service, and queue failures.</li>
-                            <li><span class="font-semibold">Harden &amp; Document (Weeks 5-8):</span> Finalize runbooks, calibrate alert thresholds, publish onboarding videos, and deploy the AI documentation agent prototype.</li>
-                            <li><span class="font-semibold">Migrate &amp; Monitor (Weeks 7-12):</span> Sequence AWS cutovers, verify merchant tagging loads, track recon dashboards, and run cross-team go/no-go reviews.</li>
-                        </ol>
-                    </div>
-                    <div class="grid gap-6 md:grid-cols-2">
-                        <div class="example-box rounded-2xl p-6 space-y-3">
-                            <h3 class="text-lg font-semibold text-indigo-700">Example Play &mdash; Recon Issue Response</h3>
-                            <p class="text-indigo-800">1) Identify variance in dashboard, 2) assign SOR/ODS pairing owner, 3) validate upstream fix with FCDP, 4) rerun reconciliation batch, 5) archive resolution in tracker, 6) push update to AI onboarding corpus for consumer transparency.</p>
-                            <p class="text-indigo-600 text-sm">This loop maintains the “identify &amp; fix” discipline Kiran demanded.</p>
-                        </div>
-                        <div class="highlight-box rounded-2xl p-6 space-y-3">
-                            <h3 class="text-lg font-semibold text-slate-900">Cross-Links for Deeper Context</h3>
-                            <ul class="space-y-2 text-slate-800 text-sm">
-                                <li>Revisit the <a class="inline-link" href="../blogs/strategic-transaction-history-architecture.html">Strategic Transaction History Architecture</a> memo to align on platform north stars.</li>
-                                <li>Study the <a class="inline-link" href="../blogs/end-to-end-and-api-testing-for-etd.html">ETD Testing Strategy</a> for reusable QA patterns.</li>
-                                <li>Share the <a class="inline-link" href="../blogs/dda-api-migration-v2-to-v3.html">DDA Migration Guide</a> with lagging V2 consumers.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="space-y-8" id="source-references">
-                    <h2 class="text-3xl font-bold text-slate-900">Source References</h2>
-                    <div class="highlight-box rounded-2xl p-6 space-y-3">
-                        <h3 class="text-xl font-semibold text-slate-900">Quarterly Planning Content</h3>
-                        <ul class="list-disc pl-6 space-y-2 text-slate-700">
-                            <li>CDP DC Exit – Move Spark Jobs from CDP Cluster including monitoring, analysis, etc. (<span class="font-semibold">175 Points</span>).</li>
-                            <li>SOD Ingestion (<span class="font-semibold">100 Points</span>) for all applications (includes redesign, implementation).</li>
-                            <li>Cascade (<span class="font-semibold">50 Points</span>) including redesigned architecture and MT 2.0 ➜ 2.5 uplift.</li>
-                            <li>MMS (<span class="font-semibold">25 Points</span>) including MMS integrations (e.g., Zelle File, RTP).</li>
-                            <li>DDA Primary (<span class="font-semibold">205 Points</span>).</li>
-                            <li>DQ Recon (<span class="font-semibold">75 Points</span>)—increase recon percentage from 92% to 99%, coordinate with SOR on field discrepancies, validate SOR fixes.</li>
-                            <li>MT Retag Support (<span class="font-semibold">50 Points</span>)—confirm retag success, verify merchant data modifications, validate retag data loads.</li>
-                            <li>Account Breach (<span class="font-semibold">30 Points</span>)—production validation, performance testing, and production fixes.</li>
-                            <li>Dynamic Orchestration (<span class="font-semibold">30 Points</span>)—consume FCDP file, manage start/stop data, load batch status tables, reinforce observability/monitoring/alerting.</li>
-                            <li>Merchant Tagging Historical Load (<span class="font-semibold">10 Points</span>)—ensure files arrive, load historical merchant data, and monitor audit mail daily.</li>
-                            <li>ETD V3 Consumer Integration Testing (<span class="font-semibold">10 Points</span>)—investigate ingestion-related defects.</li>
-                            <li>Other sizing efforts remain underway.</li>
-                            <li>Quarterly Maintenance responsibilities continue.</li>
-                            <li>You Build It You Run It commitments remain active.</li>
-                            <li>FARM/IT Breaks preparation and execution.</li>
-                        </ul>
-                    </div>
-
-                    <div class="challenge-card rounded-2xl p-6 space-y-3">
-                        <h3 class="text-xl font-semibold text-rose-700">Meeting 91225 Highlights</h3>
-                        <ul class="list-disc pl-6 space-y-2 text-rose-800">
-                            <li><strong>Cassandra resiliency focus:</strong> Common library updates narrowed to Cassandra retry resiliency, with consensus it can finish within the next sprint without creating a dedicated epic.</li>
-                            <li><strong>THV4 workstreams:</strong> Confirmed epics for development/bug fixes, QA and pagination coverage, performance testing, FMEA, documentation, onboarding agent creation, and production readiness including runbooks.</li>
-                            <li><strong>Testing expectations:</strong> Anticipate substantial defect discovery while maturing the brand-new API; pagination testing, TrueCD adoption, and Sonar coverage sit inside the QA scope.</li>
-                            <li><strong>Onboarding automation:</strong> Plan to build an AI agent that surfaces documentation, videos, and FAQs so new consumers can self-serve answers.</li>
-                            <li><strong>Gateway decision:</strong> Need fast alignment on Envoy versus existing API gateway to unblock GLBs and routing; Envoy offers AWS connectivity but remains a bottleneck.</li>
-                            <li><strong>Alerting hygiene:</strong> Address Splunk alert fatigue and email noise that currently desensitize the team; remove product stakeholders from BAU notifications and fine-tune thresholds.</li>
-                            <li><strong>Documentation scope:</strong> Include swagger/API store readiness, onboarding videos, Deadpool integration, observability dashboards, and runbooks in the production readiness track.</li>
-                            <li><strong>Consumer migrations:</strong> Coordinate ETD V3 and TH V3/V4 onboarding for digital channels and aggregators, distribute version comparison documentation, and enforce migration deadlines while handling unresponsive legacy teams.</li>
-                            <li><strong>Data reconciliation discipline:</strong> Elevate recon from 92% to 99% with daily metrics, war-room style analysis, validation of SOR fixes, and alignment with ingestion/CDP partners.</li>
-                            <li><strong>Performance targets:</strong> Aim for 3K–5K TPS parity or better than V3; BlazeMeter limits around 3K TPS require creative stress testing and documentation of ceilings.</li>
-                            <li><strong>Account breach handling:</strong> Route breached accounts to SOR initially (&lt;0.1 TPS) to reduce launch complexity while planning long-term THV4 solutions.</li>
-                            <li><strong>CDP DC exit collaboration:</strong> Delaware engineers backfill BLR2 bandwidth, emphasizing knowledge sharing across ingestion and API teams as AWS migrations progress.</li>
-                            <li><strong>Photon &amp; Cassandra upgrades:</strong> Advance upgrades to Photon 3.4.5 with a shared tracker; Cassandra 5 migration underway with traffic already enabled in updated clusters.</li>
-                            <li><strong>Additional integrations:</strong> Track OCS wire status modernization as a potential new epic after escalations highlighted onboarding gaps.</li>
-                            <li><strong>Prioritization &amp; sizing:</strong> Reconfirmed DQ recon as top priority, followed by THV4 development and consumer integration; sized THV4 development/bug fixes, performance, and FMEA at 50 SP each, production readiness at 25 SP, consumer integration testing around 20–25 SP, and noted CDP exit support as minimal but time-boxed.</li>
-                            <li><strong>Operational obligations:</strong> Quarterly maintenance, FARM/IT breaks, and “You Build It You Run It” remain baseline commitments alongside Photon upgrades.</li>
-                            <li><strong>Migration communications:</strong> Treat TH V2 ➜ V3 offboarding as an ongoing product initiative—send formal deadlines, support aggregators eager to upgrade, and document differences between versions.</li>
-                            <li><strong>Runbook &amp; telemetry calibration:</strong> Ensure observability alerts remain meaningful, calibrate Splunk thresholds, and capture lessons learned for the AI onboarding corpus.</li>
-                        </ul>
-                    </div>
-
-                    <div class="framework-box rounded-2xl p-6 space-y-3">
-                        <h3 class="text-xl font-semibold text-emerald-700">JQL Reference</h3>
-                        <pre class="bg-slate-900 text-slate-100 p-4 rounded-2xl text-sm overflow-x-auto">jql = '"Planning Increment"  ~ CCB-25Q3 and (project = "Enhanced Transaction Utility"  or project = "Digital Utilities Data Enrichment" ) and status != Cancelled and (Team = 6495 or Team = 9223 or Team = 11520 )'</pre>
-                    </div>
-
-                    <div class="example-box rounded-2xl p-6 space-y-3">
-                        <h3 class="text-xl font-semibold text-indigo-700">Version History Snapshots</h3>
-                        <ul class="list-disc pl-6 space-y-2 text-indigo-800">
-                            <li><strong>Snapshot 2:</strong> Executive update emphasizes THV4 implementation and data reconciliation as dual north stars, prioritizes recon (&ge;99%), outlines THV4 investment (100 pts), reinforces performance goals (3K–5K TPS), consumer onboarding via AI agent, and spotlights risks such as API gateway decisions, alert fatigue, and Photon tracking.</li>
-                            <li><strong>Snapshot 3:</strong> Provides synchronized Wil2/BLR2 epic tables with capacities, reiterates CDP exit, recon, performance, FMEA, production readiness, Photon upgrade timelines, quarterly maintenance, and stretch discovery items focused on OCS/CDFO field ingestion.</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <div class="reflection-box rounded-2xl p-8 space-y-6" id="reflection-questions">
-                    <h2 class="text-3xl font-bold text-slate-900">Reflection Questions</h2>
-                    <ol class="list-decimal pl-6 space-y-3 text-slate-900">
-                        <li>What’s blocking a final API gateway decision, and who owns clearing it this sprint?</li>
-                        <li>How quickly can we convert the 92% reconciliation metric into a daily 99% trend, and what joint rituals with SOR/CDP partners are missing?</li>
-                        <li>Where does alert volume still mask true incidents, and what telemetry do we turn off, tune, or automate through the AI onboarding agent?</li>
-                        <li>How will we confirm cross-product consistency (TH vs. Cross Product APIs) before production traffic doubles?</li>
-                        <li>Which AWS migration milestones need executive escalation now to protect the year-end CDP exit?</li>
-                    </ol>
-                </div>
-
-                <div class="space-y-6" id="atomic-notes">
-                    <h2 class="text-3xl font-bold text-slate-900">Atomic Notes</h2>
-                    <ul class="grid gap-4 md:grid-cols-2 text-slate-700">
-                        <li class="highlight-box rounded-2xl p-4">CDP exit portfolio includes <span class="font-semibold">Spark job migrations (175 pts)</span>, SOD ingestion redesign (100 pts), Cascade 2.5 uplift (50 pts), MMS updates (25 pts), DDA primary (205 pts), dynamic orchestration (30 pts), merchant tagging historical load (10 pts), ETD V3 consumer testing (10 pts), and Account Breach validation (30 pts).</li>
-                        <li class="highlight-box rounded-2xl p-4">Photon upgrades progressing toward <span class="font-semibold">v3.4.5</span>; need confluence tracker to log version per API and ensure deployments accompany feature work.</li>
-                        <li class="highlight-box rounded-2xl p-4">Wil2 backlog sizing signals <span class="font-semibold">THV4 development (50 pts)</span>, <span class="font-semibold">performance testing (25 pts)</span>, <span class="font-semibold">FMEA (25 pts)</span>, <span class="font-semibold">production readiness (25 pts)</span>, and <span class="font-semibold">consumer integration (20 pts)</span>.</li>
-                        <li class="highlight-box rounded-2xl p-4">Alert fatigue surfaced via Splunk emails and build notifications; product stakeholders should be unsubscribed from BAU noise while engineering tunes signal-to-noise ratios.</li>
-                        <li class="highlight-box rounded-2xl p-4">Account breach flow may route to SOR for initial go-live (<span class="font-semibold">&lt;0.1 TPS</span>) to avoid complexity during THV4 launch.</li>
-                        <li class="highlight-box rounded-2xl p-4">New AWS hire onboarded Oct 1 with prior migration experience—deploy toward high-burn CDP exit user stories early.</li>
-                    </ul>
-                </div>
-
-                <div class="section-divider"></div>
-
-                <footer class="space-y-4 text-sm text-slate-600">
-                    <p>Want more context on the platform journey? Explore the <a class="inline-link" href="../blogs/troubleshooting-transaction-enrichment-api.html">incident retrospectives</a> or the <a class="inline-link" href="../blogs/system-thinking-empire-building.html">systems thinking essays</a> that shaped this playbook.</p>
-                    <p>&copy; 2025 Christopher Manuel Cruz-Guzman. All rights reserved.</p>
-                </footer>
             </div>
-        </section>
-    </main>
+
+             <!-- Card 3: Data Quality Reconciliation -->
+            <div class="card p-6 flex flex-col">
+                 <div class="flex items-center mb-4">
+                    <div class="icon-bg bg-amber-100"><svg class="w-8 h-8 text-amber-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></div>
+                    <span class="ml-4 text-2xl font-bold text-gray-700">125 <span class="text-base font-medium">pts</span></span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Data Quality Reconciliation</h3>
+                <p class="text-gray-600 flex-grow text-sm">Critical data validation to increase reconciliation accuracy from 92% to over 99% before Going Primary.</p>
+                 <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <p class="text-xs font-semibold uppercase text-amber-600">MEDIUM PRIORITY</p>
+                    <div><span class="inline-block bg-sky-100 text-sky-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">WIL2</span> <span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">BLR2</span></div>
+                </div>
+            </div>
+
+            <!-- Card 4: ETD Support -->
+            <div class="card p-6 flex flex-col">
+                 <div class="flex items-center mb-4">
+                    <div class="icon-bg bg-teal-100"><svg class="w-8 h-8 text-teal-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.658-.463 1.243-1.119 1.243H4.25a1.125 1.125 0 01-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" /></svg></div>
+                    <span class="ml-4 text-2xl font-bold text-gray-700">115 <span class="text-base font-medium">pts</span></span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Enhanced Transaction Detail (ETD) Support</h3>
+                <p class="text-gray-600 flex-grow text-sm">Providing rich merchant data to improve customer experience and address a top customer complaint.</p>
+                 <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <p class="text-xs font-semibold uppercase text-amber-600">MEDIUM PRIORITY</p>
+                    <div><span class="inline-block bg-sky-100 text-sky-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">WIL2</span> <span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">BLR2</span></div>
+                </div>
+            </div>
+
+            <!-- Card 5: Infrastructure & Maintenance -->
+            <div class="card p-6 flex flex-col">
+                 <div class="flex items-center mb-4">
+                    <div class="icon-bg bg-slate-100"><svg class="w-8 h-8 text-slate-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 3v1.5M4.5 8.25H21M18 18h.01M5.25 18h.01M18.75 18h.01M19.5 12h.01M18.75 12h.01M11.25 6h1.5M11.25 18h1.5M15 3.75V2.25m-1.5 1.5V2.25m3 3.75V2.25m-1.5 1.5V2.25m-6 13.5V12m-1.5 1.5V12m3 1.5V12m-1.5 1.5V12m-1.5-1.5h-1.5m1.5 1.5h-1.5m3-1.5h-1.5m-1.5 1.5h-1.5M15 12h-1.5m1.5 1.5h-1.5M15 18h-1.5m1.5-1.5h-1.5" /></svg></div>
+                    <span class="ml-4 text-2xl font-bold text-gray-700">109 <span class="text-base font-medium">pts</span></span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Infrastructure & Maintenance</h3>
+                <p class="text-gray-600 flex-grow text-sm">Essential "keep the lights on" work, including system health, security, compliance, and YBIYRI cultural shift.</p>
+                 <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <p class="text-xs font-semibold uppercase text-gray-500">ONGOING</p>
+                    <div><span class="inline-block bg-sky-100 text-sky-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">WIL2</span> <span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">BLR2</span></div>
+                </div>
+            </div>
+
+            <!-- Card 6: Discovery & Future Requirements -->
+            <div class="card p-6 flex flex-col">
+                 <div class="flex items-center mb-4">
+                    <div class="icon-bg bg-cyan-100"><svg class="w-8 h-8 text-cyan-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.25 6.087c0-.355.186-.676.401-.959.215-.283.49-.533.795-.732a7.47 7.47 0 016.052 6.052c-.2.305-.45.58-.732.795-.283.215-.604.401-.959.401h-3.214c-.355 0-.676-.186-.959-.401-.283-.215-.533-.49-.732-.795a7.47 7.47 0 01-6.052-6.052c.2-.305.49-.58.795-.732.215-.283.401-.604.401-.959V3.413c0-.355-.186-.676-.401-.959-.215-.283-.49-.533-.795-.732a7.47 7.47 0 00-6.052 6.052c.2.305.45.58.732.795.283.215.604.401.959.401h3.214c.355 0 .676.186.959.401.283.215.533.49.732.795a7.47 7.47 0 006.052 6.052c-.2.305-.49.58-.795.732-.215.283-.401.604-.401.959v3.174c0 .355.186.676.401.959.215.283.49.533.795.732a7.47 7.47 0 006.052-6.052c.2-.305.45-.58.732-.795.283-.215.604-.401.959-.401h-3.214z" /></svg></div>
+                    <span class="ml-4 text-2xl font-bold text-gray-700">75+ <span class="text-base font-medium">pts</span></span>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mb-2">Discovery & Future Requirements</h3>
+                <p class="text-gray-600 flex-grow text-sm">Strategic research to address emerging business needs, optimize performance, and support major infrastructure transitions.</p>
+                 <div class="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                    <p class="text-xs font-semibold uppercase text-gray-500">EXPLORATORY</p>
+                    <div><span class="inline-block bg-emerald-100 text-emerald-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">BLR2</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const ctx = document.getElementById('workloadChart').getContext('2d');
+            const workloadChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['WIL2 Team', 'BLR2 Team'],
+                    datasets: [{
+                        label: 'Workload in Story Points',
+                        data: [350, 504],
+                        backgroundColor: [
+                            '#0ea5e9', // sky-500
+                            '#10b981'  // emerald-500
+                        ],
+                        borderColor: [
+                            '#ffffff',
+                            '#ffffff'
+                        ],
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + ' points';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    </script>
 </body>
 </html>
