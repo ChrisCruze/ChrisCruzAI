@@ -640,8 +640,9 @@
         const durationLabels = ['5min', '25min', '50min'];
         const ACTIVE_TIMER_LABEL = 'active-timer';
         const COMPLETION_LOG_PATTERN = /\[\d{1,2}:\d{2}:\d{2}(?:am|pm)-\d{1,2}:\d{2}:\d{2}(?:am|pm)\|\d+(?:\.\d+)?min]/i;
-        const baseDocumentTitle = document.title;
-        let documentTitleSource = null;
+        const existingTitleHelpers = window.todoistTitleHelpers;
+        const baseDocumentTitle = existingTitleHelpers?.baseDocumentTitle || document.title;
+        let documentTitleSource = existingTitleHelpers?.documentTitleSource || null;
 
         // Views
         const taskListView = document.getElementById('task-list-view');
@@ -1044,6 +1045,14 @@
             }
         }
 
+        window.todoistTitleHelpers = {
+            baseDocumentTitle,
+            get documentTitleSource() { return documentTitleSource; },
+            set documentTitleSource(value) { documentTitleSource = value; },
+            updateDocumentTitleWithTimer,
+            clearDocumentTitleTimer,
+        };
+
         function formatTimeForLog(date) {
             if (!date) return '';
             let hours = date.getHours();
@@ -1408,6 +1417,49 @@
             "2159934103": "Social", "2277408838": "Van", "2159935681": "Bnb", "2302758535": "Fitness"
         };
 
+        const titleHelpers = window.todoistTitleHelpers || (() => {
+            const baseDocumentTitle = document.title;
+            let documentTitleSource = null;
+
+            function formatTimeForDisplay(seconds) {
+                const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+                const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+                const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+                return `${h}:${m}:${s}`;
+            }
+
+            function updateDocumentTitleWithTimer(elapsedSeconds, source, force = false) {
+                if (documentTitleSource && documentTitleSource !== source && !force) {
+                    return;
+                }
+                if (force || !documentTitleSource) {
+                    documentTitleSource = source;
+                }
+                if (documentTitleSource !== source) return;
+                document.title = `${formatTimeForDisplay(elapsedSeconds)} • ${baseDocumentTitle}`;
+            }
+
+            function clearDocumentTitleTimer(source) {
+                if (documentTitleSource === source) {
+                    documentTitleSource = null;
+                    document.title = baseDocumentTitle;
+                }
+            }
+
+            const helpers = {
+                baseDocumentTitle,
+                get documentTitleSource() { return documentTitleSource; },
+                set documentTitleSource(value) { documentTitleSource = value; },
+                updateDocumentTitleWithTimer,
+                clearDocumentTitleTimer,
+            };
+
+            window.todoistTitleHelpers = helpers;
+            return helpers;
+        })();
+
+        const { updateDocumentTitleWithTimer, clearDocumentTitleTimer } = titleHelpers;
+
         // --- DOM Elements ---
         const matrixView = document.getElementById('matrix-view');
         const tableView = document.getElementById('table-view');
@@ -1545,8 +1597,9 @@
             container.innerHTML = '';
             Object.values(activeTimers).forEach(clearInterval);
             activeTimers = {};
-            if (documentTitleSource && documentTitleSource.startsWith('todoist-')) {
-                clearDocumentTitleTimer(documentTitleSource);
+            const currentTitleSource = titleHelpers.documentTitleSource;
+            if (currentTitleSource && currentTitleSource.startsWith('todoist-')) {
+                clearDocumentTitleTimer(currentTitleSource);
             }
 
             if (!projectName) {
@@ -1577,7 +1630,8 @@
                             updateDocumentTitleWithTimer(elapsedSeconds, contextId);
                         };
                         const initialElapsedSeconds = Math.floor((new Date() - startTime) / 1000);
-                        if (!documentTitleSource || documentTitleSource.startsWith('todoist-')) {
+                        const activeTitleSource = titleHelpers.documentTitleSource;
+                        if (!activeTitleSource || activeTitleSource.startsWith('todoist-')) {
                             updateDocumentTitleWithTimer(initialElapsedSeconds, contextId, true);
                         }
                         updateDisplay();
