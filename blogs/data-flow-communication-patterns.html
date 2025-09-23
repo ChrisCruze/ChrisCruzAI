@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to Data Flow Communication Patterns | ChrisCruz.ai</title>
+    <meta name="description" content="Compare REST APIs, message queues, and shared libraries with interactive tabs, orchestration visuals, and a practical recommendation for the DDA transaction history failover decision." />
+    <meta name="keywords" content="data flow patterns, system integration, REST API, message queue, shared library, orchestration, choreography, transaction history architecture" />
+    <meta name="author" content="Christopher Manuel Cruz-Guzman" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="Interactive Guide to Data Flow Communication Patterns" />
+    <meta property="og:description" content="Explore the trade-offs between APIs, queues, and shared libraries through an interactive decision guide tailored for the DDA history failover program." />
+    <meta property="og:url" content="https://chriscruz.ai/blogs/data-flow-communication-patterns.html" />
+    <meta property="og:image" content="https://chriscruz.ai/images/data-flow-patterns.jpg" />
+    <meta property="article:published_time" content="2025-09-23T00:00:00Z" />
+    <meta property="article:author" content="Christopher Manuel Cruz-Guzman" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <style>
+        :root {
+            color-scheme: light;
+            --bg-gradient: linear-gradient(145deg, #eef2ff 0%, #e0f2fe 50%, #ede9fe 100%);
+            --surface: rgba(255, 255, 255, 0.92);
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --accent: #7c3aed;
+            --text-dark: #0f172a;
+            --text-muted: #475569;
+            --border: rgba(99, 102, 241, 0.2);
+            --radius-xl: 28px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            min-height: 100vh;
+        }
+
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 16px;
+            background: #0f172a;
+            color: #f8fafc;
+            padding: 0.75rem 1.25rem;
+            border-radius: 999px;
+            text-decoration: none;
+            transition: top 0.3s ease;
+            z-index: 1000;
+        }
+
+        .skip-link:focus {
+            top: 16px;
+        }
+
+        .site-header {
+            position: sticky;
+            top: 0;
+            z-index: 999;
+            backdrop-filter: blur(16px);
+            background: rgba(15, 23, 42, 0.72);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .header-inner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 1.5rem;
+        }
+
+        .brand {
+            font-weight: 800;
+            font-size: 1.1rem;
+            letter-spacing: 0.05em;
+            color: #f8fafc;
+            text-decoration: none;
+        }
+
+        .brand span {
+            color: #38bdf8;
+        }
+
+        .primary-nav {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .primary-nav a {
+            color: rgba(248, 250, 252, 0.82);
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .primary-nav a:hover,
+        .primary-nav a:focus {
+            color: #e0f2fe;
+        }
+
+        .page-content {
+            padding: 6rem 1.5rem 4rem;
+        }
+
+        .post-shell {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: var(--radius-xl);
+            padding: 3rem;
+            box-shadow: 0 35px 80px rgba(15, 23, 42, 0.16);
+            border: 1px solid rgba(15, 23, 42, 0.05);
+        }
+
+        .post-hero {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 1rem;
+        }
+
+        .post-title {
+            font-size: clamp(2.2rem, 5vw, 3.4rem);
+            letter-spacing: -0.03em;
+            margin-bottom: 1rem;
+        }
+
+        .post-subtitle {
+            max-width: 720px;
+            margin: 0 auto 1.5rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 1.1rem;
+        }
+
+        .post-meta {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            font-size: 0.95rem;
+            color: #334155;
+        }
+
+        .tabset {
+            margin: 3.5rem 0;
+            border-top: 1px solid rgba(148, 163, 184, 0.15);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding: 1.5rem 0 0.5rem;
+        }
+
+        .tab {
+            appearance: none;
+            background: rgba(15, 23, 42, 0.04);
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab[aria-selected="true"] {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: #ffffff;
+            border-color: rgba(59, 130, 246, 0.3);
+            box-shadow: 0 12px 25px rgba(59, 130, 246, 0.2);
+        }
+
+        .tab:focus-visible {
+            outline: 3px solid rgba(59, 130, 246, 0.5);
+            outline-offset: 2px;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem 0 0;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .diagram {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08), rgba(129, 140, 248, 0.08));
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin: 2rem 0;
+            text-align: center;
+        }
+
+        .diagram h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .flow-diagram {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .service-box {
+            background: #ffffff;
+            border: 2px solid rgba(37, 99, 235, 0.15);
+            border-radius: 18px;
+            padding: 1.25rem 1.75rem;
+            min-width: 150px;
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.12);
+        }
+
+        .service-box h4 {
+            margin-bottom: 0.35rem;
+            font-size: 1.1rem;
+        }
+
+        .arrow {
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .pattern-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.75rem;
+            margin-top: 2.5rem;
+        }
+
+        .pattern-card {
+            border-radius: 20px;
+            padding: 1.75rem;
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.02), rgba(79, 70, 229, 0.08));
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .pattern-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 30px 60px rgba(37, 99, 235, 0.16);
+        }
+
+        .pattern-title {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .pattern-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .pattern-description {
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 1.25rem;
+        }
+
+        .pros-cons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .pros,
+        .cons {
+            border-radius: 14px;
+            padding: 1.1rem;
+            background: rgba(241, 245, 249, 0.8);
+        }
+
+        .pros {
+            border-left: 4px solid #22c55e;
+        }
+
+        .cons {
+            border-left: 4px solid #ef4444;
+        }
+
+        .pros h4,
+        .cons h4 {
+            margin-top: 0;
+            margin-bottom: 0.65rem;
+            font-size: 1rem;
+        }
+
+        .pros ul,
+        .cons ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .pros li,
+        .cons li {
+            position: relative;
+            padding-left: 1.35rem;
+            margin-bottom: 0.5rem;
+            color: #334155;
+            font-size: 0.95rem;
+        }
+
+        .pros li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #16a34a;
+            font-weight: 700;
+        }
+
+        .cons li::before {
+            content: '✗';
+            position: absolute;
+            left: 0;
+            color: #dc2626;
+            font-weight: 700;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+            margin-top: 2.5rem;
+        }
+
+        .comparison-table th {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #f8fafc;
+            text-align: left;
+            padding: 1rem 1.2rem;
+            font-size: 0.95rem;
+            letter-spacing: 0.05em;
+        }
+
+        .comparison-table td {
+            background: rgba(255, 255, 255, 0.96);
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            font-size: 0.96rem;
+            color: #1f2937;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .use-case {
+            background: linear-gradient(135deg, #1d4ed8, #7c3aed);
+            color: #f8fafc;
+            border-radius: 22px;
+            padding: 2.25rem;
+            margin: 2.5rem 0;
+            box-shadow: 0 30px 60px rgba(76, 29, 149, 0.28);
+        }
+
+        .use-case h3 {
+            margin-top: 0;
+            font-size: 1.6rem;
+            margin-bottom: 1.1rem;
+        }
+
+        .option-highlight {
+            background: rgba(15, 23, 42, 0.16);
+            border-radius: 16px;
+            padding: 1.25rem 1.5rem;
+            margin-top: 1rem;
+            border-left: 4px solid rgba(251, 191, 36, 0.9);
+        }
+
+        .option-highlight h4 {
+            margin: 0 0 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .decision-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .decision-card {
+            background: rgba(255, 255, 255, 0.92);
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            padding: 1.5rem;
+            color: #1f2937;
+            box-shadow: 0 15px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        .decision-card .pattern-icon {
+            border-radius: 50%;
+        }
+
+        .resource-banner {
+            margin-top: 3rem;
+            background: rgba(15, 23, 42, 0.85);
+            color: #e2e8f0;
+            border-radius: 18px;
+            padding: 1.75rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .resource-banner a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.4rem;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #38bdf8, #6366f1);
+            color: #0f172a;
+            font-weight: 600;
+            text-decoration: none;
+            box-shadow: 0 12px 25px rgba(59, 130, 246, 0.25);
+        }
+
+        .resource-banner a:hover,
+        .resource-banner a:focus {
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 1024px) {
+            .post-shell {
+                padding: 2.25rem;
+            }
+            .pros-cons {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-inner {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            .primary-nav {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+            .post-shell {
+                padding: 1.75rem;
+            }
+            .diagram {
+                padding: 1.75rem;
+            }
+            .tab {
+                flex: 1 1 48%;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .page-content {
+                padding-top: 5.5rem;
+            }
+            .tab {
+                flex: 1 1 100%;
+            }
+            .comparison-table th,
+            .comparison-table td {
+                font-size: 0.9rem;
+                padding: 0.75rem;
+            }
+            .service-box {
+                min-width: unset;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.001ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="../brand-hub.html" class="brand">ChrisCruz<span>.ai</span></a>
+            <nav class="primary-nav" aria-label="Primary">
+                <a href="../brand-hub.html">Empire</a>
+                <a href="../manifesto.html">Manifesto</a>
+                <a href="../index.html">Home</a>
+                <a href="../blogs/index.html" aria-current="page">Blog</a>
+                <a href="../contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main id="main-content" class="page-content" tabindex="-1">
+        <article class="post-shell">
+            <header class="post-hero">
+                <span class="hero-eyebrow">Integration Architecture · Interactive Guide</span>
+                <h1 class="post-title">Data Flow Communication Patterns, Compared Live</h1>
+                <p class="post-subtitle">Use the tabs, diagrams, and comparison matrix to stress-test REST APIs, message queues, and shared libraries before you pick the architecture that will protect DDA transaction history during batch failovers.</p>
+                <div class="post-meta">
+                    <span>Published September 23, 2025</span>
+                    <span>12 minute read</span>
+                    <span>Updated for Cross-Product API vs. DDA History</span>
+                </div>
+            </header>
+
+            <section class="tabset" aria-label="Data flow exploration">
+                <div class="tabs" role="tablist" aria-label="Integration topics">
+                    <button id="tab-overview" class="tab" role="tab" aria-selected="true" aria-controls="overview" type="button">Overview</button>
+                    <button id="tab-patterns" class="tab" role="tab" aria-selected="false" aria-controls="patterns" type="button">Communication Patterns</button>
+                    <button id="tab-orchestration" class="tab" role="tab" aria-selected="false" aria-controls="orchestration" type="button">Orchestration</button>
+                    <button id="tab-comparison" class="tab" role="tab" aria-selected="false" aria-controls="comparison" type="button">Detailed Comparison</button>
+                    <button id="tab-your-case" class="tab" role="tab" aria-selected="false" aria-controls="your-case" type="button">Your Use Case</button>
+                </div>
+
+                <div id="overview" class="tab-content active" role="tabpanel" aria-labelledby="tab-overview">
+                    <h2>System Integration Patterns at a Glance</h2>
+                    <p>Modern digital ecosystems rarely survive on a single data flow pattern. The healthiest programs blend synchronous APIs, asynchronous events, and embedded libraries depending on <strong>latency targets</strong>, <strong>operational tolerance</strong>, and the <strong>coupling</strong> the business can support. This interactive guide elevates the conversation above personal preference so you can pair each integration with the scenario it was built for.</p>
+                    <div class="diagram" role="figure" aria-labelledby="figure-overview-title">
+                        <h3 id="figure-overview-title">Data Flow Communication Methods</h3>
+                        <div class="flow-diagram">
+                            <div class="service-box">
+                                <h4>Service A</h4>
+                                <p>Producer</p>
+                            </div>
+                            <div class="arrow" aria-hidden="true">→</div>
+                            <div class="service-box" aria-label="Communication Channel">
+                                <h4>Communication</h4>
+                                <p>API · MQ · Library</p>
+                            </div>
+                            <div class="arrow" aria-hidden="true">→</div>
+                            <div class="service-box">
+                                <h4>Service B</h4>
+                                <p>Consumer</p>
+                            </div>
+                        </div>
+                    </div>
+                    <p>Rotate through the tabs to understand how each pattern changes your error budgets, staffing model, and ability to scale the DDA history platform without sacrificing resiliency.</p>
+                </div>
+
+                <div id="patterns" class="tab-content" role="tabpanel" aria-labelledby="tab-patterns">
+                    <h2>Communication Patterns Deep Dive</h2>
+                    <div class="pattern-grid">
+                        <div class="pattern-card">
+                            <div class="pattern-title">
+                                <div class="pattern-icon" aria-hidden="true">API</div>
+                                RESTful API Calls
+                            </div>
+                            <div class="pattern-description">
+                                Synchronous HTTP-based communication where services expose endpoints that downstream teams can call directly. Data is requested and returned in real-time, which keeps teams closely aligned but adds live dependency risk.
+                            </div>
+                            <div class="pros-cons">
+                                <div class="pros">
+                                    <h4>Pros</h4>
+                                    <ul>
+                                        <li>Simple to understand and implement</li>
+                                        <li>Real-time data exchange</li>
+                                        <li>Direct request-response pattern</li>
+                                        <li>Easy debugging and monitoring</li>
+                                        <li>Technology agnostic</li>
+                                    </ul>
+                                </div>
+                                <div class="cons">
+                                    <h4>Cons</h4>
+                                    <ul>
+                                        <li>Tight coupling between services</li>
+                                        <li>Network latency on every call</li>
+                                        <li>Single points of failure</li>
+                                        <li>Harder to scale under high load</li>
+                                        <li>Synchronous blocking calls</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pattern-card">
+                            <div class="pattern-title">
+                                <div class="pattern-icon" aria-hidden="true">MQ</div>
+                                Message Queue (Kafka · RabbitMQ)
+                            </div>
+                            <div class="pattern-description">
+                                Asynchronous messaging where producers publish events and consumers process them when ready. Queues decouple sender and receiver, letting each scale independently while embracing eventual consistency.
+                            </div>
+                            <div class="pros-cons">
+                                <div class="pros">
+                                    <h4>Pros</h4>
+                                    <ul>
+                                        <li>Loose coupling between services</li>
+                                        <li>High throughput capability</li>
+                                        <li>Built-in retry and dead-letter queues</li>
+                                        <li>Horizontal scalability</li>
+                                        <li>Event-driven architecture support</li>
+                                    </ul>
+                                </div>
+                                <div class="cons">
+                                    <h4>Cons</h4>
+                                    <ul>
+                                        <li>Additional infrastructure complexity</li>
+                                        <li>Eventual consistency trade-offs</li>
+                                        <li>Difficult to trace distributed flows</li>
+                                        <li>Message ordering constraints</li>
+                                        <li>Operational overhead</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="pattern-card">
+                            <div class="pattern-title">
+                                <div class="pattern-icon" aria-hidden="true">LIB</div>
+                                Shared Library Integration
+                            </div>
+                            <div class="pattern-description">
+                                In-process code sharing where reusable components are packaged as libraries and compiled into each service. Latency is minimal and deployments are simple, but versioning discipline becomes the make-or-break factor.
+                            </div>
+                            <div class="pros-cons">
+                                <div class="pros">
+                                    <h4>Pros</h4>
+                                    <ul>
+                                        <li>Lowest latency (in-process)</li>
+                                        <li>No network overhead</li>
+                                        <li>Code reuse and consistency</li>
+                                        <li>Simpler runtime operations</li>
+                                        <li>Transactional integrity</li>
+                                    </ul>
+                                </div>
+                                <div class="cons">
+                                    <h4>Cons</h4>
+                                    <ul>
+                                        <li>Tight coupling at build time</li>
+                                        <li>Coordinated deployments required</li>
+                                        <li>Language and framework lock-in</li>
+                                        <li>Versioning complexity</li>
+                                        <li>Harder to scale independently</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="orchestration" class="tab-content" role="tabpanel" aria-labelledby="tab-orchestration">
+                    <h2>Service Orchestration Patterns</h2>
+                    <div class="diagram" role="figure" aria-labelledby="figure-orchestration-title">
+                        <h3 id="figure-orchestration-title">Orchestration vs. Choreography</h3>
+                        <div class="flow-diagram" style="margin-top: 1.5rem; flex-direction: column; gap: 1.75rem;">
+                            <div>
+                                <h4>Orchestration (Central Control)</h4>
+                                <div class="flow-diagram" style="flex-wrap: nowrap; gap: 0.65rem; margin-top: 0.75rem;">
+                                    <div class="service-box" style="background: #1e293b; color: #e2e8f0; border-color: rgba(30, 41, 59, 0.4);">
+                                        <h4>Orchestrator</h4>
+                                        <p>Business Brain</p>
+                                    </div>
+                                    <div class="arrow" aria-hidden="true">→</div>
+                                    <div class="service-box" style="font-size: 0.9rem;">
+                                        Service A
+                                    </div>
+                                    <div class="arrow" aria-hidden="true">→</div>
+                                    <div class="service-box" style="font-size: 0.9rem;">
+                                        Service B
+                                    </div>
+                                    <div class="arrow" aria-hidden="true">→</div>
+                                    <div class="service-box" style="font-size: 0.9rem;">
+                                        Service C
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4>Choreography (Event-Driven)</h4>
+                                <div class="flow-diagram" style="margin-top: 0.75rem;">
+                                    <div class="service-box" style="font-size: 0.9rem;">
+                                        Service A
+                                    </div>
+                                    <div class="arrow" aria-hidden="true">→</div>
+                                    <div class="service-box" style="background: #22c55e; color: #0f172a; border-color: rgba(34, 197, 94, 0.4);">
+                                        Event Bus
+                                    </div>
+                                    <div class="arrow" aria-hidden="true">→</div>
+                                    <div class="service-box" style="font-size: 0.9rem;">
+                                        Service B
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="pattern-grid">
+                        <div class="pattern-card">
+                            <div class="pattern-title">
+                                <div class="pattern-icon" aria-hidden="true">🎯</div>
+                                Orchestration Pattern
+                            </div>
+                            <div class="pattern-description">
+                                A central orchestrator coordinates downstream calls and business rules. You gain visibility and deterministic flows, but the orchestrator becomes a reliability and scalability choke point if it is not engineered with redundancy.
+                            </div>
+                            <div class="pros-cons">
+                                <div class="pros">
+                                    <h4>Pros</h4>
+                                    <ul>
+                                        <li>Centralized business logic</li>
+                                        <li>Easier to trace and debug</li>
+                                        <li>Coordinated error handling</li>
+                                        <li>Simplified testing</li>
+                                    </ul>
+                                </div>
+                                <div class="cons">
+                                    <h4>Cons</h4>
+                                    <ul>
+                                        <li>Single point of failure</li>
+                                        <li>Potential performance bottleneck</li>
+                                        <li>Tight coupling to orchestrator</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pattern-card">
+                            <div class="pattern-title">
+                                <div class="pattern-icon" aria-hidden="true">💃</div>
+                                Choreography Pattern
+                            </div>
+                            <div class="pattern-description">
+                                Services exchange events without a central coordinator. Each bounded context publishes and reacts to domain events, unlocking scale and autonomy while increasing the need for strong observability and eventual consistency playbooks.
+                            </div>
+                            <div class="pros-cons">
+                                <div class="pros">
+                                    <h4>Pros</h4>
+                                    <ul>
+                                        <li>Loose coupling</li>
+                                        <li>High scalability</li>
+                                        <li>No single point of failure</li>
+                                        <li>Independent service evolution</li>
+                                    </ul>
+                                </div>
+                                <div class="cons">
+                                    <h4>Cons</h4>
+                                    <ul>
+                                        <li>Complex to trace workflows</li>
+                                        <li>Challenging error handling</li>
+                                        <li>Eventual consistency concerns</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="comparison" class="tab-content" role="tabpanel" aria-labelledby="tab-comparison">
+                    <h2>Detailed Comparison Matrix</h2>
+                    <p>This matrix sharpens the decision lens. Start with latency and failure handling—two metrics that directly influence customer experience during SOR outages—and then zoom into operational overhead to understand what your run teams will inherit.</p>
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Criteria</th>
+                                <th scope="col">RESTful API</th>
+                                <th scope="col">Message Queue</th>
+                                <th scope="col">Shared Library</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Latency</strong></td>
+                                <td>Medium (100–500 ms)</td>
+                                <td>High (seconds to minutes)</td>
+                                <td>Lowest (microseconds)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Throughput</strong></td>
+                                <td>Medium</td>
+                                <td>Very high</td>
+                                <td>Very high</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Coupling</strong></td>
+                                <td>Runtime coupling</td>
+                                <td>Loose coupling</td>
+                                <td>Build-time coupling</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Scalability</strong></td>
+                                <td>Moderate</td>
+                                <td>Excellent</td>
+                                <td>Limited</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Reliability</strong></td>
+                                <td>Medium</td>
+                                <td>High (with retry/DLQ)</td>
+                                <td>High (in-process)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Complexity</strong></td>
+                                <td>Low</td>
+                                <td>High</td>
+                                <td>Medium</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Technology Independence</strong></td>
+                                <td>High</td>
+                                <td>High</td>
+                                <td>Low</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Operational Overhead</strong></td>
+                                <td>Medium</td>
+                                <td>High</td>
+                                <td>Low</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Data Consistency</strong></td>
+                                <td>Strong (synchronous)</td>
+                                <td>Eventual</td>
+                                <td>Strong (transactional)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Failure Handling</strong></td>
+                                <td>Immediate failure propagation</td>
+                                <td>Built-in retry &amp; DLQ</td>
+                                <td>Application-level recovery</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="your-case" class="tab-content" role="tabpanel" aria-labelledby="tab-your-case">
+                    <h2>Your Cross-Product API Use Case Analysis</h2>
+                    <div class="use-case">
+                        <h3>Context: DDA Transaction History Integration</h3>
+                        <p>Three competing options surfaced during the SOR failover discovery work. Use the highlights below to align timeline pressure with infrastructure reality, then explore the recommended Option B orchestration route.</p>
+                        <div class="option-highlight">
+                            <h4>🅰️ Option A: Direct SOR Integration in Cross-Product API</h4>
+                            <p><strong>Pattern:</strong> RESTful API + database integration<br />
+                            <strong>Timeline:</strong> 16 sprints (March 2026)<br />
+                            <strong>Assessment:</strong> Long-term target state with significant complexity, engineering lift, and timeline risk.</p>
+                        </div>
+                        <div class="option-highlight">
+                            <h4>🅱️ Option B: Consumer Orchestration (Bifurcated Architecture)</h4>
+                            <p><strong>Pattern:</strong> Service orchestration with dual API calls<br />
+                            <strong>Timeline:</strong> Meets 11/30 deadline<br />
+                            <strong>Assessment:</strong> Pragmatic interim solution with transparent technical debt and fast runway to production.</p>
+                        </div>
+                        <div class="option-highlight">
+                            <h4>🅲 Option C: Library Integration (Rejected)</h4>
+                            <p><strong>Pattern:</strong> Shared library with routing logic<br />
+                            <strong>Timeline:</strong> 8 sprints (January 2026)<br />
+                            <strong>Assessment:</strong> Elegant on paper but blocked by MQ infrastructure constraints and connection limits.</p>
+                        </div>
+                    </div>
+
+                    <div class="diagram" role="figure" aria-labelledby="figure-option-b">
+                        <h3 id="figure-option-b">Option B: Recommended Architecture Flow</h3>
+                        <div class="flow-diagram">
+                            <div class="service-box" style="background: #0f172a; color: #f8fafc; border-color: rgba(15, 23, 42, 0.4);">
+                                <h4>Digital Channels</h4>
+                                <p>Orchestrator</p>
+                            </div>
+                            <div class="arrow" aria-hidden="true">→</div>
+                            <div class="service-box" style="background: #22c55e; color: #0f172a; border-color: rgba(34, 197, 94, 0.4);">
+                                <h4>DDA History API</h4>
+                                <p>List Views · SOR Resilient</p>
+                            </div>
+                        </div>
+                        <div style="margin: 1.5rem 0; font-weight: 600;">AND</div>
+                        <div class="flow-diagram">
+                            <div class="service-box" style="background: #0f172a; color: #f8fafc; border-color: rgba(15, 23, 42, 0.4);">
+                                <h4>Search Experience</h4>
+                                <p>SSE Team</p>
+                            </div>
+                            <div class="arrow" aria-hidden="true">→</div>
+                            <div class="service-box" style="background: #2563eb; color: #f8fafc; border-color: rgba(37, 99, 235, 0.4);">
+                                <h4>Cross-Product API</h4>
+                                <p>Search &amp; CDA · Multi-account</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3>Key Considerations for Your Decision</h3>
+                    <div class="decision-grid">
+                        <div class="decision-card">
+                            <div class="pattern-title" style="margin-bottom: 0.75rem;">
+                                <div class="pattern-icon" aria-hidden="true">⏱️</div>
+                                Timeline Pressure
+                            </div>
+                            <p class="pattern-description" style="margin-bottom: 0;">
+                                The Q1 2026 milestone is non-negotiable. Option B extends the proven integrations you already run in production, giving delivery leads a credible path to the November 30th checkpoint.
+                            </p>
+                        </div>
+                        <div class="decision-card">
+                            <div class="pattern-title" style="margin-bottom: 0.75rem;">
+                                <div class="pattern-icon" aria-hidden="true">🏗️</div>
+                                Infrastructure Constraints
+                            </div>
+                            <p class="pattern-description" style="margin-bottom: 0;">
+                                Mainframe MQ connection limits blocked Option C. Roughly 40 Cross-Product instances would demand persistent MQ channels that infrastructure cannot provision without risking stability.
+                            </p>
+                        </div>
+                        <div class="decision-card">
+                            <div class="pattern-title" style="margin-bottom: 0.75rem;">
+                                <div class="pattern-icon" aria-hidden="true">🎯</div>
+                                Strategic Evolution
+                            </div>
+                            <p class="pattern-description" style="margin-bottom: 0;">
+                                Long-term ambition remains a unified Cross-Product “Uber API.” Option B protects current delivery while the utilities-only architecture and AWS optimization efforts move forward.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="resource-banner">
+                <div>
+                    <strong>Need the executive-ready deck?</strong>
+                    <p style="margin: 0; color: rgba(226, 232, 240, 0.8);">Download the companion slide library with stakeholder talking points, RAID items, and sprint-by-sprint checkpoints.</p>
+                </div>
+                <a href="https://docs.google.com/presentation/d/1ExampleDeck" target="_blank" rel="noopener">Open the Strategy Deck →</a>
+            </div>
+        </article>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabButtons = Array.from(document.querySelectorAll('[role="tab"]'));
+            const tabPanels = Array.from(document.querySelectorAll('[role="tabpanel"]'));
+
+            function activateTab(nextTab) {
+                tabButtons.forEach((tab) => {
+                    const isActive = tab === nextTab;
+                    tab.setAttribute('aria-selected', String(isActive));
+                    tab.classList.toggle('active', isActive);
+                    if (isActive) {
+                        tab.focus();
+                    }
+                });
+
+                tabPanels.forEach((panel) => {
+                    const isTarget = panel.id === nextTab.getAttribute('aria-controls');
+                    panel.classList.toggle('active', isTarget);
+                });
+            }
+
+            tabButtons.forEach((tab, index) => {
+                tab.addEventListener('click', () => activateTab(tab));
+                tab.addEventListener('keydown', (event) => {
+                    const { key } = event;
+                    const lastIndex = tabButtons.length - 1;
+                    if (key === 'ArrowRight' || key === 'ArrowDown') {
+                        event.preventDefault();
+                        const nextIndex = index === lastIndex ? 0 : index + 1;
+                        activateTab(tabButtons[nextIndex]);
+                    }
+                    if (key === 'ArrowLeft' || key === 'ArrowUp') {
+                        event.preventDefault();
+                        const prevIndex = index === 0 ? lastIndex : index - 1;
+                        activateTab(tabButtons[prevIndex]);
+                    }
+                    if (key === 'Home') {
+                        event.preventDefault();
+                        activateTab(tabButtons[0]);
+                    }
+                    if (key === 'End') {
+                        event.preventDefault();
+                        activateTab(tabButtons[lastIndex]);
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
