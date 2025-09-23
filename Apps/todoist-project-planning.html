@@ -640,6 +640,8 @@
         const durationLabels = ['5min', '25min', '50min'];
         const ACTIVE_TIMER_LABEL = 'active-timer';
         const COMPLETION_LOG_PATTERN = /\[\d{1,2}:\d{2}:\d{2}(?:am|pm)-\d{1,2}:\d{2}:\d{2}(?:am|pm)\|\d+(?:\.\d+)?min]/i;
+        const baseDocumentTitle = document.title;
+        let documentTitleSource = null;
 
         // Views
         const taskListView = document.getElementById('task-list-view');
@@ -1024,6 +1026,24 @@
             return `${h}:${m}:${s}`;
         }
 
+        function updateDocumentTitleWithTimer(elapsedSeconds, source, force = false) {
+            if (documentTitleSource && documentTitleSource !== source && !force) {
+                return;
+            }
+            if (force || !documentTitleSource) {
+                documentTitleSource = source;
+            }
+            if (documentTitleSource !== source) return;
+            document.title = `${formatTimeForDisplay(elapsedSeconds)} • ${baseDocumentTitle}`;
+        }
+
+        function clearDocumentTitleTimer(source) {
+            if (documentTitleSource === source) {
+                documentTitleSource = null;
+                document.title = baseDocumentTitle;
+            }
+        }
+
         function formatTimeForLog(date) {
             if (!date) return '';
             let hours = date.getHours();
@@ -1046,6 +1066,7 @@
             timerButton.classList.remove('bg-red-500', 'hover:bg-red-600', 'btn-loading');
             timerButton.classList.add('bg-emerald-500', 'hover:bg-emerald-600');
             timerButton.disabled = false;
+            clearDocumentTitleTimer('editor');
         }
 
         function startTimerUI(startTime) {
@@ -1055,9 +1076,15 @@
             timerButton.classList.remove('bg-emerald-500', 'hover:bg-emerald-600');
             timerButton.classList.add('bg-red-500', 'hover:bg-red-600');
 
+            updateDocumentTitleWithTimer(0, 'editor', true);
+
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
             timerInterval = setInterval(() => {
                 const elapsedSeconds = Math.floor((new Date() - timerStartTime) / 1000);
                 timerButton.textContent = `Stop (${formatTimeForDisplay(elapsedSeconds)})`;
+                updateDocumentTitleWithTimer(elapsedSeconds, 'editor');
             }, 1000);
         }
 
@@ -1518,6 +1545,9 @@
             container.innerHTML = '';
             Object.values(activeTimers).forEach(clearInterval);
             activeTimers = {};
+            if (documentTitleSource && documentTitleSource.startsWith('todoist-')) {
+                clearDocumentTitleTimer(documentTitleSource);
+            }
 
             if (!projectName) {
                 section.classList.add('hidden');
@@ -1539,10 +1569,17 @@
                     if (isTimerActive && task.due?.datetime) {
                         const timerDisplay = el.querySelector(`#timer-display-${task.id}`);
                         const startTime = new Date(task.due.datetime);
+                        const contextId = `todoist-${task.id}`;
                         const updateDisplay = () => {
                             const elapsed = new Date() - startTime;
                             timerDisplay.textContent = formatDuration(elapsed);
+                            const elapsedSeconds = Math.floor(elapsed / 1000);
+                            updateDocumentTitleWithTimer(elapsedSeconds, contextId);
                         };
+                        const initialElapsedSeconds = Math.floor((new Date() - startTime) / 1000);
+                        if (!documentTitleSource || documentTitleSource.startsWith('todoist-')) {
+                            updateDocumentTitleWithTimer(initialElapsedSeconds, contextId, true);
+                        }
                         updateDisplay();
                         activeTimers[task.id] = setInterval(updateDisplay, 1000);
                     }
@@ -2028,6 +2065,7 @@
                 
                 clearInterval(activeTimers[taskId]);
                 delete activeTimers[taskId];
+                clearDocumentTitleTimer(`todoist-${taskId}`);
 
                 await Promise.all([fetchTodoistTasks(), fetchCompletedTodoistTasks()]);
                 updateAllProjectKPIs();
