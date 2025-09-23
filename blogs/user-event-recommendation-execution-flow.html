@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Step-by-Step User Event Recommendation Execution Flow | ChrisCruz.ai</title>
+    <meta name="description" content="Progressive disclosure playbook for building a personalized user event recommendation engine with vector matching, configurable thresholds, and quality controls.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f5f7fb;
+            --surface: #ffffff;
+            --surface-accent: #eef2ff;
+            --text: #1f2933;
+            --text-muted: #52616b;
+            --accent: #3b82f6;
+            --accent-strong: #2563eb;
+            --border: #d8dee9;
+            --shadow: 0 30px 60px -20px rgba(15, 23, 42, 0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top right, rgba(59, 130, 246, 0.12), transparent 45%),
+                        radial-gradient(circle at bottom left, rgba(129, 140, 248, 0.1), transparent 40%),
+                        var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(14px);
+            background: rgba(245, 247, 251, 0.85);
+            border-bottom: 1px solid rgba(226, 232, 240, 0.9);
+        }
+
+        .nav {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav .pill {
+            font-size: 0.9rem;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, rgba(37, 99, 235, 0.08), rgba(59, 130, 246, 0.18));
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        main {
+            max-width: 1080px;
+            margin: 0 auto;
+            padding: 72px 24px 120px;
+        }
+
+        .hero {
+            background: var(--surface);
+            border-radius: 28px;
+            padding: 64px 56px;
+            box-shadow: var(--shadow);
+            margin-bottom: 64px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(140deg, rgba(37, 99, 235, 0.12), rgba(129, 140, 248, 0.06), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            color: var(--accent-strong);
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.75rem, 5vw, 3.8rem);
+            margin: 0 0 16px;
+            font-weight: 900;
+            letter-spacing: -1.8px;
+        }
+
+        .hero p {
+            max-width: 620px;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            margin: 0 0 32px;
+        }
+
+        .hero-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 18px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .cta-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 32px;
+        }
+
+        .btn {
+            padding: 14px 24px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, var(--accent), var(--accent-strong));
+            color: #fff;
+            box-shadow: 0 18px 30px -15px rgba(37, 99, 235, 0.5);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: rgba(37, 99, 235, 0.08);
+            color: var(--accent-strong);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 40px;
+        }
+
+        .intro {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 32px 36px;
+            box-shadow: var(--shadow);
+        }
+
+        .intro h2 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            letter-spacing: -0.6px;
+        }
+
+        .intro p {
+            color: var(--text-muted);
+            margin-bottom: 16px;
+        }
+
+        .tag-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .tag {
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.06);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .phase-card {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 32px 36px;
+            box-shadow: var(--shadow);
+        }
+
+        .phase-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 2.4px;
+            color: var(--accent-strong);
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+
+        .phase-title {
+            margin: 0 0 12px;
+            font-size: 1.6rem;
+            letter-spacing: -0.5px;
+        }
+
+        .phase-desc {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+
+        details.timeline {
+            border: 1px solid rgba(37, 99, 235, 0.18);
+            border-radius: 18px;
+            padding: 20px 22px;
+            background: linear-gradient(145deg, rgba(59, 130, 246, 0.1), rgba(255, 255, 255, 0.92));
+            margin-bottom: 16px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        details.timeline[open] {
+            border-color: rgba(37, 99, 235, 0.35);
+            box-shadow: 0 24px 40px -20px rgba(37, 99, 235, 0.35);
+        }
+
+        details.timeline summary {
+            list-style: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.05rem;
+            letter-spacing: -0.2px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        details.timeline summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .summary-indicator {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            color: var(--accent-strong);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            transition: transform 0.2s ease;
+        }
+
+        details.timeline[open] .summary-indicator {
+            transform: rotate(90deg);
+        }
+
+        .timeline-body {
+            margin-top: 18px;
+            border-top: 1px solid rgba(15, 23, 42, 0.08);
+            padding-top: 18px;
+            color: var(--text-muted);
+        }
+
+        .timeline-body p {
+            margin-top: 0;
+            margin-bottom: 12px;
+        }
+
+        .timeline-body ul {
+            padding-left: 20px;
+            margin: 12px 0;
+        }
+
+        .split-grid {
+            display: grid;
+            gap: 28px;
+        }
+
+        @media (min-width: 960px) {
+            .split-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .callout {
+            background: linear-gradient(120deg, rgba(224, 242, 254, 0.9), rgba(219, 234, 254, 0.7));
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            border-radius: 20px;
+            padding: 28px 30px;
+            box-shadow: var(--shadow);
+        }
+
+        .callout h3 {
+            margin-top: 0;
+        }
+
+        .code-block {
+            background: var(--surface);
+            border-radius: 18px;
+            padding: 24px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            color: #0f172a;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            overflow-x: auto;
+            box-shadow: var(--shadow);
+        }
+
+        .footer {
+            margin-top: 72px;
+            padding: 40px 0 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .bullet-grid {
+            display: grid;
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .bullet-item {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .bullet-item span {
+            font-weight: 700;
+            color: var(--accent-strong);
+        }
+
+        @media (max-width: 720px) {
+            .hero {
+                padding: 48px 32px;
+            }
+
+            .intro,
+            .phase-card,
+            .callout,
+            .code-block {
+                padding: 26px 24px;
+            }
+
+            .hero-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav">
+            <a href="/" aria-label="Return to ChrisCruz.ai home">← Back to Home</a>
+            <a href="/blogs/index.html" class="pill">Explore the Empire Blog</a>
+        </div>
+    </header>
+    <main>
+        <section class="hero">
+            <div class="hero-badge">Recommendation Systems Playbook</div>
+            <h1>Step-by-Step User Event Recommendation Execution Flow</h1>
+            <p>
+                A progressive disclosure blueprint for delivering personalized event nudges with traceable logging, vector-based matching,
+                and configurable guardrails. Use it to stand up a production-ready engine that balances intelligence, transparency,
+                and psychological resonance.
+            </p>
+            <div class="hero-meta">
+                <span>Updated: October 22, 2025</span>
+                <span>Reading Time: 11 minutes</span>
+                <span>Author: Christopher Manuel Cruz-Guzman</span>
+            </div>
+            <div class="cta-group">
+                <a class="btn btn-primary" href="#execution-map">Open the Execution Map</a>
+                <a class="btn btn-secondary" href="#reference-implementation">Jump to Code References</a>
+            </div>
+        </section>
+
+        <div class="content-grid">
+            <section class="intro">
+                <h2>Why this flow matters</h2>
+                <p>
+                    Push notifications succeed when the orchestration is as intentional as the copy. This walkthrough breaks the recommendation lifecycle into
+                    discrete checkpoints—from validating inputs to closing the loop on logging—so product and engineering teams can adopt it without guesswork.
+                </p>
+                <p>
+                    Each stage below opens as you need it, keeping strategic intent visible while hiding implementation detail until you are ready. That is progressive
+                    disclosure applied to system design: clarity up front, depth on demand.
+                </p>
+                <div class="tag-grid">
+                    <span class="tag">Vector Personalization</span>
+                    <span class="tag">Quality Control</span>
+                    <span class="tag">Psychology-Driven Nudges</span>
+                    <span class="tag">Full-Funnel Logging</span>
+                </div>
+            </section>
+
+            <section class="phase-card" id="execution-map">
+                <div class="phase-label">Execution Blueprint</div>
+                <h2 class="phase-title">Progressive Disclosure Timeline</h2>
+                <p class="phase-desc">
+                    Expand each checkpoint to understand its goals, implementation notes, and fallback paths. Collapse when finished to keep your focus on the stages ahead.
+                </p>
+
+                <details class="timeline" open>
+                    <summary>
+                        <span>01. Input Validation & Initial Logging</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Receive user and event identifiers, record the timestamp, and confirm both IDs match expected formats before any downstream work.</p>
+                        <ul>
+                            <li>Capture structured logs with function name, parameters, and start status.</li>
+                            <li>Reject early if IDs are malformed to preserve compute and maintain traceability.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>02. User Profile Lookup</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Pull the full behavioral, preference, and social graph to fuel personalization.</p>
+                        <ul>
+                            <li>Load profile basics, historic events, interaction patterns, and notification preferences.</li>
+                            <li>Gracefully handle missing users by raising a <code>UserNotFoundError</code>.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>03. User Vectorization Check</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Confirm an embedding exists before continuing. If absent, pivot into vector generation.</p>
+                        <ul>
+                            <li>Refresh the profile after vectorization so downstream logic uses the latest data.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>04. User Vectorization Process</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Create a narrative that blends demographics, interests, spending signals, and history to feed the embedding model.</p>
+                        <ul>
+                            <li>Generate the vector with <code>text-embedding-3-large</code> (or your selected provider).</li>
+                            <li>Persist the vector back into the behavioral profile and log dimensionality.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>05. Event Data Retrieval</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Load venue insights, participant counts, and existing event vectors to compare against user intent.</p>
+                        <ul>
+                            <li>Short-circuit with <code>EventNotFoundError</code> when details are missing.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>06. Vector Similarity Calculation</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Compute a compatibility score between user and event vectors. Normalize results to a 0–1 scale.</p>
+                        <ul>
+                            <li>Log the raw score for analytics and A/B tuning.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>07. Compatibility Threshold Check</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Compare the score to configurable modes (strict, moderate, relaxed, discovery) or custom thresholds.</p>
+                        <ul>
+                            <li>Return a "no recommendation" response if the match misses the bar and document the reason.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>08. User Data Sufficiency Assessment</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Score profile completeness to decide between high, moderate, or generic personalization paths.</p>
+                        <ul>
+                            <li>Fallback to discovery templates when the data score falls below the threshold.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>09. Nudge Type Determination</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Use social context, scarcity triggers, venue reputation, and compatibility strength to pick a psychology-backed nudge.</p>
+                        <ul>
+                            <li>Available options: friend interest, scarcity alert, host reputation, perfect match, similar taste.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>10. Context Generation</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Assemble the narrative ingredients—preferences, event details, compatibility, personalization level—using configurable templates.</p>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>11. Message Generation</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Create the notification with creativity and tone parameters while honoring length limits.</p>
+                        <ul>
+                            <li>Regenerate with adjusted creativity when quality checks fall below minimum thresholds.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>12. Message Quality Validation</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Run grammar, relevance, and appropriateness checks. Only approve messages that meet configured scores.</p>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>13. User Interaction History Update</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Persist notification content, nudge type, and metadata to both user behavior and centralized notification stores.</p>
+                        <ul>
+                            <li>Track psychology principle usage for future targeting experiments.</li>
+                        </ul>
+                    </div>
+                </details>
+
+                <details class="timeline">
+                    <summary>
+                        <span>14. Final Logging & Return</span>
+                        <span class="summary-indicator">➜</span>
+                    </summary>
+                    <div class="timeline-body">
+                        <p>Record execution completion, timing metrics, and outputs. Return structured results for downstream analytics.</p>
+                    </div>
+                </details>
+            </section>
+
+            <section class="split-grid" id="personalization">
+                <div class="phase-card">
+                    <div class="phase-label">Configuration Levers</div>
+                    <h2 class="phase-title">What you can tune without code changes</h2>
+                    <p class="phase-desc">Template and threshold controls make the engine adaptable across acquisition, retention, or discovery campaigns.</p>
+                    <div class="bullet-grid">
+                        <div class="bullet-item"><span>01</span><div>Threshold configuration with strict/moderate/relaxed/discovery modes or per-campaign overrides.</div></div>
+                        <div class="bullet-item"><span>02</span><div>Template families aligned to nudge psychology (friend interest, scarcity, host reputation, perfect match, similar taste).</div></div>
+                        <div class="bullet-item"><span>03</span><div>Quality control settings: minimum scores, regeneration attempts, and creativity/tone adjustments.</div></div>
+                        <div class="bullet-item"><span>04</span><div>Logging toggles for inputs, outputs, execution timing, and sensitive data masking.</div></div>
+                    </div>
+                </div>
+                <div class="callout">
+                    <h3>Alternative Protocols</h3>
+                    <p>Sometimes the smartest recommendation is knowing when to pause. Two resilient fallbacks keep the UX sharp:</p>
+                    <ul>
+                        <li><strong>Insufficient User Data</strong>: pivot to generic discovery templates, emphasize venue credibility, and invite profile completion.</li>
+                        <li><strong>Low Compatibility</strong>: return a no-recommendation response, log the cause, and optionally trigger a nudge to enrich profile data.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <section class="phase-card" id="reference-implementation">
+                <div class="phase-label">Reference Implementation</div>
+                <h2 class="phase-title">Core orchestration function</h2>
+                <p class="phase-desc">Use this async workflow as your baseline. It strings together the entire execution flow while emitting observability breadcrumbs.</p>
+                <div class="code-block">
+<pre><code>async def generate_user_event_recommendation(user_id, event_id, config):
+    execution_start = datetime.now()
+    try:
+        log_function_execution(..., {"status": "started", "timestamp": execution_start})
+        user_profile = await fetch_user_profile_complete(user_id, [...])
+        if not user_profile:
+            raise UserNotFoundError(...)
+        if not user_profile.behavioral_data.get('user_vector'):
+            await vectorize_user(user_id, user_profile)
+            user_profile = await fetch_user_profile_complete(user_id, ["behavioral_data"])
+        event_data = await fetch_event_details_with_venue(event_id, include_participants=True)
+        if not event_data:
+            raise EventNotFoundError(...)
+        compatibility_score = calculate_user_event_compatibility(
+            user_profile.behavioral_data.user_vector,
+            event_data.event_vector
+        )
+        min_threshold = config.get('compatibility_threshold', 0.7)
+        if compatibility_score &lt; min_threshold:
+            return RecommendationResult(success=False, reason="compatibility_below_threshold", ...)
+        nudge_type = determine_optimal_nudge_type(user_profile, event_data, compatibility_score)
+        personalization_level = assess_user_data_sufficiency(user_profile)
+        if personalization_level == "insufficient":
+            nudge_type = "generic_discovery"
+        context = await assemble_message_context(user_id, event_id, "recommendation")
+        context.compatibility_score = compatibility_score
+        context.personalization_level = personalization_level
+        message_result = await generate_personalized_message_with_template(nudge_type, context, config)
+        await update_user_message_history(user_id, event_id, nudge_type, message_result)
+        result = RecommendationResult(success=True, message=message_result.content, ...)
+        log_function_execution(..., result.to_dict(), {"status": "completed", "execution_time_ms": result.execution_time_ms})
+        return result
+    except Exception as e:
+        log_function_execution(..., {"error": str(e)}, {"status": "failed", "error_type": type(e).__name__})
+        raise
+</code></pre>
+                </div>
+            </section>
+
+            <section class="phase-card" id="supporting-components">
+                <div class="phase-label">Supporting Components</div>
+                <h2 class="phase-title">Functions that power the engine</h2>
+                <p class="phase-desc">Keep these helpers modular so teams can swap models, logging providers, or persistence layers without rewriting orchestration.</p>
+                <div class="bullet-grid">
+                    <div class="bullet-item"><span>Vectorize</span><div><strong><code>vectorize_user</code></strong> crafts a natural-language narrative, requests embeddings, persists vectors, and logs the dimensionality.</div></div>
+                    <div class="bullet-item"><span>Threshold</span><div><strong><code>check_compatibility_threshold</code></strong> respects strict/moderate/relaxed/discovery presets or campaign overrides.</div></div>
+                    <div class="bullet-item"><span>Nudge</span><div><strong><code>determine_optimal_nudge_type</code></strong> picks the right psychology lever—social proof, scarcity, reputation, or perfect match—before defaulting to discovery.</div></div>
+                    <div class="bullet-item"><span>Assess</span><div><strong><code>assess_user_data_sufficiency</code></strong> scores profile richness across preferences, behavior, and social context to set personalization tiers.</div></div>
+                    <div class="bullet-item"><span>Generate</span><div><strong><code>generate_personalized_message_with_template</code></strong> pairs context-aware prompts with validation loops until quality benchmarks are met.</div></div>
+                    <div class="bullet-item"><span>Log</span><div><strong><code>update_user_message_history</code></strong> archives every interaction, nudge type, and psychology principle for future experimentation.</div></div>
+                </div>
+            </section>
+
+            <section class="callout" id="resilience">
+                <h3>Error handling that preserves trust</h3>
+                <p>Design guardrails for the inevitable outages and edge cases:</p>
+                <ul>
+                    <li><strong>User Not Found</strong>: stop execution, log the failure, and surface an actionable error upstream.</li>
+                    <li><strong>Event Not Found</strong>: apply the same rigor—log, exit, and avoid phantom notifications.</li>
+                    <li><strong>Vectorization Failure</strong>: gracefully fall back to rule-based matching and simplified scoring while flagging the incident for retraining review.</li>
+                </ul>
+            </section>
+        </div>
+
+        <footer class="footer">
+            <p>Need a companion system? Continue exploring on the <a href="/blogs/index.html">Empire Blog</a> or connect via the <a href="/contact.html">contact portal</a>.</p>
+            <p>© 2025 Christopher Manuel Cruz-Guzman. Crafted for clarity-first, progressive disclosure experiences.</p>
+        </footer>
+    </main>
+</body>
+</html>
