@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cuculi AI Notification System – Python Function Library</title>
+    <meta name="description" content="Explore the complete Cuculi AI notification Python library with 32 functions organized across configuration, data, psychology, AI generation, delivery, and monitoring layers." />
+    <meta name="keywords" content="Cuculi AI, notification system, Python library, AI nudges, progressive disclosure" />
+    <meta name="author" content="Chris Cruz" />
+    <meta property="og:title" content="Cuculi AI Notification System – Python Function Library" />
+    <meta property="og:description" content="Dive into the 32-function Cuculi AI notification stack with progressive disclosure of configuration, database, psychology, AI, delivery, and monitoring workflows." />
+    <meta property="og:type" content="article" />
+    <meta property="og:url" content="https://chriscruz.ai/blogs/cuculi-ai-notification-system-python-function-library.html" />
+    <meta property="og:image" content="https://chriscruz.ai/images/cuculi-ai-notification-library-cover.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Cuculi AI Notification System – Python Function Library" />
+    <meta name="twitter:description" content="Progressively reveal every configuration, function table, and execution phase behind Cuculi AI's psychology-driven notifications." />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(180deg, #f9fafb 0%, #eef2ff 45%, #ffffff 100%);
+            color: #1f2937;
+        }
+        .surface-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            border-radius: 1.5rem;
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.08);
+            border: 1px solid rgba(99, 102, 241, 0.1);
+        }
+        .disclosure-card {
+            border-radius: 1rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            background: rgba(255, 255, 255, 0.92);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        details[open].disclosure-card {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 20px 35px rgba(30, 64, 175, 0.12);
+        }
+        .disclosure-summary {
+            cursor: pointer;
+            list-style: none;
+        }
+        .disclosure-summary::-webkit-details-marker {
+            display: none;
+        }
+        .disclosure-icon {
+            transition: transform 0.2s ease;
+        }
+        details[open] .disclosure-icon {
+            transform: rotate(90deg);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 0.75rem;
+            text-align: left;
+            vertical-align: top;
+        }
+        th {
+            background: rgba(79, 70, 229, 0.08);
+            font-weight: 600;
+            color: #312e81;
+        }
+        code {
+            background-color: rgba(30, 64, 175, 0.08);
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.45rem;
+            font-size: 0.9rem;
+        }
+        pre {
+            border-radius: 1rem;
+            background: rgba(15, 23, 42, 0.9);
+            color: #f8fafc;
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+        .phase-grid {
+            display: grid;
+            gap: 1.5rem;
+        }
+        @media (min-width: 768px) {
+            .phase-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <nav class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-10 text-sm font-semibold text-indigo-700">
+            <a href="../index.html" class="inline-flex items-center gap-2 hover:text-indigo-900 transition-colors">
+                <span aria-hidden="true">←</span>
+                <span>Back to Home</span>
+            </a>
+            <a href="index.html" class="inline-flex items-center gap-2 hover:text-indigo-900 transition-colors">
+                <span>Browse All Articles</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        </nav>
+
+        <header class="surface-card p-10 sm:p-14 mb-14">
+            <div class="flex flex-col gap-6">
+                <div class="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-indigo-500">
+                    <span class="w-2 h-2 rounded-full bg-indigo-400"></span>
+                    Cuculi AI · Notification Engineering
+                </div>
+                <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black text-slate-900 leading-tight">
+                    Cuculi AI Notification System – Python Function Library
+                </h1>
+                <p class="text-lg sm:text-xl text-slate-600 max-w-3xl">
+                    Progressively uncover the 32 core functions, configuration blueprints, and execution choreography that power Cuculi AI's psychology-driven notification engine. Each section is designed for progressive disclosure—skim the summaries, expand the layers, and capture every implementation detail.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
+                    <div class="rounded-2xl border border-indigo-100 bg-white/70 p-5">
+                        <p class="text-3xl font-black text-indigo-600">32</p>
+                        <p class="font-semibold text-slate-600">Core Python Functions</p>
+                        <p class="text-slate-500">Organized across 7 interlocking categories.</p>
+                    </div>
+                    <div class="rounded-2xl border border-indigo-100 bg-white/70 p-5">
+                        <p class="text-3xl font-black text-indigo-600">6</p>
+                        <p class="font-semibold text-slate-600">Execution Phases</p>
+                        <p class="text-slate-500">Critical-to-low priority pipeline orchestration.</p>
+                    </div>
+                    <div class="rounded-2xl border border-indigo-100 bg-white/70 p-5">
+                        <p class="text-3xl font-black text-indigo-600">4</p>
+                        <p class="font-semibold text-slate-600">Configuration Files</p>
+                        <p class="text-slate-500">Environment, templates, delivery, and tests.</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section aria-labelledby="toc" class="mb-16">
+            <div class="surface-card p-8">
+                <h2 id="toc" class="text-2xl font-bold text-slate-900 mb-6">Progressive Disclosure Roadmap</h2>
+                <p class="text-slate-600 mb-6">Follow the curated sequence below. Each card reveals a deeper layer—from architecture context to exact YAML configurations.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <a href="#system-overview" class="group block p-5 rounded-2xl border border-indigo-100 bg-white/70 hover:border-indigo-400 transition">
+                        <div class="text-sm uppercase tracking-[0.2em] text-indigo-500 mb-2">01</div>
+                        <p class="text-lg font-semibold text-slate-900 group-hover:text-indigo-600">System Overview &amp; Data Flow</p>
+                        <p class="text-sm text-slate-500">Understand how configuration, context, AI, and delivery connect.</p>
+                    </a>
+                    <a href="#directory-structure" class="group block p-5 rounded-2xl border border-indigo-100 bg-white/70 hover:border-indigo-400 transition">
+                        <div class="text-sm uppercase tracking-[0.2em] text-indigo-500 mb-2">02</div>
+                        <p class="text-lg font-semibold text-slate-900 group-hover:text-indigo-600">Source Directory Blueprint</p>
+                        <p class="text-sm text-slate-500">Map every folder that houses the functions and configs.</p>
+                    </a>
+                    <a href="#function-categories" class="group block p-5 rounded-2xl border border-indigo-100 bg-white/70 hover:border-indigo-400 transition">
+                        <div class="text-sm uppercase tracking-[0.2em] text-indigo-500 mb-2">03</div>
+                        <p class="text-lg font-semibold text-slate-900 group-hover:text-indigo-600">Function Categories</p>
+                        <p class="text-sm text-slate-500">Reveal tables for configuration, database, psychology, AI, delivery, and monitoring.</p>
+                    </a>
+                    <a href="#execution-sequence" class="group block p-5 rounded-2xl border border-indigo-100 bg-white/70 hover:border-indigo-400 transition">
+                        <div class="text-sm uppercase tracking-[0.2em] text-indigo-500 mb-2">04</div>
+                        <p class="text-lg font-semibold text-slate-900 group-hover:text-indigo-600">Execution Sequence</p>
+                        <p class="text-sm text-slate-500">Step-by-step flows grouped by priority phase.</p>
+                    </a>
+                    <a href="#priority-matrix" class="group block p-5 rounded-2xl border border-indigo-100 bg-white/70 hover:border-indigo-400 transition">
+                        <div class="text-sm uppercase tracking-[0.2em] text-indigo-500 mb-2">05</div>
+                        <p class="text-lg font-semibold text-slate-900 group-hover:text-indigo-600">Priority Matrix</p>
+                        <p class="text-sm text-slate-500">Clarify what must launch first versus continuous optimizations.</p>
+                    </a>
+                    <a href="#configuration-management" class="group block p-5 rounded-2xl border border-indigo-100 bg-white/70 hover:border-indigo-400 transition">
+                        <div class="text-sm uppercase tracking-[0.2em] text-indigo-500 mb-2">06</div>
+                        <p class="text-lg font-semibold text-slate-900 group-hover:text-indigo-600">Configuration Management</p>
+                        <p class="text-sm text-slate-500">Inspect every YAML file powering environments, nudges, and delivery.</p>
+                    </a>
+                    <a href="#testing-framework" class="group block p-5 rounded-2xl border border-indigo-100 bg-white/70 hover:border-indigo-400 transition">
+                        <div class="text-sm uppercase tracking-[0.2em] text-indigo-500 mb-2">07</div>
+                        <p class="text-lg font-semibold text-slate-900 group-hover:text-indigo-600">Testing Framework</p>
+                        <p class="text-sm text-slate-500">Review mandatory validation, performance, and integration coverage.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+        <section id="system-overview" class="mb-16">
+            <div class="surface-card p-10">
+                <div class="flex flex-col gap-6">
+                    <h2 class="text-3xl font-bold text-slate-900">System Overview</h2>
+                    <p class="text-lg text-slate-600">
+                        The Cuculi AI notification system orchestrates <strong>32 core functions</strong> across seven categories to craft personalized nudges rooted in behavioral psychology. Each layer—from configuration to analytics—feeds the next, enabling a disciplined, testable pipeline.
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="rounded-2xl border border-indigo-100 bg-white/70 p-6">
+                            <h3 class="text-xl font-semibold text-slate-900 mb-3">Data Flow Spine</h3>
+                            <p class="text-slate-600 mb-4">Every notification follows a strict progression so no dependency is skipped.</p>
+                            <ol class="space-y-2 text-slate-600 list-decimal list-inside">
+                                <li>Configuration Load</li>
+                                <li>Database Initialization</li>
+                                <li>User Action Intake</li>
+                                <li>Context Assembly</li>
+                                <li>Psychology Selection</li>
+                                <li>AI Content Generation</li>
+                                <li>Delivery Execution</li>
+                                <li>Analytics &amp; Monitoring</li>
+                            </ol>
+                        </div>
+                        <div class="rounded-2xl border border-indigo-100 bg-white/70 p-6">
+                            <h3 class="text-xl font-semibold text-slate-900 mb-3">What Progressive Disclosure Means Here</h3>
+                            <p class="text-slate-600 mb-4">Each section below unlocks more fidelity:</p>
+                            <ul class="space-y-2 text-slate-600">
+                                <li><span class="font-semibold">Start broad:</span> Understand categories at a glance.</li>
+                                <li><span class="font-semibold">Expand tables:</span> Reveal exact function signatures, outputs, and tunable parameters.</li>
+                                <li><span class="font-semibold">Drill into YAML:</span> See the literal configuration values driving runtime behavior.</li>
+                                <li><span class="font-semibold">Validate:</span> Close with the testing obligations for every function.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="directory-structure" class="mb-16">
+            <div class="surface-card p-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-6">Directory Structure</h2>
+                <p class="text-slate-600 mb-6">Trace where each component of the notification engine lives. Expand the tree mentally as you map functions, configs, scripts, and test fixtures.</p>
+                <pre><code>cuculi_ai_notifications/
+├── config/
+│   ├── settings.yaml              # Main system configuration
+│   ├── nudge_templates.yaml       # Psychology-driven templates
+│   ├── delivery_channels.yaml     # Channel configurations
+│   └── test_settings.yaml         # Testing configurations
+├── src/
+│   ├── __init__.py
+│   ├── core/
+│   │   ├── __init__.py
+│   │   ├── config/
+│   │   │   ├── __init__.py
+│   │   │   └── config_manager.py
+│   │   ├── database/
+│   │   │   ├── __init__.py
+│   │   │   ├── mongodb_client.py
+│   │   │   ├── vector_operations.py
+│   │   │   └── data_retrieval.py
+│   │   ├── ai/
+│   │   │   ├── __init__.py
+│   │   │   ├── openai_client.py
+│   │   │   ├── prompt_engine.py
+│   │   │   └── content_generator.py
+│   │   ├── psychology/
+│   │   │   ├── __init__.py
+│   │   │   ├── behavioral_analyzer.py
+│   │   │   ├── nudge_selector.py
+│   │   │   └── user_segmenter.py
+│   │   ├── delivery/
+│   │   │   ├── __init__.py
+│   │   │   ├── channel_manager.py
+│   │   │   ├── timing_optimizer.py
+│   │   │   └── delivery_handler.py
+│   │   ├── monitoring/
+│   │   │   ├── __init__.py
+│   │   │   ├── logger.py
+│   │   │   ├── performance_tracker.py
+│   │   │   └── quality_controller.py
+│   │   └── utils/
+│   │       ├── __init__.py
+│   │       ├── validators.py
+│   │       ├── formatters.py
+│   │       └── helpers.py
+├── tests/
+│   ├── __init__.py
+│   ├── unit/
+│   │   ├── test_config/
+│   │   ├── test_database/
+│   │   ├── test_ai/
+│   │   ├── test_psychology/
+│   │   ├── test_delivery/
+│   │   └── test_monitoring/
+│   ├── integration/
+│   │   ├── test_end_to_end.py
+│   │   └── test_api_flows.py
+│   ├── fixtures/
+│   │   ├── sample_users.json
+│   │   ├── sample_events.json
+│   │   └── mock_responses.json
+│   └── conftest.py
+├── scripts/
+│   ├── setup_database.py
+│   ├── create_indexes.py
+│   ├── migrate_data.py
+│   └── run_benchmarks.py
+├── docs/
+│   ├── api_reference.md
+│   ├── configuration_guide.md
+│   └── deployment_guide.md
+├── requirements/
+│   ├── base.txt
+│   ├── dev.txt
+│   └── test.txt
+└── README.md</code></pre>
+            </div>
+        </section>
+        <section id="function-categories" class="mb-16">
+            <div class="surface-card p-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Function Categories</h2>
+                <p class="text-slate-600 mb-8">Expand each accordion to reveal every function, file location, signature, return object, and configurable parameter. This is the heart of the library—<strong>32 functions</strong> divided into seven mission-specific categories.</p>
+                <div class="space-y-5" data-accordion="categories">
+                    <details class="disclosure-card" open>
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-indigo-500">Category 1</p>
+                                <h3 class="text-xl font-semibold text-slate-900">Configuration &amp; Initialization</h3>
+                                <p class="text-sm text-slate-500">Foundation functions for system setup and configuration management.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Function Name</th>
+                                            <th>File Location</th>
+                                            <th>Input Parameters</th>
+                                            <th>Output Type</th>
+                                            <th>Configurable Parameters</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>load_yaml_configuration</code></td>
+                                            <td><code>config/config_manager.py</code></td>
+                                            <td><code>config_path: str, env: str</code></td>
+                                            <td><code>ConfigDict</code></td>
+                                            <td>environment, validation_schema</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>validate_configuration_schema</code></td>
+                                            <td><code>config/config_manager.py</code></td>
+                                            <td><code>config: dict, schema: dict</code></td>
+                                            <td><code>ValidationResult</code></td>
+                                            <td>strict_mode, error_handling</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>initialize_environment_variables</code></td>
+                                            <td><code>config/config_manager.py</code></td>
+                                            <td><code>config: ConfigDict</code></td>
+                                            <td><code>EnvVars</code></td>
+                                            <td>override_existing, prefix</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>setup_logging_configuration</code></td>
+                                            <td><code>config/config_manager.py</code></td>
+                                            <td><code>log_config: dict</code></td>
+                                            <td><code>Logger</code></td>
+                                            <td>log_level, file_rotation, format</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-indigo-500">Category 2</p>
+                                <h3 class="text-xl font-semibold text-slate-900">Database Connectivity &amp; Operations</h3>
+                                <p class="text-sm text-slate-500">MongoDB connection, vector search, and data operations.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Function Name</th>
+                                            <th>File Location</th>
+                                            <th>Input Parameters</th>
+                                            <th>Output Type</th>
+                                            <th>Configurable Parameters</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>create_mongodb_connection</code></td>
+                                            <td><code>database/mongodb_client.py</code></td>
+                                            <td><code>connection_string: str, config: dict</code></td>
+                                            <td><code>MongoClient</code></td>
+                                            <td>timeout, pool_size, retry_writes</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>initialize_database_collections</code></td>
+                                            <td><code>database/mongodb_client.py</code></td>
+                                            <td><code>client: MongoClient, db_name: str</code></td>
+                                            <td><code>Database</code></td>
+                                            <td>collection_names, indexes</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>setup_vector_search_indexes</code></td>
+                                            <td><code>database/vector_operations.py</code></td>
+                                            <td><code>db: Database, index_config: dict</code></td>
+                                            <td><code>IndexResults</code></td>
+                                            <td>vector_dimensions, similarity_algorithm</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>create_aggregation_pipeline</code></td>
+                                            <td><code>database/data_retrieval.py</code></td>
+                                            <td><code>pipeline_type: str, params: dict</code></td>
+                                            <td><code>Pipeline</code></td>
+                                            <td>optimization_level, cache_results</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>execute_vector_similarity_search</code></td>
+                                            <td><code>database/vector_operations.py</code></td>
+                                            <td><code>collection: Collection, query_vector: List[float], params: dict</code></td>
+                                            <td><code>SimilarityResults</code></td>
+                                            <td>num_candidates, similarity_threshold</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-indigo-500">Category 3</p>
+                                <h3 class="text-xl font-semibold text-slate-900">Data Retrieval &amp; Context Assembly</h3>
+                                <p class="text-sm text-slate-500">Functions for gathering user, event, and contextual data.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Function Name</th>
+                                            <th>File Location</th>
+                                            <th>Input Parameters</th>
+                                            <th>Output Type</th>
+                                            <th>Configurable Parameters</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>fetch_user_profile_complete</code></td>
+                                            <td><code>database/data_retrieval.py</code></td>
+                                            <td><code>user_id: ObjectId, include_fields: List[str]</code></td>
+                                            <td><code>UserProfile</code></td>
+                                            <td>cache_ttl, include_behavioral, include_social</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>fetch_event_details_with_venue</code></td>
+                                            <td><code>database/data_retrieval.py</code></td>
+                                            <td><code>event_id: ObjectId, include_participants: bool</code></td>
+                                            <td><code>EventContext</code></td>
+                                            <td>participant_limit, venue_details_depth</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>fetch_social_proof_indicators</code></td>
+                                            <td><code>database/data_retrieval.py</code></td>
+                                            <td><code>user_id: ObjectId, event_id: ObjectId</code></td>
+                                            <td><code>SocialProofData</code></td>
+                                            <td>friend_network_depth, mutual_connections</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>calculate_user_event_compatibility</code></td>
+                                            <td><code>database/vector_operations.py</code></td>
+                                            <td><code>user_vector: List[float], event_vector: List[float]</code></td>
+                                            <td><code>float</code></td>
+                                            <td>similarity_metric, normalization</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>assemble_message_context</code></td>
+                                            <td><code>database/data_retrieval.py</code></td>
+                                            <td><code>user_id: ObjectId, event_id: ObjectId, context_type: str</code></td>
+                                            <td><code>MessageContext</code></td>
+                                            <td>context_depth, historical_data</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-indigo-500">Category 4</p>
+                                <h3 class="text-xl font-semibold text-slate-900">Psychology &amp; Behavioral Analysis</h3>
+                                <p class="text-sm text-slate-500">User psychology profiling and nudge selection.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Function Name</th>
+                                            <th>File Location</th>
+                                            <th>Input Parameters</th>
+                                            <th>Output Type</th>
+                                            <th>Configurable Parameters</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>analyze_user_behavioral_patterns</code></td>
+                                            <td><code>psychology/behavioral_analyzer.py</code></td>
+                                            <td><code>user_data: UserProfile, timeframe: int</code></td>
+                                            <td><code>BehaviorProfile</code></td>
+                                            <td>pattern_window, significance_threshold</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>calculate_engagement_score</code></td>
+                                            <td><code>psychology/behavioral_analyzer.py</code></td>
+                                            <td><code>behavioral_data: dict, weights: dict</code></td>
+                                            <td><code>float</code></td>
+                                            <td>recency_weight, frequency_weight, quality_weight</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>determine_psychology_profile</code></td>
+                                            <td><code>psychology/behavioral_analyzer.py</code></td>
+                                            <td><code>user_behavior: BehaviorProfile</code></td>
+                                            <td><code>PsychologyProfile</code></td>
+                                            <td>profile_confidence, fallback_default</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>segment_user_by_engagement</code></td>
+                                            <td><code>psychology/user_segmenter.py</code></td>
+                                            <td><code>user_data: UserProfile, segmentation_rules: dict</code></td>
+                                            <td><code>UserSegment</code></td>
+                                            <td>segment_boundaries, custom_rules</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>select_optimal_nudge_type</code></td>
+                                            <td><code>psychology/nudge_selector.py</code></td>
+                                            <td><code>psychology_profile: PsychologyProfile, context: MessageContext</code></td>
+                                            <td><code>NudgeStrategy</code></td>
+                                            <td>effectiveness_weights, historical_performance</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>check_notification_frequency_limits</code></td>
+                                            <td><code>psychology/nudge_selector.py</code></td>
+                                            <td><code>user_id: ObjectId, proposed_nudge: str</code></td>
+                                            <td><code>FrequencyCheckResult</code></td>
+                                            <td>daily_limit, weekly_limit, cooldown_period</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-indigo-500">Category 5</p>
+                                <h3 class="text-xl font-semibold text-slate-900">AI Content Generation</h3>
+                                <p class="text-sm text-slate-500">OpenAI integration and personalized message creation.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Function Name</th>
+                                            <th>File Location</th>
+                                            <th>Input Parameters</th>
+                                            <th>Output Type</th>
+                                            <th>Configurable Parameters</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>initialize_openai_client</code></td>
+                                            <td><code>ai/openai_client.py</code></td>
+                                            <td><code>api_key: str, model_config: dict</code></td>
+                                            <td><code>OpenAIClient</code></td>
+                                            <td>model_name, temperature, max_tokens, timeout</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>load_prompt_templates</code></td>
+                                            <td><code>ai/prompt_engine.py</code></td>
+                                            <td><code>template_config: dict, nudge_type: str</code></td>
+                                            <td><code>PromptTemplate</code></td>
+                                            <td>template_version, personalization_level</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>generate_psychology_driven_prompt</code></td>
+                                            <td><code>ai/prompt_engine.py</code></td>
+                                            <td><code>template: PromptTemplate, context: MessageContext</code></td>
+                                            <td><code>GeneratedPrompt</code></td>
+                                            <td>dynamic_variables, context_injection</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>create_personalized_message</code></td>
+                                            <td><code>ai/content_generator.py</code></td>
+                                            <td><code>prompt: GeneratedPrompt, generation_params: dict</code></td>
+                                            <td><code>GeneratedMessage</code></td>
+                                            <td>creativity_level, length_constraint, tone</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>validate_message_quality</code></td>
+                                            <td><code>ai/content_generator.py</code></td>
+                                            <td><code>message: str, quality_criteria: dict</code></td>
+                                            <td><code>QualityScore</code></td>
+                                            <td>grammar_check, relevance_score, appropriateness</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>optimize_message_for_channel</code></td>
+                                            <td><code>ai/content_generator.py</code></td>
+                                            <td><code>message: str, channel: str, constraints: dict</code></td>
+                                            <td><code>OptimizedMessage</code></td>
+                                            <td>character_limits, formatting_rules</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-indigo-500">Category 6</p>
+                                <h3 class="text-xl font-semibold text-slate-900">Delivery &amp; Channel Management</h3>
+                                <p class="text-sm text-slate-500">Message delivery, timing, and channel optimization.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Function Name</th>
+                                            <th>File Location</th>
+                                            <th>Input Parameters</th>
+                                            <th>Output Type</th>
+                                            <th>Configurable Parameters</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>determine_optimal_delivery_time</code></td>
+                                            <td><code>delivery/timing_optimizer.py</code></td>
+                                            <td><code>user_timezone: str, user_activity: dict, event_timing: datetime</code></td>
+                                            <td><code>DeliverySchedule</code></td>
+                                            <td>timezone_handling, activity_windows</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>select_best_delivery_channel</code></td>
+                                            <td><code>delivery/channel_manager.py</code></td>
+                                            <td><code>user_preferences: dict, message_urgency: str</code></td>
+                                            <td><code>ChannelSelection</code></td>
+                                            <td>channel_priority, fallback_options</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>format_message_for_channel</code></td>
+                                            <td><code>delivery/channel_manager.py</code></td>
+                                            <td><code>message: str, channel: str</code></td>
+                                            <td><code>FormattedMessage</code></td>
+                                            <td>channel_specifications, emoji_support</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>queue_notification_for_delivery</code></td>
+                                            <td><code>delivery/delivery_handler.py</code></td>
+                                            <td><code>notification: Notification, priority: str</code></td>
+                                            <td><code>QueueResult</code></td>
+                                            <td>batch_size, priority_levels, delay_scheduling</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>send_notification_via_channel</code></td>
+                                            <td><code>delivery/delivery_handler.py</code></td>
+                                            <td><code>message: FormattedMessage, channel: str, recipient: str</code></td>
+                                            <td><code>DeliveryResult</code></td>
+                                            <td>retry_attempts, timeout, delivery_confirmation</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>handle_delivery_failures</code></td>
+                                            <td><code>delivery/delivery_handler.py</code></td>
+                                            <td><code>failed_delivery: DeliveryResult</code></td>
+                                            <td><code>RetryResult</code></td>
+                                            <td>backoff_strategy, max_retries, fallback_channels</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-indigo-500">Category 7</p>
+                                <h3 class="text-xl font-semibold text-slate-900">Monitoring &amp; Analytics</h3>
+                                <p class="text-sm text-slate-500">Logging, performance tracking, and quality control.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>Function Name</th>
+                                            <th>File Location</th>
+                                            <th>Input Parameters</th>
+                                            <th>Output Type</th>
+                                            <th>Configurable Parameters</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><code>log_function_execution</code></td>
+                                            <td><code>monitoring/logger.py</code></td>
+                                            <td><code>function_name: str, inputs: dict, outputs: dict, metadata: dict</code></td>
+                                            <td><code>LogEntry</code></td>
+                                            <td>log_level, retention_period, sensitive_data_masking</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>track_message_generation_metrics</code></td>
+                                            <td><code>monitoring/performance_tracker.py</code></td>
+                                            <td><code>generation_data: dict, performance_metrics: dict</code></td>
+                                            <td><code>GenerationMetrics</code></td>
+                                            <td>metric_types, aggregation_period</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>monitor_system_health</code></td>
+                                            <td><code>monitoring/performance_tracker.py</code></td>
+                                            <td><code>system_components: List[str]</code></td>
+                                            <td><code>HealthStatus</code></td>
+                                            <td>check_interval, alert_thresholds, escalation_rules</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>calculate_nudge_effectiveness</code></td>
+                                            <td><code>monitoring/performance_tracker.py</code></td>
+                                            <td><code>nudge_history: List[dict], success_criteria: dict</code></td>
+                                            <td><code>EffectivenessReport</code></td>
+                                            <td>time_window, conversion_definitions</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>generate_analytics_dashboard_data</code></td>
+                                            <td><code>monitoring/performance_tracker.py</code></td>
+                                            <td><code>date_range: tuple, metrics: List[str]</code></td>
+                                            <td><code>AnalyticsData</code></td>
+                                            <td>aggregation_level, real_time_updates</td>
+                                        </tr>
+                                        <tr>
+                                            <td><code>perform_quality_control_review</code></td>
+                                            <td><code>monitoring/quality_controller.py</code></td>
+                                            <td><code>generated_content: dict, review_criteria: dict</code></td>
+                                            <td><code>QualityReview</code></td>
+                                            <td>automated_checks, human_review_threshold</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+        <section id="execution-sequence" class="mb-16">
+            <div class="surface-card p-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Execution Sequence &amp; Dependencies</h2>
+                <p class="text-slate-600 mb-8">Progressively step through each priority band. Expand a phase to reveal the ordered function calls that must complete before moving forward.</p>
+                <div class="space-y-4" data-accordion="phases">
+                    <details class="disclosure-card" open>
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-red-500">Phase 1 · Critical</p>
+                                <h3 class="text-xl font-semibold text-slate-900">System Bootstrap</h3>
+                                <p class="text-sm text-slate-500">Must execute first to make the system operational.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <ol class="space-y-2 text-slate-600 list-decimal list-inside">
+                                <li><code>load_yaml_configuration</code></li>
+                                <li><code>validate_configuration_schema</code></li>
+                                <li><code>initialize_environment_variables</code></li>
+                                <li><code>setup_logging_configuration</code></li>
+                                <li><code>create_mongodb_connection</code></li>
+                                <li><code>initialize_database_collections</code></li>
+                                <li><code>setup_vector_search_indexes</code></li>
+                                <li><code>initialize_openai_client</code></li>
+                                <li><code>load_prompt_templates</code></li>
+                            </ol>
+                        </div>
+                    </details>
+
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-orange-500">Phase 2 · High</p>
+                                <h3 class="text-xl font-semibold text-slate-900">User Action Trigger</h3>
+                                <p class="text-sm text-slate-500">Real-time context assembly triggered by user activity.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <ol class="space-y-2 text-slate-600 list-decimal list-inside">
+                                <li><code>fetch_user_profile_complete</code></li>
+                                <li><code>fetch_event_details_with_venue</code></li>
+                                <li><code>fetch_social_proof_indicators</code></li>
+                                <li><code>calculate_user_event_compatibility</code></li>
+                                <li><code>assemble_message_context</code></li>
+                            </ol>
+                        </div>
+                    </details>
+
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-orange-500">Phase 3 · High</p>
+                                <h3 class="text-xl font-semibold text-slate-900">Psychology Analysis &amp; Nudge Selection</h3>
+                                <p class="text-sm text-slate-500">Core logic that chooses the right persuasion technique.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <ol class="space-y-2 text-slate-600 list-decimal list-inside">
+                                <li><code>analyze_user_behavioral_patterns</code></li>
+                                <li><code>calculate_engagement_score</code></li>
+                                <li><code>determine_psychology_profile</code></li>
+                                <li><code>segment_user_by_engagement</code></li>
+                                <li><code>select_optimal_nudge_type</code></li>
+                                <li><code>check_notification_frequency_limits</code></li>
+                            </ol>
+                        </div>
+                    </details>
+
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-orange-500">Phase 4 · High</p>
+                                <h3 class="text-xl font-semibold text-slate-900">AI Content Generation</h3>
+                                <p class="text-sm text-slate-500">Prompt crafting, generation, validation, and optimization.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <ol class="space-y-2 text-slate-600 list-decimal list-inside">
+                                <li><code>generate_psychology_driven_prompt</code></li>
+                                <li><code>create_personalized_message</code></li>
+                                <li><code>validate_message_quality</code></li>
+                                <li><code>optimize_message_for_channel</code></li>
+                            </ol>
+                        </div>
+                    </details>
+
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-amber-500">Phase 5 · Medium</p>
+                                <h3 class="text-xl font-semibold text-slate-900">Delivery Orchestration</h3>
+                                <p class="text-sm text-slate-500">Timing, channel selection, and resilient delivery operations.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <ol class="space-y-2 text-slate-600 list-decimal list-inside">
+                                <li><code>determine_optimal_delivery_time</code></li>
+                                <li><code>select_best_delivery_channel</code></li>
+                                <li><code>format_message_for_channel</code></li>
+                                <li><code>queue_notification_for_delivery</code></li>
+                                <li><code>send_notification_via_channel</code></li>
+                                <li><code>handle_delivery_failures</code></li>
+                            </ol>
+                        </div>
+                    </details>
+
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <p class="text-sm uppercase tracking-[0.2em] text-emerald-500">Phase 6 · Low</p>
+                                <h3 class="text-xl font-semibold text-slate-900">Monitoring &amp; Analytics</h3>
+                                <p class="text-sm text-slate-500">Runs continuously in the background to measure and improve.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <ol class="space-y-2 text-slate-600 list-decimal list-inside">
+                                <li><code>log_function_execution</code> (runs parallel to all functions)</li>
+                                <li><code>track_message_generation_metrics</code></li>
+                                <li><code>monitor_system_health</code></li>
+                                <li><code>calculate_nudge_effectiveness</code></li>
+                                <li><code>generate_analytics_dashboard_data</code></li>
+                                <li><code>perform_quality_control_review</code></li>
+                            </ol>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+        <section id="priority-matrix" class="mb-16">
+            <div class="surface-card p-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-6">Priority Matrix</h2>
+                <p class="text-slate-600 mb-8">Align stakeholders on what must be shipped before go-live and what can iterate after stabilization.</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="rounded-2xl border border-red-200 bg-white/80 p-6">
+                        <h3 class="text-xl font-semibold text-red-600 mb-3">🔴 Critical Priority</h3>
+                        <ul class="space-y-2 text-slate-600">
+                            <li>Configuration loading and validation</li>
+                            <li>Database connection initialization</li>
+                            <li>OpenAI client setup</li>
+                            <li>Basic logging setup</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-2xl border border-orange-200 bg-white/80 p-6">
+                        <h3 class="text-xl font-semibold text-orange-500 mb-3">🟠 High Priority</h3>
+                        <ul class="space-y-2 text-slate-600">
+                            <li>User data retrieval</li>
+                            <li>Psychology analysis</li>
+                            <li>Message generation</li>
+                            <li>Nudge type selection</li>
+                            <li>Basic delivery functionality</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-2xl border border-amber-200 bg-white/80 p-6">
+                        <h3 class="text-xl font-semibold text-amber-500 mb-3">🟡 Medium Priority</h3>
+                        <ul class="space-y-2 text-slate-600">
+                            <li>Advanced delivery optimization</li>
+                            <li>Channel-specific formatting</li>
+                            <li>Retry mechanisms</li>
+                            <li>Performance monitoring</li>
+                        </ul>
+                    </div>
+                    <div class="rounded-2xl border border-emerald-200 bg-white/80 p-6">
+                        <h3 class="text-xl font-semibold text-emerald-500 mb-3">🟢 Low Priority</h3>
+                        <ul class="space-y-2 text-slate-600">
+                            <li>Advanced analytics</li>
+                            <li>Quality control automation</li>
+                            <li>Dashboard data generation</li>
+                            <li>A/B testing support</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section id="configuration-management" class="mb-16">
+            <div class="surface-card p-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Configuration Management</h2>
+                <p class="text-slate-600 mb-8">Expand each YAML file to see the exact configuration powering environments, psychology heuristics, delivery channels, and testing guarantees.</p>
+                <div class="space-y-4" data-accordion="configs">
+                    <details class="disclosure-card" open>
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <h3 class="text-xl font-semibold text-slate-900">Main Configuration File <code>config/settings.yaml</code></h3>
+                                <p class="text-sm text-slate-500">Environment defaults, database tuning, vector search, psychology, delivery, and monitoring.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <pre><code># Environment Configuration
+environment:
+  name: "${ENV:-development}"
+  debug_mode: true
+  log_level: "INFO"
+  timezone: "UTC"
+
+# Database Configuration
+database:
+  connection_string: "${MONGO_CONNECTION_STRING}"
+  database_name: "cuculi_ai_notifications"
+  timeout_seconds: 30
+  retry_attempts: 3
+  connection_pool:
+    min_size: 5
+    max_size: 50
+  collections:
+    users: "users"
+    events: "events"
+    notifications: "notifications"
+    venues: "venues"
+
+# Vector Search Configuration
+vector_search:
+  enabled: true
+  indexes:
+    user_vector:
+      name: "user_vector_index"
+      path: "behavioral_data.user_vector"
+      dimensions: 3072
+      similarity: "cosine"
+    event_vector:
+      name: "event_vector_index" 
+      path: "event_vector"
+      dimensions: 3072
+      similarity: "cosine"
+  search_params:
+    num_candidates: 100
+    similarity_threshold: 0.7
+
+# OpenAI Configuration
+openai:
+  api_key: "${OPENAI_API_KEY}"
+  model: "gpt-4o"
+  temperature: 0.7
+  max_tokens: 200
+  timeout_seconds: 30
+  retry_attempts: 3
+  rate_limits:
+    requests_per_minute: 500
+    tokens_per_minute: 80000
+
+# Psychology Configuration
+psychology:
+  nudge_types:
+    - name: "friend_interest"
+      psychology_principle: "social_proof"
+      effectiveness_weight: 0.25
+      min_friends_threshold: 1
+    - name: "scarcity_alert"
+      psychology_principle: "urgency"
+      effectiveness_weight: 0.20
+      min_spots_threshold: 5
+    - name: "similar_taste"
+      psychology_principle: "personalization"
+      effectiveness_weight: 0.18
+      similarity_threshold: 0.8
+    - name: "host_reputation"
+      psychology_principle: "authority"
+      effectiveness_weight: 0.15
+      min_rating_threshold: 4.5
+    - name: "new_match"
+      psychology_principle: "discovery"
+      effectiveness_weight: 0.12
+      compatibility_threshold: 0.75
+
+  user_segmentation:
+    engagement_levels:
+      high: 
+        min_events_attended: 3
+        min_recent_activity_days: 7
+      medium:
+        min_events_attended: 1
+        min_recent_activity_days: 14
+      low:
+        min_events_attended: 0
+        min_recent_activity_days: 30
+      dormant:
+        max_recent_activity_days: 30
+
+# Notification Frequency Limits
+frequency_limits:
+  max_notifications:
+    daily: 1
+    weekly: 3
+    monthly: 8
+  cooldown_periods:
+    same_nudge_type: 24  # hours
+    same_event: 12       # hours
+    any_notification: 6  # hours
+  priority_overrides:
+    urgent_events: true
+    friend_invitations: true
+
+# Content Generation
+content_generation:
+  templates:
+    max_length: 160
+    personalization_depth: "high"
+    creativity_level: 0.7
+    tone: "enthusiastic"
+  quality_control:
+    grammar_check: true
+    appropriateness_filter: true
+    relevance_threshold: 0.8
+    minimum_quality_score: 0.75
+
+# Delivery Configuration
+delivery:
+  channels:
+    push:
+      provider: "onesignal"
+      priority: 1
+      max_retries: 3
+      timeout_seconds: 10
+    sms:
+      provider: "twilio"
+      priority: 2
+      max_retries: 2
+      timeout_seconds: 15
+    email:
+      provider: "mailchimp"
+      priority: 3
+      max_retries: 2
+      timeout_seconds: 20
+  timing_optimization:
+    user_timezone_aware: true
+    respect_do_not_disturb: true
+    optimal_windows:
+      morning: "09:00-11:00"
+      lunch: "12:00-13:30"
+      evening: "17:00-20:00"
+  retry_strategy:
+    backoff_multiplier: 2
+    max_backoff_seconds: 300
+    jitter_enabled: true
+
+# Monitoring & Analytics
+monitoring:
+  logging:
+    level: "INFO"
+    format: "json"
+    retention_days: 90
+    sensitive_data_masking: true
+  performance_tracking:
+    enabled: true
+    metrics_retention_days: 365
+    real_time_alerts: true
+  health_checks:
+    interval_seconds: 300
+    timeout_seconds: 10
+    alert_thresholds:
+      error_rate: 0.05
+      response_time_ms: 2000
+      queue_depth: 1000
+  analytics:
+    dashboard_refresh_seconds: 60
+    historical_data_months: 12
+    export_formats: ["json", "csv"]
+
+# Testing Configuration
+testing:
+  mock_external_apis: true
+  test_data_cleanup: true
+  performance_benchmarks:
+    max_response_time_ms: 1000
+    max_memory_mb: 512
+  quality_gates:
+    min_test_coverage: 0.80
+    max_complexity_score: 10</code></pre>
+                        </div>
+                    </details>
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <h3 class="text-xl font-semibold text-slate-900">Nudge Templates <code>config/nudge_templates.yaml</code></h3>
+                                <p class="text-sm text-slate-500">Social proof, urgency, and personalization patterns with variables and constraints.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <pre><code>templates:
+  friend_interest:
+    psychology_principle: "social_proof"
+    base_template: "{friend_count} {friend_names} {interest_verb} {event_title}"
+    variations:
+      single_friend: "{friend_name} is interested in {event_title}!"
+      multiple_friends: "{friend_count} friends are interested in {event_title}"
+      close_friends: "Your friends {friend_names} are going to {event_title}"
+    variables:
+      friend_count: "integer"
+      friend_names: "string_list"
+      friend_name: "string"
+      interest_verb: "enum[interested in, going to, excited about]"
+      event_title: "string"
+    constraints:
+      max_length: 150
+      min_friends: 1
+      max_friends_shown: 3
+
+  scarcity_alert:
+    psychology_principle: "urgency"
+    base_template: "Only {spots_remaining} spots left for {event_title}!"
+    variations:
+      low_availability: "Only {spots_remaining} spots left for {event_title}"
+      very_low: "Last {spots_remaining} spots for {event_title} - grab yours!"
+      filling_fast: "{event_title} is filling up fast - {spots_remaining} spots left"
+    variables:
+      spots_remaining: "integer"
+      event_title: "string"
+      urgency_modifier: "enum[quickly, fast, soon]"
+    constraints:
+      max_length: 140
+      max_spots_threshold: 5
+      min_spots_threshold: 1
+
+  similar_taste:
+    psychology_principle: "personalization"
+    base_template: "Perfect {event_type} for your love of {cuisine_preference}"
+    variations:
+      cuisine_match: "Love {cuisine}? You'll enjoy this {event_title}"
+      venue_return: "Another great event at {venue_name} - you loved it last time!"
+      style_match: "Based on your preferences: {event_title}"
+    variables:
+      event_type: "string"
+      cuisine_preference: "string"
+      cuisine: "string"
+      event_title: "string"
+      venue_name: "string"
+    constraints:
+      max_length: 155
+      min_similarity_score: 0.8</code></pre>
+                        </div>
+                    </details>
+
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <h3 class="text-xl font-semibold text-slate-900">Delivery Channels <code>config/delivery_channels.yaml</code></h3>
+                                <p class="text-sm text-slate-500">Provider credentials, formatting limits, and delivery options for push, SMS, and email.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <pre><code>channels:
+  push:
+    provider: "onesignal"
+    configuration:
+      app_id: "${ONESIGNAL_APP_ID}"
+      api_key: "${ONESIGNAL_API_KEY}"
+      timeout_seconds: 10
+      retry_attempts: 3
+    formatting:
+      max_title_length: 50
+      max_body_length: 160
+      supports_emoji: true
+      supports_rich_media: true
+    delivery_options:
+      immediate: true
+      scheduled: true
+      timezone_aware: true
+      badge_updates: true
+
+  sms:
+    provider: "twilio"
+    configuration:
+      account_sid: "${TWILIO_ACCOUNT_SID}"
+      auth_token: "${TWILIO_AUTH_TOKEN}"
+      from_number: "${TWILIO_FROM_NUMBER}"
+      timeout_seconds: 15
+      retry_attempts: 2
+    formatting:
+      max_length: 160
+      supports_emoji: false
+      supports_links: true
+      link_shortening: true
+    delivery_options:
+      immediate: true
+      scheduled: true
+      delivery_receipts: true
+
+  email:
+    provider: "mailchimp"
+    configuration:
+      api_key: "${MAILCHIMP_API_KEY}"
+      list_id: "${MAILCHIMP_LIST_ID}"
+      timeout_seconds: 20
+      retry_attempts: 2
+    formatting:
+      max_subject_length: 78
+      max_body_length: 5000
+      supports_html: true
+      supports_attachments: false
+    delivery_options:
+      immediate: true
+      scheduled: true
+      open_tracking: true
+      click_tracking: true</code></pre>
+                        </div>
+                    </details>
+                    <details class="disclosure-card">
+                        <summary class="disclosure-summary flex items-center justify-between gap-4 px-6 py-5">
+                            <div>
+                                <h3 class="text-xl font-semibold text-slate-900">Testing Configuration <code>config/test_settings.yaml</code></h3>
+                                <p class="text-sm text-slate-500">Test database handling, mocking requirements, performance benchmarks, and quality gates.</p>
+                            </div>
+                            <span class="disclosure-icon text-indigo-500 text-2xl">⟶</span>
+                        </summary>
+                        <div class="px-6 pb-6">
+                            <pre><code>testing:
+  database:
+    test_db_name: "cuculi_ai_test"
+    cleanup_after_tests: true
+    use_transactions: true
+  
+  mocking:
+    mock_openai_api: true
+    mock_delivery_channels: true
+    mock_vector_search: false
+    
+  performance_benchmarks:
+    max_response_time_ms: 1000
+    max_memory_usage_mb: 512
+    concurrent_request_limit: 100
+    
+  quality_gates:
+    min_code_coverage: 0.85
+    max_cyclomatic_complexity: 10
+    min_test_success_rate: 0.98</code></pre>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+        <section id="testing-framework" class="mb-16">
+            <div class="surface-card p-10">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Testing Framework</h2>
+                <p class="text-slate-600 mb-8">Quality gates ensure every function—configuration through analytics—behaves reliably under ideal and adverse conditions.</p>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="rounded-2xl border border-indigo-100 bg-white/75 p-6">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-4">Unit Testing Requirements</h3>
+                        <details class="disclosure-card" open>
+                            <summary class="disclosure-summary flex items-center justify-between gap-4 px-4 py-3">
+                                <span class="font-semibold text-slate-800">Input Validation Tests</span>
+                                <span class="disclosure-icon text-indigo-500 text-xl">⟶</span>
+                            </summary>
+                            <div class="px-4 pb-4">
+                                <ul class="space-y-2 text-slate-600 text-sm">
+                                    <li>Valid input parameters with expected data types</li>
+                                    <li>Invalid/missing required parameters</li>
+                                    <li>Edge cases and boundary conditions</li>
+                                    <li>Malformed data structures</li>
+                                </ul>
+                            </div>
+                        </details>
+                        <details class="disclosure-card mt-4">
+                            <summary class="disclosure-summary flex items-center justify-between gap-4 px-4 py-3">
+                                <span class="font-semibold text-slate-800">Output Verification Tests</span>
+                                <span class="disclosure-icon text-indigo-500 text-xl">⟶</span>
+                            </summary>
+                            <div class="px-4 pb-4">
+                                <ul class="space-y-2 text-slate-600 text-sm">
+                                    <li>Correct return data types and structures</li>
+                                    <li>Required fields presence in output objects</li>
+                                    <li>Data consistency and integrity checks</li>
+                                    <li>Performance benchmarks (response time, memory usage)</li>
+                                </ul>
+                            </div>
+                        </details>
+                        <details class="disclosure-card mt-4">
+                            <summary class="disclosure-summary flex items-center justify-between gap-4 px-4 py-3">
+                                <span class="font-semibold text-slate-800">Error Handling Tests</span>
+                                <span class="disclosure-icon text-indigo-500 text-xl">⟶</span>
+                            </summary>
+                            <div class="px-4 pb-4">
+                                <ul class="space-y-2 text-slate-600 text-sm">
+                                    <li>Network connectivity failures</li>
+                                    <li>API rate limit handling</li>
+                                    <li>Database connection timeouts</li>
+                                    <li>Invalid configuration scenarios</li>
+                                    <li>Graceful degradation behaviors</li>
+                                </ul>
+                            </div>
+                        </details>
+                    </div>
+                    <div class="rounded-2xl border border-indigo-100 bg-white/75 p-6">
+                        <h3 class="text-xl font-semibold text-slate-900 mb-4">Integration Testing</h3>
+                        <ul class="space-y-3 text-slate-600 text-sm">
+                            <li><span class="font-semibold text-slate-800">Database connection and query execution:</span> Validate MongoDB setup, index creation, and aggregation pipelines end-to-end.</li>
+                            <li><span class="font-semibold text-slate-800">External API integrations:</span> Ensure OpenAI and delivery channel connectors behave with mocks and live credentials.</li>
+                            <li><span class="font-semibold text-slate-800">End-to-end workflow validation:</span> Simulate the entire notification journey from trigger through analytics logging.</li>
+                            <li><span class="font-semibold text-slate-800">Cross-function dependency testing:</span> Confirm downstream functions respond correctly to upstream outputs and failure states.</li>
+                        </ul>
+                        <div class="mt-6 rounded-xl border border-indigo-200 bg-white/70 p-5">
+                            <h4 class="text-lg font-semibold text-slate-900 mb-3">Test Configuration Snapshot</h4>
+                            <p class="text-sm text-slate-600 mb-4">Pulled directly from <code>config/test_settings.yaml</code> to enforce non-negotiable quality thresholds.</p>
+                            <pre class="text-xs leading-relaxed"><code>testing:
+  database:
+    test_db_name: "cuculi_ai_test"
+    cleanup_after_tests: true
+    use_transactions: true
+  
+  mocking:
+    mock_openai_api: true
+    mock_delivery_channels: true
+    mock_vector_search: false
+    
+  performance_benchmarks:
+    max_response_time_ms: 1000
+    max_memory_usage_mb: 512
+    concurrent_request_limit: 100
+    
+  quality_gates:
+    min_code_coverage: 0.85
+    max_cyclomatic_complexity: 10
+    min_test_success_rate: 0.98</code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <section class="mb-12">
+            <div class="surface-card p-10 flex flex-col gap-4">
+                <h2 class="text-3xl font-bold text-slate-900">Putting It All Together</h2>
+                <p class="text-slate-600 text-lg">This Python library is more than a collection of helper functions—it is a disciplined operating system for Cuculi AI's psychology-driven notifications. Progressive disclosure gives stakeholders a way to scan quickly, dig deep, and trace every dependency before code ever hits production.</p>
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 text-sm">
+                    <a href="index.html" class="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-800 transition-colors">
+                        <span aria-hidden="true">←</span>
+                        <span>Return to Blog Index</span>
+                    </a>
+                    <a href="../index.html#contact" class="inline-flex items-center gap-2 text-indigo-600 font-semibold hover:text-indigo-800 transition-colors">
+                        <span>Discuss Implementation</span>
+                        <span aria-hidden="true">→</span>
+                    </a>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.querySelectorAll('[data-accordion]').forEach(function(accordion) {
+            const items = accordion.querySelectorAll('details');
+            items.forEach(function(item) {
+                item.addEventListener('toggle', function() {
+                    if (item.open) {
+                        items.forEach(function(other) {
+                            if (other !== item) {
+                                other.removeAttribute('open');
+                            }
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
