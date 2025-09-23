@@ -950,7 +950,7 @@ const ArtifactView = ({ artifact, onEdit, setSelectedArtifact, setError, showToa
                     Modified && React.createElement('p', null, React.createElement('strong', null, "Last Modified: "), new Date(Modified).toLocaleString()),
                     React.createElement('p', null, React.createElement('strong', null, "Stats: "), `${wordCount} words / ${charCount} characters`)
                 ),
-                React.createElement(SourcesViewer, { sources, isLoading: isLoadingSources }),
+                React.createElement(SourcesViewer, { sources, isLoading: isLoadingSources, showToast }),
                 React.createElement(AtomicNotesViewer, { notes: atomicNotes, isLoading: isLoadingAtomicNotes }),
                 React.createElement(SnapshotViewer, { snapshotsContent })
             )
@@ -1233,8 +1233,9 @@ const AttachmentGalleryModal = ({ attachments, onClose }) => {
     );
 };
 
-const SourcesViewer = ({ sources, isLoading }) => {
+const SourcesViewer = ({ sources, isLoading, showToast }) => {
     const [openSources, setOpenSources] = useState({});
+    const safeShowToast = typeof showToast === 'function' ? showToast : () => {};
 
     if (isLoading) {
         return React.createElement('div', { className: "mt-12 pt-6 border-t" },
@@ -1258,7 +1259,14 @@ const SourcesViewer = ({ sources, isLoading }) => {
                     React.createElement('div', { className: 'flex flex-col space-y-2 mb-4' },
                         source.fields.URL && React.createElement('a', { href: source.fields.URL, target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "Primary URL")),
                         source.fields['View URL'] && React.createElement('a', { href: source.fields['View URL'], target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "View Source Page")),
-                        source.fields['Airtable URL'] && React.createElement('a', { href: source.fields['Airtable URL'], target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "View in Airtable"))
+                        source.fields['Airtable URL'] && React.createElement('a', { href: source.fields['Airtable URL'], target: "_blank", rel: "noopener noreferrer", className: "text-blue-500 hover:underline flex items-center text-sm" }, React.createElement(ExternalLink, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "View in Airtable")),
+                        source.fields.Content && React.createElement('button', {
+                            type: 'button',
+                            onClick: () => copyToClipboard(source.fields.Content || '', safeShowToast),
+                            className: "text-blue-500 hover:underline flex items-center text-sm focus:outline-none",
+                            title: "Copy source content",
+                            'aria-label': "Copy source content"
+                        }, React.createElement(Copy, { className: "w-4 h-4 mr-2 flex-shrink-0" }), React.createElement('span', { className: "truncate" }, "Copy Content"))
                     ),
                     React.createElement(AttachmentViewer, { attachments: source.fields.Attachments }),
                     source.fields.Content && React.createElement('div', { className: "prose dark:prose-invert max-w-none mt-4 pt-4 border-t border-gray-200 dark:border-gray-700" },
