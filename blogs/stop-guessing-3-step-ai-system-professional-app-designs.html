@@ -1,0 +1,806 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stop Guessing: The 3-Step AI System for Professional App Designs | ChrisCruz.ai</title>
+    <meta name="description" content="Follow a sleek, light-background, progressive disclosure workflow that uses Claude Code to deconstruct top apps, forge a token-based design system, and brainstorm polished screens."/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f5f7fb;
+            --bg-accent: rgba(37, 99, 235, 0.08);
+            --surface: #ffffff;
+            --surface-subtle: #f1f5ff;
+            --surface-strong: #e8edff;
+            --border: rgba(148, 163, 184, 0.35);
+            --border-strong: rgba(59, 130, 246, 0.45);
+            --text: #0f172a;
+            --text-muted: #475569;
+            --accent: #2563eb;
+            --accent-soft: rgba(37, 99, 235, 0.12);
+            --accent-strong: rgba(37, 99, 235, 0.18);
+            --glow: 0 24px 64px -32px rgba(37, 99, 235, 0.45);
+            --shadow-soft: 0 28px 80px -40px rgba(15, 23, 42, 0.28);
+            --radius-lg: 28px;
+            --radius-md: 20px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 12% 20%, rgba(59, 130, 246, 0.10), transparent 45%),
+                        radial-gradient(circle at 88% 8%, rgba(14, 165, 233, 0.12), transparent 38%),
+                        linear-gradient(160deg, rgba(244, 247, 255, 0.82), rgba(230, 240, 255, 0.95));
+            color: var(--text);
+            line-height: 1.68;
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 60;
+            backdrop-filter: blur(18px);
+            background: rgba(245, 247, 251, 0.92);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.25);
+        }
+
+        .nav {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 22px 26px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 18px;
+        }
+
+        .back-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(37, 99, 235, 0.18);
+            background: var(--accent-soft);
+            color: var(--accent);
+            transition: background 0.3s ease, transform 0.3s ease;
+        }
+
+        .back-pill:hover {
+            background: rgba(37, 99, 235, 0.2);
+            transform: translateY(-1px);
+        }
+
+        main {
+            max-width: 1140px;
+            margin: 0 auto;
+            padding: 92px 26px 120px;
+        }
+
+        .hero {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 72px 64px;
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.10), transparent 65%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.14);
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero h1 {
+            margin: 26px 0 18px;
+            font-size: clamp(3.0rem, 5vw, 3.8rem);
+            letter-spacing: -1.6px;
+            font-weight: 900;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero p {
+            max-width: 680px;
+            margin: 0;
+            font-size: 1.12rem;
+            color: var(--text-muted);
+            position: relative;
+            z-index: 2;
+        }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 28px;
+            color: var(--text-muted);
+            font-weight: 600;
+            position: relative;
+            z-index: 2;
+        }
+
+        .meta span {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.05);
+        }
+
+        .hero-links {
+            margin-top: 36px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-links a {
+            padding: 10px 18px;
+            border-radius: 999px;
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            background: rgba(37, 99, 235, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hero-links a:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--glow);
+            text-decoration: none;
+        }
+
+        .section-heading {
+            margin: 86px 0 24px;
+        }
+
+        .section-heading h2 {
+            margin: 0;
+            font-size: clamp(2.1rem, 4vw, 2.7rem);
+            letter-spacing: -0.8px;
+        }
+
+        .section-heading p {
+            margin: 12px 0 0;
+            max-width: 680px;
+            color: var(--text-muted);
+            font-size: 1.02rem;
+        }
+
+        .phase-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .phase-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 28px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow-soft);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .phase-card::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(140deg, rgba(37, 99, 235, 0.16), transparent 65%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .phase-card:hover::after {
+            opacity: 1;
+        }
+
+        .phase-card h3 {
+            margin: 0 0 12px;
+            font-size: 1.38rem;
+        }
+
+        .phase-card p {
+            margin: 0 0 18px;
+            color: var(--text-muted);
+        }
+
+        .phase-card a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .callout {
+            margin: 40px 0;
+            background: var(--surface-subtle);
+            border: 1px solid var(--border-strong);
+            border-radius: var(--radius-md);
+            padding: 32px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .callout p {
+            margin: 0;
+            font-size: 1.08rem;
+            color: var(--text-muted);
+        }
+
+        .quote {
+            border-left: 4px solid var(--accent);
+            padding-left: 20px;
+            margin: 32px 0;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .disclosure-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin: 32px 0 48px;
+        }
+
+        details.disclosure {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        details.disclosure[open] {
+            transform: translateY(-2px);
+            box-shadow: var(--glow);
+            border-color: rgba(37, 99, 235, 0.28);
+        }
+
+        details.disclosure summary {
+            list-style: none;
+            margin: 0;
+            padding: 26px 32px;
+            font-weight: 700;
+            font-size: 1.12rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+            cursor: pointer;
+        }
+
+        details.disclosure summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .summary-icon {
+            flex: 0 0 auto;
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: var(--surface-subtle);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .disclosure-content {
+            padding: 0 32px 32px;
+            color: var(--text-muted);
+        }
+
+        .disclosure-content ul {
+            padding-left: 22px;
+        }
+
+        .pill-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 18px 0;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.06);
+            font-weight: 600;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .grid-two {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            margin-top: 24px;
+        }
+
+        .link-card {
+            background: var(--surface-subtle);
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .link-card h4 {
+            margin: 0 0 10px;
+        }
+
+        .quiz-list, .answer-list, .glossary-list {
+            display: grid;
+            gap: 16px;
+        }
+
+        .question {
+            background: var(--surface);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            border-radius: var(--radius-md);
+            padding: 20px 24px;
+            color: var(--text-muted);
+        }
+
+        .question strong {
+            color: var(--text);
+        }
+
+        .answer {
+            background: var(--surface-subtle);
+            border: 1px solid rgba(79, 70, 229, 0.3);
+            border-radius: var(--radius-md);
+            padding: 18px 20px;
+        }
+
+        .essay-list li {
+            margin-bottom: 14px;
+        }
+
+        .glossary-list dl {
+            margin: 0;
+        }
+
+        .glossary-list dt {
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .glossary-list dd {
+            margin: 6px 0 18px 0;
+            color: var(--text-muted);
+        }
+
+        footer {
+            margin-top: 96px;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.16), rgba(59, 130, 246, 0.08));
+            border-radius: var(--radius-lg);
+            padding: 40px;
+            text-align: center;
+            box-shadow: var(--shadow-soft);
+        }
+
+        footer h3 {
+            margin: 0 0 12px;
+            font-size: 1.8rem;
+        }
+
+        footer p {
+            margin: 0 0 20px;
+            color: var(--text-muted);
+        }
+
+        footer a {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 22px;
+            border-radius: 999px;
+            background: var(--accent);
+            color: #fff;
+            font-weight: 700;
+            box-shadow: var(--glow);
+        }
+
+        @media (max-width: 860px) {
+            main {
+                padding: 80px 20px 96px;
+            }
+
+            .hero {
+                padding: 56px 32px;
+            }
+
+            details.disclosure summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .nav {
+                padding: 18px 18px;
+            }
+
+            .hero h1 {
+                font-size: 2.6rem;
+            }
+
+            .meta span {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="nav">
+            <a class="back-pill" href="../index.html#writing">← Back to ChrisCruz.ai</a>
+            <a href="index.html">View all posts →</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <span class="hero-badge">Design Systems</span>
+            <h1>Stop Guessing: The 3-Step AI System for Professional App Designs</h1>
+            <p>
+                Trying to build an app without a design system is like attempting to cook a five-star meal by throwing random
+                ingredients together and hoping for magic. This three-phase Claude Code workflow replaces guesswork with
+                psychological insight, token-based structure, and agency-level ideation so every screen feels intentional.
+            </p>
+            <div class="meta">
+                <span>📅 November 6, 2025</span>
+                <span>⏱️ 9 minute read</span>
+                <span>🧭 Progressive Disclosure</span>
+            </div>
+            <div class="hero-links">
+                <a href="#phase-1">Phase 1 · Deconstruct</a>
+                <a href="#phase-2">Phase 2 · Systemize</a>
+                <a href="#phase-3">Phase 3 · Design</a>
+                <a href="#study-guide">Study Guide</a>
+                <a href="#glossary">Glossary</a>
+            </div>
+        </section>
+
+        <div class="section-heading">
+            <h2>Three moves that turn vibe coding into intentional design</h2>
+            <p>
+                For developers who can ship features but struggle with polish, this workflow turns AI into a creative director.
+                Move through inspiration mining, token creation, and multi-state brainstorming—each stage backed by custom
+                Claude Code commands and progressive disclosure briefs you can adapt anywhere.
+            </p>
+        </div>
+
+        <div class="phase-cards">
+            <article class="phase-card">
+                <h3>Phase 1 · Deconstruct the Greats</h3>
+                <p>Use AI to unpack why top-tier apps feel the way they do, capture the psychology behind color, type, and layout, and build a bank of transferable insights.</p>
+                <a href="#phase-1">Jump to Phase 1 →</a>
+            </article>
+            <article class="phase-card">
+                <h3>Phase 2 · Forge Tokens</h3>
+                <p>Translate those psychological drivers into a token-based design system tailored to your product, so every component is consistent and intentional.</p>
+                <a href="#phase-2">Jump to Phase 2 →</a>
+            </article>
+            <article class="phase-card">
+                <h3>Phase 3 · Brainstorm Like an Agency</h3>
+                <p>Generate multiple screen variations, evaluate edge cases, and curate the winning direction with the same rigor as a professional design team.</p>
+                <a href="#phase-3">Jump to Phase 3 →</a>
+            </article>
+        </div>
+
+        <div class="callout">
+            <p>
+                When you can articulate why another app makes a user feel a certain way, you can recreate those feelings on
+                demand. That is the difference between copying pixels and designing experiences that boost retention,
+                conversion, and trust.
+            </p>
+        </div>
+
+        <section id="phase-1" class="section-heading">
+            <h2>Phase 1: Deconstruct the Greats with AI-Powered Analysis</h2>
+            <p>
+                Start by looking outward. Instead of limiting inspiration to your category, curate interfaces from adjacent
+                industries that evoke the emotion you want. Then push past the screenshot stage with Claude Code commands that
+                expose the psychology underneath.
+            </p>
+        </section>
+
+        <div class="disclosure-group">
+            <details class="disclosure" open>
+                <summary><span class="summary-icon">🔭</span>Why cross-vertical inspiration matters</summary>
+                <div class="disclosure-content">
+                    <p>
+                        The professional move is to borrow feelings, not layouts. For an interior design app, the benchmark pull
+                        came from Airbnb’s warm, information-rich hospitality experience and Blackbird’s minimal restaurant
+                        rewards utility. Together they delivered a welcoming tone plus sharp navigation—the exact mix the new app
+                        needed.
+                    </p>
+                    <ul>
+                        <li><strong>Airbnb:</strong> Warm, welcoming presentation that handles dense information gracefully.</li>
+                        <li><strong>Blackbird:</strong> Simple, uncluttered navigation that signals professional focus.</li>
+                    </ul>
+                    <p>
+                        Pairing opposites gives you contrast. Airbnb keeps the emotional tone grounded in hospitality while
+                        Blackbird ensures the flow stays clean and efficient.
+                    </p>
+                </div>
+            </details>
+            <details class="disclosure">
+                <summary><span class="summary-icon">🧠</span>Deploy the <code>/extract it</code> command for design psychology</summary>
+                <div class="disclosure-content">
+                    <p>
+                        The <code>/extract it</code> prompt tells Claude Code to behave like a UX designer. Feed it your curated
+                        screenshots and it will unpack:
+                    </p>
+                    <div class="pill-group">
+                        <span class="pill">Color palettes &amp; temperature</span>
+                        <span class="pill">Typography hierarchy</span>
+                        <span class="pill">Component patterns</span>
+                        <span class="pill">Interaction psychology</span>
+                    </div>
+                    <p>
+                        Results land inside <strong>competitor-analysis.markdown</strong>, complete with “pondering tags” that
+                        expose chain-of-thought reasoning. This meta commentary surfaces why each visual choice nudges a specific
+                        feeling—data you can actually act on.
+                    </p>
+                </div>
+            </details>
+            <details class="disclosure">
+                <summary><span class="summary-icon">🪜</span>Push a level deeper with <code>/expand it</code></summary>
+                <div class="disclosure-content">
+                    <p>
+                        Many builders stop after the first analysis. The <code>/expand it</code> command forces the system to
+                        articulate the design philosophy beneath the surface. It augments each finding with implementation-ready
+                        notes—grid behavior, motion principles, spacing ratios—and compiles them into <strong>styles.markdown</strong>.
+                    </p>
+                    <p>
+                        This is where the meta-level understanding happens. Instead of copying an image, you capture the logic
+                        behind it so you can prompt those feelings on demand.
+                    </p>
+                </div>
+            </details>
+        </div>
+
+        <div class="quote">
+            “When you can really articulate why a different app worked the way it did to make a user feel a certain way, you can
+            recreate those feelings at will by prompting the system to do it.”
+        </div>
+
+        <section id="phase-2" class="section-heading">
+            <h2>Phase 2: Forge Your Own Token-Based System</h2>
+            <p>
+                With the psychology decoded, turn inward. Translate those feelings into tokens—color, typography, spacing, motion
+                rules—that belong to your product. This is how you create a reusable design language instead of a mood board.
+            </p>
+        </section>
+
+        <div class="disclosure-group">
+            <details class="disclosure" open>
+                <summary><span class="summary-icon">🧬</span>Merge insight with product context using <code>/merge it</code></summary>
+                <div class="disclosure-content">
+                    <p>
+                        The <code>/merge it</code> command fuses competitor analysis with your actual brief. You describe the app,
+                        the users, and the emotional tone (“warm,” “uncluttered,” “professional”). Claude Code adapts the
+                        extracted philosophies and outputs a unified token library—colors, typography scales, spacing, elevation,
+                        iconography, copy voice.
+                    </p>
+                    <p>
+                        This becomes your source of truth. Every component you build snaps to a shared vocabulary, eliminating the
+                        amateurish drift that happens when styles are improvised screen by screen.
+                    </p>
+                </div>
+            </details>
+            <details class="disclosure">
+                <summary><span class="summary-icon">🎯</span>Why tokenization matters for solo developers</summary>
+                <div class="disclosure-content">
+                    <p>
+                        Tokens let a single developer ship with team-level consistency:
+                    </p>
+                    <ul>
+                        <li><strong>Repeatable Feelings:</strong> Once “warm minimalism” is defined as specific colors and spacing,
+                            any new component can inherit that vibe.</li>
+                        <li><strong>Faster Iteration:</strong> Tweaks happen at the token level—update one variable and the entire
+                            interface adjusts.</li>
+                        <li><strong>Collaboration Ready:</strong> Hand-offs to engineers, PMs, or future designers become frictionless
+                            because the language is codified.</li>
+                    </ul>
+                </div>
+            </details>
+        </div>
+
+        <section id="phase-3" class="section-heading">
+            <h2>Phase 3: Brainstorm Like a Design Agency</h2>
+            <p>
+                Now apply the system. The <code>/design it</code> command uses your tokens to spin up multiple variations of the same
+                screen. Instead of choosing the first decent option, you curate like a creative director, comparing state by
+                state.
+            </p>
+        </section>
+
+        <div class="disclosure-group">
+            <details class="disclosure" open>
+                <summary><span class="summary-icon">🖥️</span>Prototype critical states with <code>/design it</code></summary>
+                <div class="disclosure-content">
+                    <p>
+                        Treat every screen as a mini work session. For the interior design app, the AI produced:
+                    </p>
+                    <ul>
+                        <li><strong>Empty home screen:</strong> A minimalist onboarding view and a carousel with “before and after”
+                            sliders for instant social proof.</li>
+                        <li><strong>Image processing screen:</strong> A gradient loading moment streaming real-time token feedback
+                            (“cozy · natural · bold · modern”) and a checklist that clarifies progress.</li>
+                        <li><strong>AI credit limit screen:</strong> A warm paywall that fits the aesthetic—and a mismatched dark
+                            option that was intentionally rejected to save cycles.</li>
+                    </ul>
+                    <p>
+                        Working through empty, full, and error states ensures the app behaves with the polish you expect from a
+                        funded product team.
+                    </p>
+                </div>
+            </details>
+            <details class="disclosure">
+                <summary><span class="summary-icon">📈</span>Business upside of systematic design</summary>
+                <div class="disclosure-content">
+                    <p>
+                        Professional design isn’t cosmetic. A smooth, intentional product boosts purchase rates, conversion, and
+                        stickiness because users trust what looks and feels reliable. With Claude Code acting as your agency in a
+                        box, you match the polish of teams with full-time designers.
+                    </p>
+                </div>
+            </details>
+        </div>
+
+        <section class="section-heading" id="study-guide">
+            <h2>Study Guide: The 3-Step Claude Code System for App Design</h2>
+            <p>
+                Use this guide to reinforce the workflow. Keep the questions short for quick comprehension checks, then expand the
+                answer key when you want to self-verify.
+            </p>
+        </section>
+
+        <div class="disclosure-group">
+            <details class="disclosure" open>
+                <summary><span class="summary-icon">📝</span>Quiz: Short Answer Questions</summary>
+                <div class="disclosure-content">
+                    <p>Answer each prompt in two or three sentences based on the briefing above.</p>
+                    <ol class="quiz-list">
+                        <li class="question"><strong>1.</strong> What analogy is used to describe building an app without a design system?</li>
+                        <li class="question"><strong>2.</strong> According to the video, what are the two main types of individuals who would benefit from learning this 3-step system?</li>
+                        <li class="question"><strong>3.</strong> What is the first step of the design process, and what specific tool is recommended for it?</li>
+                        <li class="question"><strong>4.</strong> Why is it important to gain a “meta level understanding” of a design rather than just copying an image?</li>
+                        <li class="question"><strong>5.</strong> Describe the function of the <code>/extract it</code> command within the Claude Code system.</li>
+                        <li class="question"><strong>6.</strong> What is the primary purpose of the <code>/expand it</code> command, and what file does it create?</li>
+                        <li class="question"><strong>7.</strong> Explain the role of the <code>/merge it</code> command in creating a unique, token-based design system.</li>
+                        <li class="question"><strong>8.</strong> When using the <code>/design it</code> command, why is it beneficial to generate multiple variations of a single screen?</li>
+                        <li class="question"><strong>9.</strong> What are the key business benefits mentioned for using this systematic design process?</li>
+                        <li class="question"><strong>10.</strong> Can the prompts and commands from this system be used outside of the Claude Code environment?</li>
+                    </ol>
+                </div>
+            </details>
+            <details class="disclosure">
+                <summary><span class="summary-icon">✅</span>Reveal the Answer Key</summary>
+                <div class="disclosure-content answer-list">
+                    <div class="answer">1. Building without a system is like trying to cook a five-star meal by randomly throwing ingredients together and hoping for a good result—chaotic, unstructured, and unlikely to impress.</div>
+                    <div class="answer">2. It serves experienced developers whose UIs feel amateurish and newcomers to vibe coding who want strong systems from day one.</div>
+                    <div class="answer">3. Step one is mining inspiration, and the recommended tool is Mobin, which curates screens from professionally designed applications.</div>
+                    <div class="answer">4. Meta-level understanding captures the psychology of why a design works and how it shapes user feelings, allowing you to recreate the experience instead of merely copying visuals.</div>
+                    <div class="answer">5. <code>/extract it</code> analyzes inspiration images, extracting design principles—color palettes, typography, component styling—into <em>competitor-analysis.markdown</em>.</div>
+                    <div class="answer">6. <code>/expand it</code> pushes the analysis deeper, fleshing out design philosophy and implementation guidance inside a comprehensive <em>styles.markdown</em> file.</div>
+                    <div class="answer">7. <code>/merge it</code> combines the competitor insights with your specific product brief to produce a custom, token-based style guide tailored to your app.</div>
+                    <div class="answer">8. Multiple variations expose empty, full, and edge states, letting you select the most compelling execution while discarding mismatched concepts quickly.</div>
+                    <div class="answer">9. The process delivers smoother experiences that raise purchase, conversion, and retention rates by building user trust.</div>
+                    <div class="answer">10. Yes. You can run the same prompts in other environments—copy the definitions into any IDE or AI assistant, such as Cursor, and execute them as standard prompts.</div>
+                </div>
+            </details>
+            <details class="disclosure">
+                <summary><span class="summary-icon">🧩</span>Essay Questions</summary>
+                <div class="disclosure-content">
+                    <ol class="essay-list">
+                        <li>Discuss the importance of moving beyond simply copying designs to developing a “meta level understanding” of UX and UI. How does the 3-step system facilitate this shift in thinking, particularly through the use of “pondering tags”?</li>
+                        <li>Explain the progression from the <code>/extract it</code> command to the <code>/expand it</code> command and finally to the <code>/merge it</code> command. Why is each step necessary, and how do they build upon one another to create a final, token-based design system?</li>
+                        <li>The video argues that this system helps developers compete with companies that have professional design resources. Elaborate on how this process bridges that gap, focusing on concepts like “polish,” “edge cases,” and user psychology.</li>
+                        <li>Describe the role of inspiration in the first phase of the system. Why does the speaker choose to draw inspiration from apps in different verticals (like Airbnb and Blackbird for an interior design app) rather than from direct competitors?</li>
+                        <li>Analyze the final implementation step of the process using the <code>/design it</code> command. How does brainstorming different screen states (e.g., empty state, processing state, credit limit reached) contribute to a more professional and robust application?</li>
+                    </ol>
+                </div>
+            </details>
+        </div>
+
+        <section class="section-heading" id="glossary">
+            <h2>Glossary of Key Terms</h2>
+            <p>
+                Reference these definitions as you work through the system or adapt the prompts to another IDE.
+            </p>
+        </section>
+
+        <div class="disclosure-group">
+            <details class="disclosure" open>
+                <summary><span class="summary-icon">📚</span>Core Vocabulary</summary>
+                <div class="disclosure-content glossary-list">
+                    <dl>
+                        <dt>Claude Code</dt>
+                        <dd>The development environment used in the workflow. Custom slash commands trigger multi-step prompts for design analysis and execution.</dd>
+                        <dt>Competitor Analysis</dt>
+                        <dd>A markdown file generated by <code>/extract it</code> that breaks down color, typography, and component systems from inspiration apps.</dd>
+                        <dt>Design System</dt>
+                        <dd>A structured set of rules, constraints, and principles that keep design and code cohesive. Building without one is described as chaotic and unpredictable.</dd>
+                        <dt><code>/design it</code></dt>
+                        <dd>The command that generates screen designs and variations based on your custom style guide. Ideal for brainstorming multiple states.</dd>
+                        <dt><code>/expand it</code></dt>
+                        <dd>The second command in the sequence. It deepens the competitor analysis, expands design philosophy, and outputs <em>styles.markdown</em>.</dd>
+                        <dt><code>/extract it</code></dt>
+                        <dd>The first command. It analyzes inspiration images and extracts their core design principles into a structured guide.</dd>
+                        <dt>Meta Level Understanding</dt>
+                        <dd>A deeper grasp of UX and UI that includes the psychology of why a design works and how it makes users feel.</dd>
+                        <dt><code>/merge it</code></dt>
+                        <dd>The command that fuses competitor insights with your product brief to create a custom, token-based design system.</dd>
+                        <dt>Mobin</dt>
+                        <dd>A recommended tool for collecting high-quality inspiration screens from professionally designed applications.</dd>
+                        <dt>Pondering Tags</dt>
+                        <dd>A prompting technique that asks the model to wrap its chain-of-thought analysis in tags, producing a meta discussion of each design decision.</dd>
+                        <dt>Token-Based Design System</dt>
+                        <dd>A design language where attributes like colors, typography, and spacing are stored as reusable tokens.</dd>
+                        <dt>UI (User Interface)</dt>
+                        <dd>The visual layer a user interacts with. Many coders struggle to make UIs feel professional without a guiding system.</dd>
+                        <dt>UX (User Experience)</dt>
+                        <dd>The overall feeling a user has while using an app. This workflow ensures that feeling is intentional and repeatable.</dd>
+                        <dt>Vibe Coding</dt>
+                        <dd>The community of builders this tutorial addresses—people who ship fast but need systems to elevate polish.</dd>
+                    </dl>
+                </div>
+            </details>
+        </div>
+
+        <footer>
+            <h3>What feeling do you want your users to have?</h3>
+            <p>Pick an unexpected app as your first inspiration source, run the slash commands, and watch intentional design emerge.</p>
+            <a href="#phase-1">Start the workflow →</a>
+        </footer>
+    </main>
+</body>
+</html>
