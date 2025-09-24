@@ -439,6 +439,19 @@
                             <li>Capture structured logs with function name, parameters, and start status.</li>
                             <li>Reject early if IDs are malformed to preserve compute and maintain traceability.</li>
                         </ul>
+                        <p><strong>Input:</strong> <code>user_id</code>, <code>event_id</code>, <code>request_metadata</code></p>
+                        <p><strong>Output:</strong> Sanitized identifiers plus a log reference that traces the execution journey.</p>
+                        <div class="code-block">
+<pre><code>payload = {"user_id": user_id, "event_id": event_id}
+validate_uuid(payload["user_id"])
+validate_uuid(payload["event_id"])
+
+log_ref = audit_logger.start(
+    "user_event_reco",
+    context={**payload, "request_metadata": request_metadata},
+)
+return payload, log_ref</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -453,6 +466,22 @@
                             <li>Load profile basics, historic events, interaction patterns, and notification preferences.</li>
                             <li>Gracefully handle missing users by raising a <code>UserNotFoundError</code>.</li>
                         </ul>
+                        <p><strong>Input:</strong> Sanitized <code>user_id</code> plus the requested <code>profile_fields</code> from configuration.</p>
+                        <p><strong>Output:</strong> Complete user profile document hydrated with behavioral and preference signals.</p>
+                        <div class="code-block">
+<pre><code>profile_fields = [
+    "basics",
+    "interaction_history",
+    "preferences",
+    "notification_settings",
+]
+user_profile = user_store.fetch(user_id=payload["user_id"], fields=profile_fields)
+
+if user_profile is None:
+    raise UserNotFoundError(payload["user_id"])
+
+return user_profile</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -466,6 +495,18 @@
                         <ul>
                             <li>Refresh the profile after vectorization so downstream logic uses the latest data.</li>
                         </ul>
+                        <p><strong>Input:</strong> Hydrated <code>user_profile</code> plus vector freshness policy (<code>vector_ttl</code>).</p>
+                        <p><strong>Output:</strong> Tuple showing the current embedding (if any) and whether regeneration is required.</p>
+                        <div class="code-block">
+<pre><code>existing_vector = user_profile.get("vector")
+vector_is_stale = vector_ttl.is_expired(user_profile.get("vector_timestamp"))
+
+needs_regeneration = existing_vector is None or vector_is_stale
+if needs_regeneration:
+    audit_logger.info("vectorization.required", {"user_id": user_profile["id"]})
+
+return existing_vector, needs_regeneration</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -480,6 +521,24 @@
                             <li>Generate the vector with <code>text-embedding-3-large</code> (or your selected provider).</li>
                             <li>Persist the vector back into the behavioral profile and log dimensionality.</li>
                         </ul>
+                        <p><strong>Input:</strong> <code>user_profile</code>, regeneration flag, and embedding model configuration.</p>
+                        <p><strong>Output:</strong> Fresh <code>user_embedding</code> saved to persistence with dimensionality metadata.</p>
+                        <div class="code-block">
+<pre><code>profile_narrative = render_profile_narrative(user_profile)
+embedding_response = embedding_client.embed(
+    model="text-embedding-3-large",
+    input=profile_narrative,
+)
+user_embedding = embedding_response["vector"]
+
+user_store.save_vector(user_profile["id"], user_embedding)
+audit_logger.info(
+    "vectorization.completed",
+    {"user_id": user_profile["id"], "dimensions": len(user_embedding)},
+)
+
+return user_embedding</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -493,6 +552,17 @@
                         <ul>
                             <li>Short-circuit with <code>EventNotFoundError</code> when details are missing.</li>
                         </ul>
+                        <p><strong>Input:</strong> Validated <code>event_id</code> plus requested <code>event_fields</code>.</p>
+                        <p><strong>Output:</strong> Event record enriched with vector data, venue insights, and logistics metadata.</p>
+                        <div class="code-block">
+<pre><code>event_fields = ["details", "schedule", "pricing", "vector", "host_reputation"]
+event_record = event_store.fetch(event_id=payload["event_id"], fields=event_fields)
+
+if event_record is None:
+    raise EventNotFoundError(payload["event_id"])
+
+return event_record</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -506,6 +576,27 @@
                         <ul>
                             <li>Log the raw score for analytics and A/B tuning.</li>
                         </ul>
+                        <p><strong>Input:</strong> <code>user_embedding</code>, <code>event_vector</code>, and a <code>normalization_strategy</code>.</p>
+                        <p><strong>Output:</strong> Normalized compatibility score ready for threshold evaluation.</p>
+                        <div class="code-block">
+<pre><code>user_vector = user_embedding
+event_vector = event_record["vector"]
+
+raw_score = cosine_similarity(user_vector, event_vector)
+compatibility_score = normalization_strategy.to_unit_interval(raw_score)
+
+metrics.log(
+    "compatibility.score",
+    compatibility_score,
+    extra={
+        "user_id": payload["user_id"],
+        "event_id": event_record["id"],
+        "raw_score": raw_score,
+    },
+)
+
+return compatibility_score</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -519,6 +610,28 @@
                         <ul>
                             <li>Return a "no recommendation" response if the match misses the bar and document the reason.</li>
                         </ul>
+                        <p><strong>Input:</strong> <code>compatibility_score</code>, user segment data, and threshold configuration.</p>
+                        <p><strong>Output:</strong> Boolean gate indicating if the recommendation proceeds, plus the applied threshold metadata.</p>
+                        <div class="code-block">
+<pre><code>threshold = threshold_resolver.resolve(
+    mode=config.threshold_mode,
+    user_segment=user_profile.get("segment"),
+)
+
+meets_bar = compatibility_score &gt;= threshold.min_score
+
+if not meets_bar:
+    audit_logger.info(
+        "recommendation.skipped",
+        {
+            "reason": "score_below_threshold",
+            "score": compatibility_score,
+            "min_score": threshold.min_score,
+        },
+    )
+
+return meets_bar, threshold</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -532,6 +645,25 @@
                         <ul>
                             <li>Fallback to discovery templates when the data score falls below the threshold.</li>
                         </ul>
+                        <p><strong>Input:</strong> <code>user_profile</code> signals and configured <code>completeness_weights</code>.</p>
+                        <p><strong>Output:</strong> Personalization tier label plus the underlying completeness score.</p>
+                        <div class="code-block">
+<pre><code>data_score = completeness_scoring(user_profile, weights=completeness_weights)
+
+if data_score &gt;= 0.8:
+    personalization_tier = "high"
+elif data_score &gt;= 0.5:
+    personalization_tier = "moderate"
+else:
+    personalization_tier = "generic"
+
+audit_logger.info(
+    "personalization.tier",
+    {"tier": personalization_tier, "score": round(data_score, 3)},
+)
+
+return personalization_tier, data_score</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -545,6 +677,21 @@
                         <ul>
                             <li>Available options: friend interest, scarcity alert, host reputation, perfect match, similar taste.</li>
                         </ul>
+                        <p><strong>Input:</strong> <code>personalization_tier</code>, <code>compatibility_score</code>, user social graph, and event metadata.</p>
+                        <p><strong>Output:</strong> Selected <code>nudge_type</code> aligned to the most persuasive psychology angle.</p>
+                        <div class="code-block">
+<pre><code>signals = gather_nudge_signals(
+    user_profile=user_profile,
+    event=event_record,
+    compatibility=compatibility_score,
+    tier=personalization_tier,
+)
+
+nudge_type = select_nudge_template(signals)
+audit_logger.info("nudge.selected", {"nudge_type": nudge_type, "signals": signals})
+
+return nudge_type</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -555,6 +702,21 @@
                     </summary>
                     <div class="timeline-body">
                         <p>Assemble the narrative ingredients—preferences, event details, compatibility, personalization level—using configurable templates.</p>
+                        <p><strong>Input:</strong> <code>nudge_type</code>, <code>personalization_tier</code>, <code>user_profile</code>, <code>event_record</code>, and <code>compatibility_score</code>.</p>
+                        <p><strong>Output:</strong> Structured context payload feeding the copy generator.</p>
+                        <div class="code-block">
+<pre><code>context_payload = build_context_payload(
+    nudge_type=nudge_type,
+    user=user_profile,
+    event=event_record,
+    compatibility=compatibility_score,
+    personalization_tier=personalization_tier,
+)
+
+context_payload["template"] = context_templates.resolve(nudge_type, personalization_tier)
+
+return context_payload</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -568,6 +730,28 @@
                         <ul>
                             <li>Regenerate with adjusted creativity when quality checks fall below minimum thresholds.</li>
                         </ul>
+                        <p><strong>Input:</strong> <code>context_payload</code>, copywriting configuration, and channel constraints.</p>
+                        <p><strong>Output:</strong> Draft message text plus generation metadata for audits.</p>
+                        <div class="code-block">
+<pre><code>message, generation_metadata = notification_generator.render(
+    template=context_payload["template"],
+    context=context_payload,
+    creativity=config.copy.creativity,
+    tone=config.copy.tone,
+    max_chars=config.copy.max_chars,
+)
+
+if generation_metadata["quality"] &lt; config.copy.minimum_quality:
+    message, generation_metadata = notification_generator.render(
+        template=context_payload["template"],
+        context=context_payload,
+        creativity=config.copy.creativity - 0.1,
+        tone=config.copy.tone,
+        max_chars=config.copy.max_chars,
+    )
+
+return message, generation_metadata</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -578,6 +762,20 @@
                     </summary>
                     <div class="timeline-body">
                         <p>Run grammar, relevance, and appropriateness checks. Only approve messages that meet configured scores.</p>
+                        <p><strong>Input:</strong> Draft <code>message</code>, <code>context_payload</code>, and quality guardrail configuration.</p>
+                        <p><strong>Output:</strong> Quality report with pass/fail status and scoring breakdown.</p>
+                        <div class="code-block">
+<pre><code>quality_report = quality_gate.evaluate(
+    message=message,
+    context=context_payload,
+    rules=config.quality.rules,
+)
+
+if not quality_report.passed:
+    raise MessageRejectedError(quality_report.reasons)
+
+return quality_report</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -591,6 +789,23 @@
                         <ul>
                             <li>Track psychology principle usage for future targeting experiments.</li>
                         </ul>
+                        <p><strong>Input:</strong> Final <code>message</code>, <code>nudge_type</code>, <code>quality_report</code>, and identifiers for the user and event.</p>
+                        <p><strong>Output:</strong> Durable interaction log entry synced across behavioral and notification systems.</p>
+                        <div class="code-block">
+<pre><code>interaction_record = {
+    "user_id": payload["user_id"],
+    "event_id": event_record["id"],
+    "nudge_type": nudge_type,
+    "message": message,
+    "quality": quality_report.scores,
+    "sent_at": utcnow(),
+}
+
+history_repo.append(interaction_record)
+notification_log.store(interaction_record)
+
+return interaction_record</code></pre>
+                        </div>
                     </div>
                 </details>
 
@@ -601,6 +816,25 @@
                     </summary>
                     <div class="timeline-body">
                         <p>Record execution completion, timing metrics, and outputs. Return structured results for downstream analytics.</p>
+                        <p><strong>Input:</strong> <code>interaction_record</code>, <code>quality_report</code>, <code>log_ref</code>, and collected execution metrics.</p>
+                        <p><strong>Output:</strong> Final response payload for API consumers alongside closed-out observability trails.</p>
+                        <div class="code-block">
+<pre><code>final_response = {
+    "user_id": payload["user_id"],
+    "event_id": event_record["id"],
+    "nudge_type": nudge_type,
+    "message": message,
+    "quality": quality_report.scores,
+    "personalization_tier": personalization_tier,
+    "compatibility_score": compatibility_score,
+    "context": context_payload,
+}
+
+audit_logger.complete(log_ref, outcome="success", result=final_response)
+timing_metrics.record(execution_start, "recommendation_flow")
+
+return final_response</code></pre>
+                        </div>
                     </div>
                 </details>
             </section>
