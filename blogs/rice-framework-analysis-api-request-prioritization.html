@@ -1,0 +1,930 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RICE Framework Analysis: API Request Prioritization for DDA Modernization | ChrisCruz.ai</title>
+    <meta name="description" content="Progressive disclosure playbook detailing how the RICE framework prioritizes three DDA modernization API requests across reach, impact, confidence, and effort."/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f6f8fb;
+            --surface: #ffffff;
+            --surface-subtle: #f1f5ff;
+            --surface-strong: #eef2ff;
+            --text: #0f172a;
+            --text-muted: #475569;
+            --accent: #2563eb;
+            --accent-soft: rgba(37, 99, 235, 0.12);
+            --border: #dbe2f1;
+            --shadow-soft: 0 20px 60px -24px rgba(15, 23, 42, 0.25);
+            --shadow-card: 0 20px 40px -32px rgba(37, 99, 235, 0.45);
+            --radius-lg: 28px;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at 12% 20%, rgba(37, 99, 235, 0.08), transparent 42%),
+                        radial-gradient(circle at 88% 8%, rgba(129, 140, 248, 0.12), transparent 38%),
+                        var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            min-height: 100vh;
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 80;
+            backdrop-filter: blur(16px);
+            background: rgba(246, 248, 251, 0.86);
+            border-bottom: 1px solid rgba(203, 213, 225, 0.6);
+        }
+
+        .nav {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 22px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .nav a {
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav .back-pill {
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: var(--accent-soft);
+            border: 1px solid rgba(37, 99, 235, 0.25);
+        }
+
+        main {
+            max-width: 1120px;
+            margin: 0 auto;
+            padding: 88px 24px 120px;
+        }
+
+        .hero {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 64px 56px;
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 48px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.08), transparent 65%);
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            margin: 0 0 18px;
+            font-size: clamp(2.8rem, 5vw, 3.7rem);
+            letter-spacing: -1.6px;
+            font-weight: 900;
+        }
+
+        .hero p {
+            margin: 0 0 24px;
+            max-width: 640px;
+            font-size: 1.08rem;
+            color: var(--text-muted);
+        }
+
+        .tag-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 999px;
+            background: rgba(15, 23, 42, 0.05);
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .metrics-grid {
+            display: grid;
+            gap: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            margin-bottom: 56px;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border-radius: 24px;
+            padding: 28px;
+            border: 1px solid rgba(203, 213, 225, 0.55);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .metric-card h3 {
+            margin: 0 0 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .metric-card p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 0.96rem;
+        }
+
+        .disclosure-group {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            margin-bottom: 72px;
+        }
+
+        details.disclosure {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(203, 213, 225, 0.6);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            transition: transform 0.35s ease, box-shadow 0.35s ease;
+        }
+
+        details.disclosure[open] {
+            box-shadow: var(--shadow-card);
+            transform: translateY(-2px);
+        }
+
+        details.disclosure summary {
+            list-style: none;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 24px;
+            padding: 28px 32px;
+            cursor: pointer;
+        }
+
+        details.disclosure summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .summary-content h2 {
+            margin: 6px 0 12px;
+            font-size: 1.45rem;
+            font-weight: 800;
+            letter-spacing: -0.6px;
+        }
+
+        .summary-content p {
+            margin: 0;
+            color: var(--text-muted);
+        }
+
+        .summary-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.12);
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .pill.low {
+            background: rgba(239, 68, 68, 0.15);
+            color: #b91c1c;
+        }
+
+        .pill.medium {
+            background: rgba(234, 179, 8, 0.18);
+            color: #a16207;
+        }
+
+        .pill.high {
+            background: rgba(34, 197, 94, 0.18);
+            color: #15803d;
+        }
+
+        .summary-indicator {
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 0.9rem;
+            padding-top: 6px;
+        }
+
+        .disclosure-content {
+            padding: 0 32px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .card-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        }
+
+        .card {
+            background: var(--surface-subtle);
+            border-radius: 22px;
+            padding: 24px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+        }
+
+        .card p {
+            margin: 0 0 10px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .scoreboard {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        }
+
+        .score {
+            background: var(--surface);
+            border-radius: 18px;
+            padding: 16px 18px;
+            border: 1px solid rgba(203, 213, 225, 0.6);
+        }
+
+        .score span {
+            display: block;
+        }
+
+        .score .label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            margin-bottom: 6px;
+        }
+
+        .score .value {
+            font-size: 1.3rem;
+            font-weight: 800;
+        }
+
+        .score .note {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+        }
+
+        .table thead {
+            background: var(--surface-strong);
+        }
+
+        .table th, .table td {
+            padding: 16px;
+            text-align: left;
+            font-size: 0.95rem;
+        }
+
+        .table th {
+            font-weight: 700;
+            color: var(--text-muted);
+        }
+
+        .table tbody tr:nth-child(even) {
+            background: rgba(241, 245, 255, 0.5);
+        }
+
+        .callout {
+            background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(129, 140, 248, 0.08));
+            border-radius: 24px;
+            padding: 32px 36px;
+            border: 1px solid rgba(37, 99, 235, 0.25);
+            margin-bottom: 64px;
+        }
+
+        .callout h2 {
+            margin-top: 0;
+            font-size: 1.4rem;
+            font-weight: 800;
+        }
+
+        .callout p {
+            color: var(--text-muted);
+            font-size: 0.98rem;
+        }
+
+        .cta {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            padding: 48px 56px;
+            box-shadow: var(--shadow-soft);
+            text-align: center;
+        }
+
+        .cta h2 {
+            margin-top: 0;
+            font-size: 2rem;
+            font-weight: 900;
+        }
+
+        .cta p {
+            color: var(--text-muted);
+            font-size: 1rem;
+            max-width: 560px;
+            margin: 16px auto 0;
+        }
+
+        a.cta-link {
+            display: inline-block;
+            margin-top: 24px;
+            padding: 14px 26px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #2563eb, #7c3aed);
+            color: white;
+            text-decoration: none;
+            font-weight: 700;
+            box-shadow: 0 20px 40px -24px rgba(37, 99, 235, 0.6);
+        }
+
+        @media (max-width: 720px) {
+            .hero {
+                padding: 40px 28px;
+            }
+
+            details.disclosure summary {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .summary-indicator {
+                padding-top: 0;
+            }
+
+            main {
+                padding: 72px 20px 96px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="nav">
+            <a class="back-pill" href="../index.html">← Back to ChrisCruz.ai</a>
+            <a href="index.html">View all posts →</a>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <span class="hero-badge">API Portfolio Prioritization</span>
+            <h1>RICE Framework Analysis for DDA Modernization API Requests</h1>
+            <p>
+                A progressive disclosure briefing that applies the Reach × Impact × Confidence ÷ Effort model to three
+                fraud-focused API requests. Explore why Prevention Desktop can move immediately, why Mastercard
+                auto-chargeback needs validation, and why digital wallet token work should wait for CDP-powered V4.
+            </p>
+            <div class="tag-grid">
+                <span class="tag">RICE Model</span>
+                <span class="tag">Fraud Operations</span>
+                <span class="tag">API Modernization</span>
+                <span class="tag">Progressive Disclosure UX</span>
+            </div>
+        </section>
+
+        <section class="metrics-grid">
+            <article class="metric-card">
+                <h3>RICE Formula</h3>
+                <p>Score = (Reach × Impact × Confidence) ÷ Effort. High scores surface work that touches many users,
+                    delivers meaningful outcomes, and can ship with certainty using the least effort.</p>
+            </article>
+            <article class="metric-card">
+                <h3>Portfolio Snapshot</h3>
+                <p>Three requests target fraud prevention and operational efficiency across CDFO teams, with confidence
+                    levels ranging from 40–75% and implementation effort spanning 6–12 person-months.</p>
+            </article>
+            <article class="metric-card">
+                <h3>Prioritization Outcome</h3>
+                <p>Prevention Desktop (162.5) leads. Mastercard Auto-Chargeback (1.7) requires data validation. Digital
+                    Wallet Token controls (1.2) remain blocked until CDP integration unlocks V4 support.</p>
+            </article>
+        </section>
+
+        <section class="disclosure-group">
+            <details class="disclosure" open>
+                <summary>
+                    <div class="summary-content">
+                        <div class="summary-meta">
+                            <span class="pill">Request 1 · ID 43040</span>
+                            <span class="pill low">RICE Score 1.2</span>
+                            <span class="pill">Status: Must Wait</span>
+                        </div>
+                        <h2>Digital Wallet Token Fraud Prevention</h2>
+                        <p>Stop fraudsters from reusing wallet tokens after card replacement by surfacing Token Requestor IDs
+                            and Token Numbers to CDFO fraud teams.</p>
+                    </div>
+                    <span class="summary-indicator">Tap to toggle full analysis</span>
+                </summary>
+                <div class="disclosure-content">
+                    <div class="card-grid">
+                        <article class="card">
+                            <h3>Business Context</h3>
+                            <p><strong>Objective:</strong> Prevent repeat fraud by automatically deactivating compromised digital
+                                wallet tokens once cards are replaced.</p>
+                            <p>Monthly reach of <strong>8 high-impact fraud cases</strong> grounded in Chase’s debit transaction
+                                scale and manual case history.</p>
+                        </article>
+                        <article class="card">
+                            <h3>Confidence Risks (60%)</h3>
+                            <p>Token data consistency between pending SOR and posted ODS systems is unproven.</p>
+                            <p>CDP platform integration requires architectural validation before ingestion can start.</p>
+                            <p>Assumed effectiveness mirrors manual fraud workflows that have yet to be automated.</p>
+                        </article>
+                        <article class="card">
+                            <h3>Implementation Load (12 person-months)</h3>
+                            <p>Requires Chase Debit Platform integration and complex pending transaction derivation logic.</p>
+                            <p>Token formatting needs extensive validation across authorization and settlement systems before
+                                production rollout.</p>
+                        </article>
+                    </div>
+                    <div class="scoreboard">
+                        <div class="score">
+                            <span class="label">Reach</span>
+                            <span class="value">8</span>
+                            <span class="note">Estimated monthly digital wallet fraud cases prevented.</span>
+                        </div>
+                        <div class="score">
+                            <span class="label">Impact</span>
+                            <span class="value">3 · Massive</span>
+                            <span class="note">100 FTE benefit via token deactivation and customer fraud protection.</span>
+                        </div>
+                        <div class="score">
+                            <span class="label">Confidence</span>
+                            <span class="value">60%</span>
+                            <span class="note">Awaiting CDP validation and token reconciliation proof.</span>
+                        </div>
+                        <div class="score">
+                            <span class="label">Effort</span>
+                            <span class="value">12</span>
+                            <span class="note">Integration blocked until CDP onboarding completes.</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Why it must wait</h3>
+                        <p>CDP integration is not yet available, preventing access to required fields:</p>
+                        <ul>
+                            <li><code>tokenRequestorIdentifier</code></li>
+                            <li><code>tokenNumber</code></li>
+                        </ul>
+                        <p>Strategic value remains high, but execution should align with V4’s enhanced token support once the
+                            CDP dependency clears.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="disclosure">
+                <summary>
+                    <div class="summary-content">
+                        <div class="summary-meta">
+                            <span class="pill">Request 2 · ID 48837</span>
+                            <span class="pill high">RICE Score 162.5</span>
+                            <span class="pill high">Status: Can Proceed with Conditions</span>
+                        </div>
+                        <h2>Prevention Desktop Fraud Investigation</h2>
+                        <p>Collapse four-to-five tools into a single Prevention Desktop interface by onboarding ETU API data
+                            for every CDFO specialist.</p>
+                    </div>
+                    <span class="summary-indicator">Tap to open workflow plan</span>
+                </summary>
+                <div class="disclosure-content">
+                    <div class="card-grid">
+                        <article class="card">
+                            <h3>Business Context</h3>
+                            <p><strong>Objective:</strong> Centralize fraud specialist workflows, eliminating tool toggling and
+                                reducing investigation time.</p>
+                            <p><strong>Reach:</strong> Direct impact on <strong>1,300 fraud specialists</strong> operating inside
+                                CDFO today.</p>
+                        </article>
+                        <article class="card">
+                            <h3>Confidence Drivers (75%)</h3>
+                            <p>Most ETU fields are confirmed, with statement start date as the only gap.</p>
+                            <p>Standard API onboarding motions, plus a clearly defined user base, support adoption.</p>
+                        </article>
+                        <article class="card">
+                            <h3>Implementation Effort (6 person-months)</h3>
+                            <p>Client team commits to managing IDAHO, ADFS, API Gateway, and RSAM independently.</p>
+                            <p>Requires alternative solution for the missing statement start date.</p>
+                        </article>
+                    </div>
+                    <div class="scoreboard">
+                        <div class="score">
+                            <span class="label">Reach</span>
+                            <span class="value">1,300</span>
+                            <span class="note">All fraud specialists adopt the unified desktop.</span>
+                        </div>
+                        <div class="score">
+                            <span class="label">Impact</span>
+                            <span class="value">1 · Medium</span>
+                            <span class="note">Improved efficiency, training reduction, and data consistency.</span>
+                        </div>
+                        <div class="score">
+                            <span class="label">Confidence</span>
+                            <span class="value">75%</span>
+                            <span class="note">Field readiness, user demand, and standard onboarding.</span>
+                        </div>
+                        <div class="score">
+                            <span class="label">Effort</span>
+                            <span class="value">6</span>
+                            <span class="note">Standard integration with moderate discovery.</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Key ETU V3 Field Coverage</h3>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Field</th>
+                                    <th>API Field</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Transaction Status</td>
+                                    <td><code>transactionStatusName</code></td>
+                                    <td>✅ Available</td>
+                                </tr>
+                                <tr>
+                                    <td>Posted Date/Time</td>
+                                    <td><code>transactionPostDate</code></td>
+                                    <td>✅ Available</td>
+                                </tr>
+                                <tr>
+                                    <td>Card Number</td>
+                                    <td><code>cardLast4DigitsNumber</code></td>
+                                    <td>✅ Last 4 digits only</td>
+                                </tr>
+                                <tr>
+                                    <td>Customer ID</td>
+                                    <td>Input parameters</td>
+                                    <td>✅ Available</td>
+                                </tr>
+                                <tr>
+                                    <td>Statement Start Date</td>
+                                    <td>N/A</td>
+                                    <td>❌ Not available</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p><strong>Go-forward requirements:</strong> lock in team self-sufficiency, validate low TPS (10–20), and
+                            define a substitute for the missing statement start date.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="disclosure">
+                <summary>
+                    <div class="summary-content">
+                        <div class="summary-meta">
+                            <span class="pill">Request 3 · ID 37661</span>
+                            <span class="pill medium">RICE Score 1.7</span>
+                            <span class="pill medium">Status: Needs Validation</span>
+                        </div>
+                        <h2>Mastercard Auto-Chargeback Automation</h2>
+                        <p>Automate chargeback processing for Mastercard debit by exposing network identifiers (CIRR/PULS) and
+                            reducing 17 FTEs of manual effort.</p>
+                    </div>
+                    <span class="summary-indicator">Tap to review investigation steps</span>
+                </summary>
+                <div class="disclosure-content">
+                    <div class="card-grid">
+                        <article class="card">
+                            <h3>Business Context</h3>
+                            <p><strong>Objective:</strong> Deliver real-time chargeback automation by surfacing network IDs that
+                                currently require manual lookup.</p>
+                            <p><strong>Reach:</strong> Automates <strong>17 full-time equivalent roles</strong> in fraud operations.</p>
+                        </article>
+                        <article class="card">
+                            <h3>Confidence Constraints (40%)</h3>
+                            <p>Unclear if CIRR/PULS network identifiers exist in CMM data today.</p>
+                            <p>Integration requires CMM modifications plus ETU enhancements, creating timeline risk for March
+                                2025.</p>
+                        </article>
+                        <article class="card">
+                            <h3>Implementation Effort (8 person-months)</h3>
+                            <p>Moderate CMM engineering to expose new fields, API changes to surface them, and end-to-end testing
+                                with CCS-UI.</p>
+                        </article>
+                    </div>
+                    <div class="scoreboard">
+                        <div class="score">
+                            <span class="label">Reach</span>
+                            <span class="value">17</span>
+                            <span class="note">Direct automation of manual chargeback positions.</span>
+                        </div>
+                        <div class="score">
+                            <span class="label">Impact</span>
+                            <span class="value">2 · High</span>
+                            <span class="note">Cost savings, fewer errors, faster processing.</span>
+                        </div>
+                        <div class="score">
+                            <span class="label">Confidence</span>
+                            <span class="value">40%</span>
+                            <span class="note">Data availability and integration risk remain open.</span>
+                        </div>
+                        <div class="score">
+                            <span class="label">Effort</span>
+                            <span class="value">8</span>
+                            <span class="note">CMM exposure, ETU enhancement, CCS-UI validation.</span>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <h3>Validation work ahead</h3>
+                        <p>Confirm the following before prioritizing:</p>
+                        <ul>
+                            <li>Validate presence of CIRR/PULS identifiers and terminal FIID within current CMM datasets.</li>
+                            <li>Assess engineering complexity to expose the fields and update ETU.</li>
+                            <li>Re-evaluate the March 2025 deadline against dependency timelines.</li>
+                        </ul>
+                        <p>Until the data question is answered, keep the initiative in investigation mode.</p>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <section class="callout">
+            <h2>Decision Matrix Summary</h2>
+            <p>This roll-up keeps the prioritization debate grounded: Prevention Desktop advances immediately, Mastercard
+                automation enters validation, and token fraud mitigation waits for platform readiness.</p>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Request</th>
+                        <th>RICE Score</th>
+                        <th>Implementation Status</th>
+                        <th>Priority Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Prevention Desktop (ID 48837)</td>
+                        <td>162.5</td>
+                        <td>✅ Can Proceed with conditions</td>
+                        <td><strong>High</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Mastercard Auto-Chargeback (ID 37661)</td>
+                        <td>1.7</td>
+                        <td>🔍 Needs validation</td>
+                        <td><strong>Medium</strong></td>
+                    </tr>
+                    <tr>
+                        <td>Digital Wallet Token Fraud Prevention (ID 43040)</td>
+                        <td>1.2</td>
+                        <td>⏸️ Must wait</td>
+                        <td><strong>Low (timing)</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="disclosure-group">
+            <details class="disclosure" open>
+                <summary>
+                    <div class="summary-content">
+                        <div class="summary-meta">
+                            <span class="pill">Implementation Recommendations</span>
+                        </div>
+                        <h2>Roadmap Sequencing Guidance</h2>
+                        <p>Open each track to see what must be true to greenlight development.</p>
+                    </div>
+                    <span class="summary-indicator">Tap to expand each track</span>
+                </summary>
+                <div class="disclosure-content">
+                    <div class="card-grid">
+                        <article class="card">
+                            <h3>Immediate Action · V3 API</h3>
+                            <p><strong>Prevention Desktop (ID 48837)</strong> can proceed now:</p>
+                            <ul>
+                                <li>TPS of 10–20 aligns with V3 onboarding guidelines.</li>
+                                <li>Standard integration path with a self-sufficient client team.</li>
+                                <li>Only dependency is an agreed alternative to statement start date.</li>
+                            </ul>
+                        </article>
+                        <article class="card">
+                            <h3>Validation Required</h3>
+                            <p><strong>Mastercard Auto-Chargeback (ID 37661)</strong> needs pre-work:</p>
+                            <ol>
+                                <li>Run a data availability check for CIRR/PULS fields in CMM.</li>
+                                <li>Estimate CMM integration effort alongside ETU changes.</li>
+                                <li>Stress-test the March 2025 target across dependencies.</li>
+                            </ol>
+                        </article>
+                        <article class="card">
+                            <h3>Strategic Delay · V4 API</h3>
+                            <p><strong>Digital Wallet Tokens (ID 43040)</strong> waits for richer capabilities:</p>
+                            <ul>
+                                <li>CDP integration must land before token controls can be delivered.</li>
+                                <li>V4 will offer enhanced token support that maximizes long-term value.</li>
+                                <li>Real-time deactivation should launch once the architecture is ready.</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </details>
+
+            <details class="disclosure">
+                <summary>
+                    <div class="summary-content">
+                        <div class="summary-meta">
+                            <span class="pill">Migration Planning</span>
+                        </div>
+                        <h2>Preparing for V3 → V4 Transition</h2>
+                        <p>Inventory usage, map dependencies, and articulate the upside of V4 before timelines accelerate.</p>
+                    </div>
+                    <span class="summary-indicator">Tap to view migration checklist</span>
+                </summary>
+                <div class="disclosure-content">
+                    <div class="card-grid">
+                        <article class="card">
+                            <h3>Assess Current V3 Usage</h3>
+                            <ul>
+                                <li>Catalog active integrations by team, TPS, and field utilization.</li>
+                                <li>Document integration complexity, including custom data transformations.</li>
+                                <li>Define compatibility requirements to ensure V4 parity.</li>
+                                <li>Align support timelines, factoring V3 deprecation and V4 adoption milestones.</li>
+                            </ul>
+                        </article>
+                        <article class="card">
+                            <h3>V4 Strategic Advantages</h3>
+                            <ul>
+                                <li>Native CDP integration unlocks enhanced token support.</li>
+                                <li>Projected 50% mainframe reduction improves performance.</li>
+                                <li>Richer data model surfaces additional fraud-relevant fields.</li>
+                                <li>Modern architecture scales with future fraud prevention growth.</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </details>
+
+            <details class="disclosure">
+                <summary>
+                    <div class="summary-content">
+                        <div class="summary-meta">
+                            <span class="pill">DST Intake Preparation</span>
+                        </div>
+                        <h2>Discovery Questions to Confirm</h2>
+                        <p>Answer these prompts during DST assessment to accelerate gating decisions.</p>
+                    </div>
+                    <span class="summary-indicator">Tap to reveal question sets</span>
+                </summary>
+                <div class="disclosure-content">
+                    <div class="card-grid">
+                        <article class="card">
+                            <h3>For All Requests</h3>
+                            <ol>
+                                <li>What are the actual peak and average TPS requirements?</li>
+                                <li>Can the requesting team own IDAHO, ADFS, API Gateway, and RSAM onboarding?</li>
+                                <li>Is the team willing to wait for V4 (mid-2026) for enhanced capabilities?</li>
+                                <li>What interim solutions exist if API integration slips?</li>
+                            </ol>
+                        </article>
+                        <article class="card">
+                            <h3>Prevention Desktop</h3>
+                            <ul>
+                                <li>How will the team handle the missing statement start date?</li>
+                                <li>Can transaction date ranges substitute for statement cycle context?</li>
+                                <li>Which fraud detection patterns demand pending versus posted status?</li>
+                            </ul>
+                        </article>
+                        <article class="card">
+                            <h3>Mastercard Auto-Chargeback</h3>
+                            <ul>
+                                <li>Have CIRR/PULS identifiers been confirmed in CMM data?</li>
+                                <li>What is the fallback if the March 2025 deadline slips?</li>
+                                <li>How much cost is saved by automating 17 FTEs?</li>
+                            </ul>
+                        </article>
+                        <article class="card">
+                            <h3>Digital Wallet Tokens</h3>
+                            <ul>
+                                <li>Can token data be reconciled between authorization and settlement systems?</li>
+                                <li>What is the business impact of waiting for CDP versus building workarounds?</li>
+                                <li>How critical is real-time deactivation compared with batch alternatives?</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </details>
+
+            <details class="disclosure">
+                <summary>
+                    <div class="summary-content">
+                        <div class="summary-meta">
+                            <span class="pill">V3 Intake Guardrails</span>
+                        </div>
+                        <h2>Decision Criteria for API Onboarding</h2>
+                        <p>Use these filters to determine whether work stays on V3, shifts to V4, or must be declined.</p>
+                    </div>
+                    <span class="summary-indicator">Tap to view guardrails</span>
+                </summary>
+                <div class="disclosure-content">
+                    <div class="card-grid">
+                        <article class="card">
+                            <h3>✅ Approve for V3 when…</h3>
+                            <ul>
+                                <li>Peak TPS ≤ 50 and integration remains standard.</li>
+                                <li>Required data fields already exist in V3.</li>
+                                <li>Requesting team can drive onboarding independently.</li>
+                                <li>Timelines align with current capacity.</li>
+                            </ul>
+                        </article>
+                        <article class="card">
+                            <h3>⏸️ Defer to V4 when…</h3>
+                            <ul>
+                                <li>Peak TPS exceeds 50 or requires complex transformations.</li>
+                                <li>Critical fields are missing from V3 payloads.</li>
+                                <li>Enhanced capabilities in V4 better support strategic outcomes.</li>
+                            </ul>
+                        </article>
+                        <article class="card">
+                            <h3>❌ Cannot support when…</h3>
+                            <ul>
+                                <li>Timelines are unrealistic relative to dependencies.</li>
+                                <li>Teams lack resources for onboarding commitments.</li>
+                                <li>Architectural conflicts or security concerns block compliance.</li>
+                            </ul>
+                        </article>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <section class="cta">
+            <h2>Align on the next API move</h2>
+            <p>Use this RICE brief to brief executives, unblock DST discussions, and plan the V3 to V4 transition. When
+                you are ready to move, sync with the modernization team to confirm dependencies and timelines.</p>
+            <a class="cta-link" href="../contact.html">Coordinate with Chris →</a>
+        </section>
+    </main>
+</body>
+</html>
