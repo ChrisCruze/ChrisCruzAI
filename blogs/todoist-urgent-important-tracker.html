@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Todoist Urgent & Important Tracker | ChrisCruz.ai</title>
+    <meta name="description" content="Inside the new Todoist Urgent & Important Tracker app that syncs projects, filters critical tasks, and logs deep work focus sessions straight into Todoist.">
+    <meta name="keywords" content="Todoist, productivity, urgent important matrix, Eisenhower matrix, time tracking, deep work, Chris Cruz">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="The Todoist Urgent & Important Tracker">
+    <meta property="og:description" content="Filter Todoist to the critical few, launch focus timers, and sync every session back to Todoist automatically.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://chriscruz.ai/blogs/todoist-urgent-important-tracker.html">
+    <meta property="og:image" content="https://chriscruz.ai/images/todoist-urgent-important-tracker.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="The Todoist Urgent & Important Tracker">
+    <meta name="twitter:description" content="Filter Todoist to the critical few, launch focus timers, and sync every session back to Todoist automatically.">
+    <meta name="article:published_time" content="2025-11-12T00:00:00Z">
+    <meta name="article:author" content="Christopher Manuel Cruz-Guzman">
+    <meta name="article:section" content="Productivity Systems">
+    <meta name="article:tag" content="Todoist, productivity, focus, urgent important, time tracking">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.18), transparent 45%),
+                        radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.18), transparent 40%),
+                        #05060a;
+            color: #f8fafc;
+        }
+        .glass {
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            backdrop-filter: blur(18px);
+        }
+        .gradient-text {
+            background: linear-gradient(120deg, #38bdf8, #22c55e, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .highlight {
+            background: linear-gradient(120deg, rgba(56, 189, 248, 0.16), rgba(34, 197, 94, 0.16));
+            border: 1px solid rgba(56, 189, 248, 0.35);
+        }
+        .callout {
+            background: rgba(15, 118, 110, 0.25);
+            border-left: 4px solid #5eead4;
+        }
+        a:not(.btn) {
+            color: #38bdf8;
+        }
+        a:not(.btn):hover {
+            color: #facc15;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 22px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, #38bdf8, #22d3ee);
+            color: #0f172a !important;
+            font-weight: 700;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 30px rgba(56, 189, 248, 0.35);
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <header class="fixed top-0 left-0 right-0 z-40 bg-black/30 backdrop-blur-md">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="../brand-hub.html" class="text-xl font-bold tracking-tighter">ChrisCruz<span class="text-sky-400">.ai</span></a>
+            <nav class="hidden md:flex space-x-8 text-sm">
+                <a href="../brand-hub.html" class="hover:text-sky-400 transition-colors">Empire</a>
+                <a href="../manifesto.html" class="hover:text-sky-400 transition-colors">Manifesto</a>
+                <a href="../Apps/index.html" class="hover:text-sky-400 transition-colors">Apps</a>
+                <a href="../contact.html" class="hover:text-sky-400 transition-colors">Contact</a>
+            </nav>
+            <span class="text-xs font-semibold py-1 px-3 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">Productivity Systems</span>
+        </div>
+    </header>
+
+    <main class="pt-28">
+        <section class="px-6 py-20">
+            <div class="container mx-auto max-w-4xl">
+                <div class="text-center mb-12">
+                    <p class="text-sky-400 text-sm uppercase tracking-[0.3em] mb-4">Launch Announcement</p>
+                    <h1 class="text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-6">
+                        Introducing the <span class="gradient-text">Todoist Urgent & Important Tracker</span>
+                    </h1>
+                    <p class="text-xl text-slate-300 leading-relaxed max-w-3xl mx-auto">
+                        When everything is marked “ASAP,” nothing gets your full attention. This new app slashes Todoist down to the critical few, visualizes momentum, and makes every focus block count.
+                    </p>
+                    <div class="mt-8 flex justify-center">
+                        <a href="../Apps/todoist-urgent-important-tracker.html" class="btn">Launch the Tracker</a>
+                    </div>
+                </div>
+
+                <div class="glass rounded-3xl p-8 md:p-12 space-y-10">
+                    <div class="flex items-center gap-3 text-sm text-slate-400">
+                        <span>🗓️ November 12, 2025</span>
+                        <span>•</span>
+                        <span>⏱️ 7 minute read</span>
+                        <span>•</span>
+                        <span>✍️ Christopher Manuel Cruz-Guzman</span>
+                    </div>
+
+                    <p class="text-lg text-slate-200 leading-relaxed">
+                        The Eisenhower Matrix is powerful in theory, but it falls apart when everything ends up in the same quadrant. I wanted a way to see only the missions that are both <strong>urgent</strong> and <strong>important</strong>, with zero manual filtering inside Todoist. The solution is a dedicated control tower that pulls in every qualifying project, tracks completion momentum, and automatically logs my deep work sessions.
+                    </p>
+
+                    <div class="highlight rounded-2xl p-6">
+                        <h2 class="text-2xl font-bold text-sky-300 mb-3">Core Outcomes</h2>
+                        <ul class="space-y-3 text-slate-100 text-base leading-relaxed">
+                            <li>• Visual project cards with real-time progress bars and next actions.</li>
+                            <li>• A single timer engine so only one initiative can be active at a time.</li>
+                            <li>• Automatic Todoist comments every time a focus block ends.</li>
+                            <li>• Local-first storage for API keys, preferences, and running timers.</li>
+                        </ul>
+                    </div>
+
+                    <h2 class="text-3xl font-bold text-white">How the Tracker Works</h2>
+                    <p class="text-lg text-slate-300 leading-relaxed">
+                        Once you drop in your Todoist REST API token, the app pulls three streams: projects, labels, and tasks. It maps each task’s labels, looking for anything tagged “urgent” and “important” (or a priority 4 task that hits either label). Projects that don’t have at least one qualifying task never appear. The result is a curated board of only the initiatives that actually demand your attention.
+                    </p>
+
+                    <div class="callout rounded-2xl p-6 text-slate-100">
+                        <p class="text-lg font-semibold mb-2">Timer Discipline Built In</p>
+                        <p class="text-base leading-relaxed">
+                            Clicking a project card launches its focus timer and automatically pauses whatever else you were working on. When you hit stop, the elapsed duration gets pushed to Todoist as a project comment so your activity feed shows a clean audit trail of deep work reps.
+                        </p>
+                    </div>
+
+                    <h3 class="text-2xl font-bold text-white">Interface Tour</h3>
+                    <ul class="space-y-4 text-slate-200 text-base leading-relaxed">
+                        <li><strong>Command Header:</strong> Save or clear your API token, toggle light/dark mode, and refresh Todoist data in one place.</li>
+                        <li><strong>Project Cards:</strong> Each card shows progress, remaining tasks, the next action, and total focused time logged.</li>
+                        <li><strong>Focus Engine:</strong> Start/stop buttons run off a single timer so the system enforces singular focus.</li>
+                        <li><strong>Task Ledger:</strong> Completed urgent tasks dim out while open items stay bold with due dates and priorities.</li>
+                    </ul>
+
+                    <p class="text-lg text-slate-300 leading-relaxed">
+                        Because the state is stored locally, you can refresh the page or close the browser without losing your running timer or total hours per project. Every session syncs back to Todoist, giving you structured notes for weekly reviews and proof of work for stakeholders.
+                    </p>
+
+                    <div class="highlight rounded-2xl p-6">
+                        <h3 class="text-2xl font-bold text-sky-300 mb-4">Why this matters for LifeOS</h3>
+                        <p class="text-base text-slate-100 leading-relaxed">
+                            LifeOS is my unified operating system for goals, assets, and rituals. The Todoist Urgent & Important Tracker plugs directly into that stack by surfacing only the mission-critical initiatives and capturing the time investments automatically. It’s the difference between <em>feeling busy</em> and <em>being effective</em>.
+                        </p>
+                    </div>
+
+                    <p class="text-lg text-slate-300 leading-relaxed">
+                        I’m sharing the full source inside the app so you can fork it, wire it into your own automations, or adapt it to whatever prioritization logic keeps you honest. The more signal we can layer into Todoist, the easier it becomes to maintain relentless focus on empire-building work.
+                    </p>
+
+                    <div class="text-center pt-6">
+                        <a href="../Apps/todoist-urgent-important-tracker.html" class="btn">Jump into the App</a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="py-12 text-center text-sm text-slate-500">
+        © 2025 Chris Cruz. Built to turn intent into outcomes.
+    </footer>
+</body>
+</html>

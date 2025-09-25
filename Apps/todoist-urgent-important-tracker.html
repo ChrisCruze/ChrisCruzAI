@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todoist Urgent & Important Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light dark;
+            --slate-900: #0f172a;
+            --slate-800: #1e293b;
+            --slate-700: #334155;
+            --slate-200: #e2e8f0;
+            --slate-100: #f1f5f9;
+            --blue-500: #3b82f6;
+            --blue-600: #2563eb;
+            --rose-500: #f43f5e;
+            --emerald-500: #10b981;
+            --amber-500: #f59e0b;
+            --surface-light: rgba(255, 255, 255, 0.8);
+            --surface-dark: rgba(15, 23, 42, 0.8);
+            --border-light: rgba(15, 23, 42, 0.08);
+            --border-dark: rgba(148, 163, 184, 0.2);
+            --text-primary-light: #0f172a;
+            --text-secondary-light: #475569;
+            --text-primary-dark: #f8fafc;
+            --text-secondary-dark: #cbd5f5;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(160deg, #0f172a 0%, #1e293b 40%, #3b82f6 100%);
+            color: var(--text-primary-dark);
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.light {
+            background: linear-gradient(140deg, #f8fafc 0%, #e0f2fe 50%, #bfdbfe 100%);
+            color: var(--text-primary-light);
+        }
+
+        .page-shell {
+            width: min(1200px, 100%);
+            margin: 0 auto;
+            padding: 32px clamp(16px, 4vw, 48px) 64px;
+        }
+
+        header {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: clamp(28px, 4vw, 40px);
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            margin: 0;
+        }
+
+        .subtitle {
+            margin: 0;
+            font-size: clamp(16px, 2.5vw, 18px);
+            color: rgba(226, 232, 240, 0.85);
+        }
+
+        body.light .subtitle {
+            color: var(--text-secondary-light);
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(59, 130, 246, 0.15);
+            color: #ffffff;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            border-radius: 9999px;
+            padding: 10px 18px;
+            font-weight: 600;
+            font-size: 14px;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.25);
+            background: rgba(37, 99, 235, 0.35);
+        }
+
+        .button.secondary {
+            background: rgba(15, 23, 42, 0.5);
+            border-color: rgba(148, 163, 184, 0.25);
+        }
+
+        body.light .button {
+            color: var(--text-primary-light);
+            background: rgba(37, 99, 235, 0.12);
+            border-color: rgba(37, 99, 235, 0.2);
+        }
+
+        body.light .button.secondary {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(15, 23, 42, 0.08);
+        }
+
+        .panel {
+            background: var(--surface-dark);
+            border: 1px solid var(--border-dark);
+            border-radius: 28px;
+            padding: clamp(20px, 3vw, 32px);
+            margin-bottom: 32px;
+            backdrop-filter: blur(18px);
+            box-shadow: 0 30px 60px rgba(15, 23, 42, 0.35);
+        }
+
+        body.light .panel {
+            background: var(--surface-light);
+            border: 1px solid var(--border-light);
+            box-shadow: 0 20px 50px rgba(15, 23, 42, 0.12);
+        }
+
+        .panel h2 {
+            margin: 0 0 16px;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .panel p {
+            margin: 0 0 12px;
+            color: rgba(226, 232, 240, 0.8);
+            font-size: 15px;
+        }
+
+        body.light .panel p {
+            color: var(--text-secondary-light);
+        }
+
+        .panel label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: rgba(226, 232, 240, 0.9);
+        }
+
+        body.light .panel label {
+            color: var(--text-primary-light);
+        }
+
+        input[type="password"],
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 14px;
+            border: 1px solid rgba(148, 163, 184, 0.25);
+            background: rgba(15, 23, 42, 0.6);
+            color: #f8fafc;
+            font-size: 15px;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        input[type="password"]:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.5);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+        }
+
+        body.light input[type="password"],
+        body.light input[type="text"] {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary-light);
+        }
+
+        .status-bar {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 14px;
+            color: rgba(226, 232, 240, 0.8);
+            margin-top: 16px;
+        }
+
+        body.light .status-bar {
+            color: var(--text-secondary-light);
+        }
+
+        .grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        }
+
+        .project-card {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+            padding: 24px;
+            border-radius: 24px;
+            background: linear-gradient(160deg, rgba(15, 23, 42, 0.85), rgba(37, 99, 235, 0.55));
+            border: 1px solid rgba(94, 234, 212, 0.08);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+            overflow: hidden;
+        }
+
+        .project-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 40px rgba(15, 23, 42, 0.4);
+            border-color: rgba(16, 185, 129, 0.45);
+        }
+
+        body.light .project-card {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.9), rgba(191, 219, 254, 0.7));
+            border-color: rgba(37, 99, 235, 0.1);
+            color: var(--text-primary-light);
+        }
+
+        body.light .project-card:hover {
+            border-color: rgba(16, 185, 129, 0.35);
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.18);
+        }
+
+        .project-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .project-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin: 0;
+            letter-spacing: -0.01em;
+        }
+
+        .project-meta {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            font-size: 13px;
+            color: rgba(226, 232, 240, 0.7);
+        }
+
+        body.light .project-meta {
+            color: var(--text-secondary-light);
+        }
+
+        .progress-bar {
+            position: relative;
+            height: 10px;
+            border-radius: 999px;
+            background: rgba(148, 163, 184, 0.2);
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #10b981, #3b82f6);
+            transform-origin: left;
+            transition: width 0.4s ease;
+        }
+
+        .timer-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.45);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+            border-radius: 16px;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        body.light .timer-display {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(148, 163, 184, 0.25);
+        }
+
+        .timer-label {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(226, 232, 240, 0.6);
+        }
+
+        body.light .timer-label {
+            color: rgba(71, 85, 105, 0.7);
+        }
+
+        .timer-value {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .timer-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .timer-actions button {
+            flex: 1;
+            border-radius: 12px;
+            border: none;
+            font-weight: 600;
+            font-size: 14px;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .timer-actions button.start {
+            background: linear-gradient(120deg, #22c55e, #0ea5e9);
+            color: #0b1120;
+        }
+
+        .timer-actions button.stop {
+            background: rgba(248, 250, 252, 0.12);
+            border: 1px solid rgba(248, 113, 113, 0.4);
+            color: #fca5a5;
+        }
+
+        .timer-actions button:hover {
+            transform: translateY(-1px);
+        }
+
+        .next-action {
+            background: rgba(15, 23, 42, 0.45);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            border-radius: 18px;
+            padding: 16px;
+        }
+
+        body.light .next-action {
+            background: rgba(255, 255, 255, 0.92);
+            border-color: rgba(59, 130, 246, 0.15);
+        }
+
+        .next-action h3 {
+            margin: 0 0 12px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(226, 232, 240, 0.6);
+        }
+
+        body.light .next-action h3 {
+            color: rgba(71, 85, 105, 0.7);
+        }
+
+        .next-action p {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .task-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: rgba(15, 23, 42, 0.35);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        body.light .task-item {
+            background: rgba(255, 255, 255, 0.92);
+            border-color: rgba(148, 163, 184, 0.18);
+        }
+
+        .task-item.completed {
+            opacity: 0.6;
+        }
+
+        .task-name {
+            font-weight: 600;
+        }
+
+        .task-meta {
+            font-size: 12px;
+            color: rgba(226, 232, 240, 0.6);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        body.light .task-meta {
+            color: rgba(71, 85, 105, 0.7);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            background: rgba(37, 99, 235, 0.15);
+            color: #bfdbfe;
+        }
+
+        body.light .badge {
+            background: rgba(59, 130, 246, 0.12);
+            color: #1d4ed8;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            border-radius: 28px;
+            background: rgba(15, 23, 42, 0.55);
+            border: 1px dashed rgba(148, 163, 184, 0.25);
+            color: rgba(226, 232, 240, 0.7);
+        }
+
+        body.light .empty-state {
+            background: rgba(255, 255, 255, 0.85);
+            color: var(--text-secondary-light);
+            border-color: rgba(148, 163, 184, 0.25);
+        }
+
+        .error {
+            color: #fca5a5;
+        }
+
+        footer {
+            margin-top: 64px;
+            text-align: center;
+            font-size: 13px;
+            color: rgba(226, 232, 240, 0.6);
+        }
+
+        body.light footer {
+            color: rgba(71, 85, 105, 0.7);
+        }
+
+        @media (max-width: 640px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .controls {
+                width: 100%;
+            }
+            .timer-display {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .timer-actions {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <header>
+            <div>
+                <h1 class="page-title">Todoist Urgent &amp; Important Tracker</h1>
+                <p class="subtitle">Laser-focus on the tasks that matter most. Pulls projects, urgent + important tasks, and tracks deep work time directly to Todoist.</p>
+            </div>
+            <div class="controls">
+                <button class="button secondary" id="themeToggle" type="button">Toggle Theme</button>
+                <button class="button" id="refreshButton" type="button">Refresh Data</button>
+            </div>
+        </header>
+
+        <section class="panel" id="authPanel">
+            <h2>Todoist Connection</h2>
+            <p>Paste your Todoist REST API token to sync urgent &amp; important tasks. We'll store it securely in your browser only.</p>
+            <label for="apiToken">Todoist API Token</label>
+            <input id="apiToken" name="apiToken" type="password" placeholder="e.g. 0123456789abcdef0123456789abcdef01234567" autocomplete="off" />
+            <div class="controls" style="margin-top: 16px;">
+                <button class="button" id="saveToken" type="button">Save Token</button>
+                <button class="button secondary" id="clearToken" type="button">Forget Token</button>
+            </div>
+            <div class="status-bar">
+                <span id="connectionStatus">Status: Waiting for token…</span>
+                <span id="syncStatus">Last Sync: Never</span>
+            </div>
+        </section>
+
+        <section class="panel">
+            <h2>Focus Playbook</h2>
+            <p>Only projects with tasks labeled both <strong>urgent</strong> and <strong>important</strong> make the cut. Start a timer by clicking a card or tapping start. When you stop a session, we log the time to Todoist as a project comment.</p>
+            <div class="badge">One timer at a time · State saved locally</div>
+        </section>
+
+        <main class="grid" id="projectsGrid"></main>
+
+        <div class="empty-state" id="emptyState" hidden>
+            <h3>No urgent &amp; important initiatives right now.</h3>
+            <p>Tag tasks with both <strong>urgent</strong> and <strong>important</strong> labels in Todoist, then hit refresh.</p>
+        </div>
+
+        <footer>
+            Built by Chris Cruz · Todoist integration via REST API · Local-first timer engine
+        </footer>
+    </div>
+
+    <script>
+        const PROJECT_LIST = [];
+        const state = {
+            apiToken: '',
+            projects: [],
+            urgentProjects: [],
+            timers: {},
+            activeTimerId: null,
+            tickInterval: null,
+            labels: new Map(),
+            isFetching: false
+        };
+
+        const els = {
+            body: document.body,
+            apiToken: document.getElementById('apiToken'),
+            saveToken: document.getElementById('saveToken'),
+            clearToken: document.getElementById('clearToken'),
+            refreshButton: document.getElementById('refreshButton'),
+            themeToggle: document.getElementById('themeToggle'),
+            connectionStatus: document.getElementById('connectionStatus'),
+            syncStatus: document.getElementById('syncStatus'),
+            projectsGrid: document.getElementById('projectsGrid'),
+            emptyState: document.getElementById('emptyState')
+        };
+
+        function loadToken() {
+            const stored = localStorage.getItem('todoistApiToken');
+            if (stored) {
+                state.apiToken = stored;
+                els.apiToken.value = '••••••••••••••••••••••••';
+                els.connectionStatus.textContent = 'Status: Token saved — ready to sync.';
+                return true;
+            }
+            return false;
+        }
+
+        function saveToken() {
+            const value = els.apiToken.value.trim();
+            if (!value) {
+                els.connectionStatus.textContent = 'Status: Please provide a valid API token.';
+                return;
+            }
+            localStorage.setItem('todoistApiToken', value);
+            state.apiToken = value;
+            els.apiToken.value = '••••••••••••••••••••••••';
+            els.connectionStatus.textContent = 'Status: Token saved — syncing Todoist data…';
+            fetchTodoistData();
+        }
+
+        function clearToken() {
+            localStorage.removeItem('todoistApiToken');
+            state.apiToken = '';
+            els.apiToken.value = '';
+            els.connectionStatus.textContent = 'Status: Token cleared. Add a token to sync.';
+            state.projects = [];
+            state.urgentProjects = [];
+            PROJECT_LIST.length = 0;
+            renderProjects();
+        }
+
+        function formatDuration(totalSeconds) {
+            const seconds = Math.max(0, Math.floor(totalSeconds));
+            const hrs = Math.floor(seconds / 3600);
+            const mins = Math.floor((seconds % 3600) / 60);
+            const secs = seconds % 60;
+            return [hrs, mins, secs]
+                .map((val) => String(val).padStart(2, '0'))
+                .join(':');
+        }
+
+        function loadTimers() {
+            try {
+                const saved = JSON.parse(localStorage.getItem('todoistUrgentTimers'));
+                if (saved && typeof saved === 'object') {
+                    state.timers = saved.timers || {};
+                    state.activeTimerId = saved.activeTimerId || null;
+                    const active = state.timers[state.activeTimerId];
+                    if (active && active.isRunning && active.lastStartedAt) {
+                        resumeTicking();
+                    }
+                }
+            } catch (error) {
+                console.error('Timer storage error', error);
+                state.timers = {};
+            }
+        }
+
+        function persistTimers() {
+            localStorage.setItem(
+                'todoistUrgentTimers',
+                JSON.stringify({ timers: state.timers, activeTimerId: state.activeTimerId })
+            );
+        }
+
+        function getElapsedFor(projectId) {
+            const timer = state.timers[projectId];
+            if (!timer) return 0;
+            let total = timer.totalSeconds || 0;
+            if (timer.isRunning && timer.lastStartedAt) {
+                total += (Date.now() - timer.lastStartedAt) / 1000;
+            }
+            return total;
+        }
+
+        async function fetchTodoistData() {
+            if (!state.apiToken) {
+                els.connectionStatus.textContent = 'Status: Add your Todoist token to begin syncing.';
+                return;
+            }
+            if (state.isFetching) return;
+            state.isFetching = true;
+            els.connectionStatus.textContent = 'Status: Syncing Todoist projects and tasks…';
+            try {
+                const headers = {
+                    Authorization: `Bearer ${state.apiToken}`
+                };
+                const [labelsRes, projectsRes, tasksRes] = await Promise.all([
+                    fetch('https://api.todoist.com/rest/v2/labels', { headers }),
+                    fetch('https://api.todoist.com/rest/v2/projects', { headers }),
+                    fetch('https://api.todoist.com/rest/v2/tasks', { headers })
+                ]);
+
+                if (!labelsRes.ok || !projectsRes.ok || !tasksRes.ok) {
+                    throw new Error('Failed to fetch Todoist data. Check your token and network connection.');
+                }
+
+                const [labels, projects, tasks] = await Promise.all([
+                    labelsRes.json(),
+                    projectsRes.json(),
+                    tasksRes.json()
+                ]);
+
+                state.labels = new Map(labels.map((label) => [label.id, label.name]));
+                state.projects = projects;
+                const decoratedTasks = tasks.map((task) => ({
+                    ...task,
+                    labelNames: (task.label_ids || []).map((id) => (state.labels.get(id) || '').toLowerCase())
+                }));
+
+                const urgentTasks = decoratedTasks.filter(isUrgentAndImportant);
+                const byProject = new Map();
+
+                urgentTasks.forEach((task) => {
+                    if (!byProject.has(task.project_id)) {
+                        byProject.set(task.project_id, []);
+                    }
+                    byProject.get(task.project_id).push(task);
+                });
+
+                state.urgentProjects = state.projects
+                    .map((project) => {
+                        const tasksForProject = (byProject.get(project.id) || []).sort((a, b) => {
+                            if (a.is_completed !== b.is_completed) {
+                                return a.is_completed ? 1 : -1;
+                            }
+                            const aDue = a.due ? new Date(a.due.date) : null;
+                            const bDue = b.due ? new Date(b.due.date) : null;
+                            if (aDue && bDue) return aDue - bDue;
+                            if (aDue) return -1;
+                            if (bDue) return 1;
+                            return (a.order || 0) - (b.order || 0);
+                        });
+                        const completed = tasksForProject.filter((task) => task.is_completed).length;
+                        const nextTask = tasksForProject.find((task) => !task.is_completed) || null;
+                        return {
+                            ...project,
+                            tasks: tasksForProject,
+                            completedCount: completed,
+                            totalCount: tasksForProject.length,
+                            nextTask
+                        };
+                    })
+                    .filter((project) => project.totalCount > 0)
+                    .sort((a, b) => a.order - b.order);
+
+                PROJECT_LIST.length = 0;
+                PROJECT_LIST.push(...state.urgentProjects.map((project) => project.name));
+
+                renderProjects();
+                els.syncStatus.textContent = `Last Sync: ${new Date().toLocaleString()}`;
+                els.connectionStatus.textContent = `Status: Synced ${state.urgentProjects.length} urgent projects.`;
+            } catch (error) {
+                console.error(error);
+                els.connectionStatus.textContent = `Status: ${error.message}`;
+            } finally {
+                state.isFetching = false;
+            }
+        }
+
+        function isUrgentAndImportant(task) {
+            const labels = task.labelNames || [];
+            const hasUrgentLabel = labels.some((name) => name.includes('urgent') || name.includes('now'));
+            const hasImportantLabel = labels.some((name) => name.includes('important') || name.includes('critical'));
+            const isHighPriority = task.priority === 4;
+            return (hasUrgentLabel && hasImportantLabel) || (isHighPriority && (hasUrgentLabel || hasImportantLabel));
+        }
+
+        function renderProjects() {
+            els.projectsGrid.innerHTML = '';
+            if (!state.urgentProjects.length) {
+                els.emptyState.hidden = false;
+                return;
+            }
+            els.emptyState.hidden = true;
+
+            state.urgentProjects.forEach((project) => {
+                const progress = project.totalCount ? Math.round((project.completedCount / project.totalCount) * 100) : 0;
+                const totalTime = getElapsedFor(project.id);
+                const isRunning = state.activeTimerId === project.id;
+                const card = document.createElement('article');
+                card.className = 'project-card';
+                card.dataset.projectId = project.id;
+                card.innerHTML = `
+                    <div class="project-header">
+                        <div>
+                            <h2 class="project-name">${project.name}</h2>
+                            <div class="project-meta">
+                                <span>${project.totalCount} urgent tasks</span>
+                                <span>•</span>
+                                <span>${progress}% complete</span>
+                            </div>
+                        </div>
+                        ${isRunning ? '<span class="badge">Timer Running</span>' : ''}
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%;"></div>
+                    </div>
+                    <div class="timer-display">
+                        <div>
+                            <div class="timer-label">Focused Time</div>
+                            <div class="timer-value" data-timer="${project.id}">${formatDuration(totalTime)}</div>
+                        </div>
+                        <div class="timer-actions">
+                            <button class="start" data-action="start" data-project="${project.id}" type="button">Start</button>
+                            <button class="stop" data-action="stop" data-project="${project.id}" type="button">Stop</button>
+                        </div>
+                    </div>
+                    <div class="next-action">
+                        <h3>Next Action</h3>
+                        <p>${project.nextTask ? project.nextTask.content : 'All urgent & important tasks are complete. Celebrate!'}</p>
+                    </div>
+                    <div class="task-list">
+                        ${project.tasks
+                            .map((task) => `
+                                <div class="task-item ${task.is_completed ? 'completed' : ''}">
+                                    <div class="task-name">${task.content}</div>
+                                    <div class="task-meta">
+                                        <span>Priority ${task.priority}</span>
+                                        ${task.due ? `<span>Due ${task.due.date}</span>` : ''}
+                                        <span>${task.is_completed ? 'Completed' : 'Open'}</span>
+                                    </div>
+                                </div>
+                            `)
+                            .join('')}
+                    </div>
+                `;
+                els.projectsGrid.appendChild(card);
+            });
+        }
+
+        function startTimer(projectId) {
+            if (!projectId) return;
+            if (state.activeTimerId && state.activeTimerId !== projectId) {
+                stopTimer(state.activeTimerId, { skipSync: false });
+            }
+            const now = Date.now();
+            const timer = state.timers[projectId] || { totalSeconds: 0 };
+            if (timer.isRunning) return;
+            timer.isRunning = true;
+            timer.lastStartedAt = now;
+            state.timers[projectId] = timer;
+            state.activeTimerId = projectId;
+            persistTimers();
+            resumeTicking();
+            renderProjects();
+        }
+
+        function stopTimer(projectId, options = {}) {
+            const timer = state.timers[projectId];
+            if (!timer || !timer.isRunning) {
+                if (!options.skipSync) renderProjects();
+                return;
+            }
+            const now = Date.now();
+            const elapsed = Math.max(0, (now - timer.lastStartedAt) / 1000);
+            timer.totalSeconds = (timer.totalSeconds || 0) + elapsed;
+            timer.isRunning = false;
+            timer.lastStartedAt = null;
+            if (state.activeTimerId === projectId) {
+                state.activeTimerId = null;
+            }
+            persistTimers();
+            pauseTicking();
+            renderProjects();
+            if (!options.skipSync) {
+                const rounded = Math.round(elapsed);
+                if (rounded >= 1) {
+                    syncTimeEntry(projectId, rounded).catch((error) => {
+                        console.error('Sync error', error);
+                        els.connectionStatus.textContent = 'Status: Time logged locally. Todoist sync failed — retry from next session.';
+                    });
+                }
+            }
+        }
+
+        function resumeTicking() {
+            if (state.tickInterval) return;
+            state.tickInterval = setInterval(() => {
+                document.querySelectorAll('[data-timer]').forEach((node) => {
+                    const projectId = node.getAttribute('data-timer');
+                    node.textContent = formatDuration(getElapsedFor(projectId));
+                });
+            }, 1000);
+        }
+
+        function pauseTicking() {
+            if (state.activeTimerId) return;
+            if (state.tickInterval) {
+                clearInterval(state.tickInterval);
+                state.tickInterval = null;
+            }
+        }
+
+        async function syncTimeEntry(projectId, seconds) {
+            if (!state.apiToken || !seconds) return;
+            const project = state.projects.find((item) => item.id === Number(projectId) || item.id === projectId);
+            if (!project) return;
+            const payload = {
+                project_id: project.id,
+                content: `⏱ Focus session logged: ${formatDuration(seconds)} — captured on ${new Date().toLocaleString()}`
+            };
+            const response = await fetch('https://api.todoist.com/rest/v2/comments', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${state.apiToken}`
+                },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) {
+                throw new Error('Todoist did not accept the time entry.');
+            }
+            els.connectionStatus.textContent = 'Status: Focus session synced to Todoist.';
+        }
+
+        function handleGridClick(event) {
+            const actionButton = event.target.closest('button[data-action]');
+            if (actionButton) {
+                const projectId = actionButton.dataset.project;
+                const action = actionButton.dataset.action;
+                if (action === 'start') {
+                    startTimer(projectId);
+                } else if (action === 'stop') {
+                    stopTimer(projectId);
+                }
+                event.stopPropagation();
+                return;
+            }
+            const card = event.target.closest('.project-card');
+            if (card) {
+                const projectId = card.dataset.projectId;
+                if (state.activeTimerId === projectId) {
+                    stopTimer(projectId);
+                } else {
+                    startTimer(projectId);
+                }
+            }
+        }
+
+        function toggleTheme() {
+            els.body.classList.toggle('light');
+            localStorage.setItem('todoistUrgentTheme', els.body.classList.contains('light') ? 'light' : 'dark');
+        }
+
+        function restoreTheme() {
+            const stored = localStorage.getItem('todoistUrgentTheme');
+            if (stored === 'light') {
+                els.body.classList.add('light');
+            }
+        }
+
+        function initEventListeners() {
+            els.saveToken.addEventListener('click', saveToken);
+            els.clearToken.addEventListener('click', clearToken);
+            els.refreshButton.addEventListener('click', fetchTodoistData);
+            els.themeToggle.addEventListener('click', toggleTheme);
+            els.projectsGrid.addEventListener('click', handleGridClick);
+        }
+
+        function bootstrap() {
+            restoreTheme();
+            loadToken();
+            loadTimers();
+            initEventListeners();
+            if (state.apiToken) {
+                fetchTodoistData();
+            }
+        }
+
+        bootstrap();
+    </script>
+</body>
+</html>
