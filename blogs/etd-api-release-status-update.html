@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ETD API Release Status Update: Navigating the Go/No-Go Decision</title>
+    <meta name="description" content="Executive summary and detailed risk analysis for the ETD API release ahead of the September 30 go/no-go decision, structured with progressive disclosure for rapid stakeholder alignment.">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="ETD API Release Status Update: Navigating the Go/No-Go Decision">
+    <meta property="og:description" content="Progressive disclosure briefing on the ETD API release, critical issues, feature flag strategy, and risk mitigation plan.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://chriscruz.ai/blogs/etd-api-release-status-update.html">
+    <meta property="og:image" content="https://chriscruz.ai/images/og-image.jpg">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="ETD API Release Status Update: Navigating the Go/No-Go Decision">
+    <meta name="twitter:description" content="Progressive disclosure briefing on the ETD API release, critical issues, feature flag strategy, and risk mitigation plan.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #ffffff;
+            --text-primary: #1b263b;
+            --text-secondary: #415a77;
+            --text-muted: #778da9;
+            --border: #e0e6ed;
+            --accent-blue: #1d4ed8;
+            --accent-amber: #f59e0b;
+            --accent-green: #059669;
+            --accent-red: #dc2626;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.7;
+            background: var(--bg);
+            color: var(--text-primary);
+        }
+
+        .page {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px 120px;
+        }
+
+        header {
+            margin-bottom: 48px;
+            padding-bottom: 32px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            max-width: 720px;
+        }
+
+        .meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-top: 24px;
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .layered-summary {
+            display: grid;
+            gap: 20px;
+            margin: 40px 0 56px;
+        }
+
+        .summary-card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            background: linear-gradient(135deg, rgba(29, 78, 216, 0.08), rgba(14, 116, 144, 0.05));
+        }
+
+        .summary-card h2 {
+            font-size: 1.6rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-card p {
+            color: var(--text-secondary);
+            font-size: 1.05rem;
+        }
+
+        .summary-card ul {
+            margin-top: 12px;
+            padding-left: 20px;
+            color: var(--text-secondary);
+        }
+
+        .summary-card li {
+            margin-bottom: 10px;
+        }
+
+        .disclosure-tier {
+            margin-bottom: 60px;
+        }
+
+        .disclosure-tier h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--accent-blue);
+            padding-left: 16px;
+        }
+
+        .disclosure-tier p {
+            margin-bottom: 20px;
+        }
+
+        .content-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            background: #f8fafc;
+        }
+
+        .card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .status-critical {
+            background: rgba(220, 38, 38, 0.1);
+            color: var(--accent-red);
+        }
+
+        .status-active {
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent-amber);
+        }
+
+        .status-complete {
+            background: rgba(5, 150, 105, 0.12);
+            color: var(--accent-green);
+        }
+
+        .checklist {
+            list-style: none;
+        }
+
+        .checklist li {
+            position: relative;
+            padding-left: 28px;
+            margin-bottom: 12px;
+        }
+
+        .checklist li::before {
+            content: '✔';
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: var(--accent-green);
+            font-weight: 600;
+        }
+
+        .issue-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .issue-list li {
+            border-left: 3px solid var(--accent-amber);
+            padding: 12px 16px;
+            margin-bottom: 16px;
+            background: rgba(245, 158, 11, 0.08);
+        }
+
+        .timeline {
+            display: grid;
+            gap: 16px;
+        }
+
+        .timeline-item {
+            border-left: 3px solid var(--accent-blue);
+            padding: 12px 16px;
+            background: #f1f5f9;
+        }
+
+        .timeline-item strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .risk-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .risk-card {
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .risk-card h4 {
+            margin-bottom: 10px;
+            color: var(--text-secondary);
+        }
+
+        footer {
+            margin-top: 80px;
+            padding-top: 32px;
+            border-top: 1px solid var(--border);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .page {
+                padding: 24px 16px 80px;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+            .summary-card h2 {
+                font-size: 1.4rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <header>
+            <p class="status-pill status-critical">Current Status: Critical Decision Point</p>
+            <h1>ETD API Release Status Update</h1>
+            <p class="subtitle">Progressive disclosure briefing designed for executive speed: start with a one-minute summary, expand into actionable detail, and drill into the operational plan that protects the October feature-flagged release.</p>
+            <div class="meta">
+                <span>📅 Updated: September 25, 2025</span>
+                <span>🕒 Reading Time: 6 minutes</span>
+                <span>📍 Program: DDA Going Primary</span>
+            </div>
+        </header>
+
+        <section class="layered-summary">
+            <div class="summary-card">
+                <h2>Level 1 · Executive Snapshot</h2>
+                <p>Go/No-Go decision locks on September 30. Three defects stand between us and the October feature-flagged launch. Feature gates and cross-team approvals are ready; execution focus is on closing the issue list in the next five days.</p>
+            </div>
+            <div class="summary-card">
+                <h2>Level 2 · Fast Facts</h2>
+                <ul>
+                    <li><strong>Decision:</strong> September 30 determines October vs. November release.</li>
+                    <li><strong>Coverage:</strong> Friends &amp; Family pilot live since September 23; mobile release staged behind flags.</li>
+                    <li><strong>Risk Level:</strong> Medium-High with mitigation via rapid disablement controls and freeze-ready update path.</li>
+                </ul>
+            </div>
+            <div class="summary-card">
+                <h2>Level 3 · Why It Matters</h2>
+                <p>This release is the tipping point for scaling the DDA Going Primary experience from a handful of pilot users to millions. Confidence hinges on delivering a clean brand experience, accurate maps, and reliable traceability before freeze windows close.</p>
+            </div>
+        </section>
+
+        <section class="disclosure-tier" id="critical-focus">
+            <h2>Tier 1 · Critical Focus Areas</h2>
+            <div class="content-grid">
+                <article class="card">
+                    <h3>Go/No-Go Governance</h3>
+                    <ul class="checklist">
+                        <li>Cross-team approval matrix finalized with BLR2, WIL2, COL, Digital Channels, CDP, and FCDP.</li>
+                        <li>Roles and RACI assignments confirmed for release-day decisions.</li>
+                        <li>Feature flag kill-switch validated for rapid rollback.</li>
+                    </ul>
+                </article>
+                <article class="card">
+                    <h3>Blocking Defects</h3>
+                    <ul class="issue-list">
+                        <li><strong>Logo Display Defect:</strong> Experience API and Swagger docs misaligned after governance change from <code>merchantUrl</code> to <code>brandingUrl</code>. Owners: Anshuman &amp; Kunal Shah.</li>
+                        <li><strong>Map Rendering Gap:</strong> Pending transactions missing latitude/longitude. BLR2 team adding fields; Abir coordinating.</li>
+                        <li><strong>Trace-ID Inconsistency:</strong> Investigation open to re-establish deterministic tracing across services.</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <section class="disclosure-tier" id="release-plan">
+            <h2>Tier 2 · Release Strategy &amp; Timeline</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <strong>Friends &amp; Family Pilot · Launched September 23</strong>
+                    <p>Control group validates core flows before broader rollout; structured bug triage with committed internal testers.</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>October 2025 · Mobile Launch (Feature-Flagged)</strong>
+                    <p>Release ships dark; progressive enablement tied to defect burn-down and freeze calendar.</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>November 2025 · Friends &amp; Family Expansion</strong>
+                    <p>Wider beta to validate at-scale behavior while maintaining opt-out safety.</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>December 2025 · Production to Millions</strong>
+                    <p>Global availability pending confidence checkpoints and freeze recovery readiness.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="disclosure-tier" id="testing">
+            <h2>Tier 3 · Testing &amp; Quality Signal</h2>
+            <div class="content-grid">
+                <article class="card">
+                    <span class="status-pill status-complete">Regression Suite: ✅ Passed</span>
+                    <h3>Coverage Highlights</h3>
+                    <ul class="checklist">
+                        <li>20 core API fields validated against acceptance criteria.</li>
+                        <li>7 scenario suites executed, including multi-merchant transactions and circuit breaker exercises.</li>
+                        <li>Feature flag toggles simulated under freeze constraints.</li>
+                    </ul>
+                </article>
+                <article class="card">
+                    <span class="status-pill status-active">Sprint Testing: 🔄 In Progress</span>
+                    <h3>Remaining Work</h3>
+                    <ul class="issue-list">
+                        <li>Continue exploratory testing through first half of next sprint.</li>
+                        <li>Validate telemetry for trace-ID fix once deployed.</li>
+                        <li>Run fall-back drills for flag disablement during Amazon Prime freeze.</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+
+        <section class="disclosure-tier" id="risk-mitigation">
+            <h2>Tier 4 · Risk Mitigation &amp; Dependencies</h2>
+            <div class="risk-grid">
+                <div class="risk-card">
+                    <h4>Amazon Prime Freeze</h4>
+                    <p>October 3 &amp; 10 freeze periods baked into release calendar. Deployment staging avoids freeze start; contingency plan prepared for post-freeze hotfixes.</p>
+                </div>
+                <div class="risk-card">
+                    <h4>Beta Issue Response</h4>
+                    <p>Feature flags provide instant disable path. Beta incident protocol established for triage, communication, and resolution accountability.</p>
+                </div>
+                <div class="risk-card">
+                    <h4>Documentation Gaps</h4>
+                    <p>Technical writing team documenting ETD API behavior when location data is unavailable. Attribute checklist in progress to prevent flag misconfiguration.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="disclosure-tier" id="next-steps">
+            <h2>Tier 5 · Next Steps &amp; Decision Gates</h2>
+            <div class="timeline">
+                <div class="timeline-item">
+                    <strong>By September 30</strong>
+                    <p>Resolve outstanding defects and publish burn-down status (closed vs. open issues).</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>October 1 – 3</strong>
+                    <p>Finalize Go/No-Go call, confirm freeze compliance, and prep feature flag activation plan.</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>October Release</strong>
+                    <p>Deploy behind feature flags, with real-time monitoring and incident playbooks on standby.</p>
+                </div>
+                <div class="timeline-item">
+                    <strong>Ongoing</strong>
+                    <p>Maintain testing cadence through sprint close; update documentation and attribute checklist.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Questions or feedback? Reach out via <a href="mailto:hello@chriscruz.ai">hello@chriscruz.ai</a>. This briefing is part of the DDA Going Primary operational reporting series.</p>
+        </footer>
+    </div>
+</body>
+</html>
