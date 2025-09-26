@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cross-Product Architecture Reassessment – Transaction List & Search</title>
+    <meta name="description" content="Executive briefing on the transaction list and search integration reassessment, outlining options, interdependencies, and next steps."/>
+    <meta name="keywords" content="transaction list, search integration, cross-product architecture, decision matrix, banking"/>
+    <meta name="author" content="Chris Cruz"/>
+    <meta property="og:title" content="Cross-Product Architecture Reassessment"/>
+    <meta property="og:description" content="Compressed summary, decision matrix, and architectural flows for the transaction list and search integration reset."/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:url" content="https://chriscruz.ai/Cross-Product/index.html"/>
+    <meta property="og:image" content="https://chriscruz.ai/images/og-image.jpg"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Cross-Product Architecture Reassessment"/>
+    <meta name="twitter:description" content="Compressed summary, decision matrix, and architectural flows for the transaction list and search integration reset."/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #f4f7fb 0%, #eef2f8 35%, #ffffff 100%);
+            color: #0f172a;
+        }
+        .tl-dr-grid {
+            display: grid;
+            gap: 0.5rem;
+        }
+        @media (min-width: 640px) {
+            .tl-dr-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+        details summary {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <nav class="flex justify-between items-center text-sm font-semibold text-slate-600">
+            <a href="/index.html" class="inline-flex items-center gap-2 text-indigo-600 hover:text-indigo-800 transition-colors">
+                <span aria-hidden="true">←</span>
+                <span>Back to Home</span>
+            </a>
+            <span class="inline-flex items-center gap-2 bg-white/60 backdrop-blur px-3 py-1 rounded-full text-slate-500 border border-indigo-100">
+                <span class="text-xs uppercase tracking-[0.2em]">Cross-Product</span>
+                <span class="w-1 h-1 rounded-full bg-indigo-300"></span>
+                <span class="text-xs">October 2025 Reset</span>
+            </span>
+        </nav>
+
+        <header class="mt-10 mb-12 text-center sm:text-left">
+            <p class="uppercase tracking-[0.3em] text-xs text-indigo-400 mb-4">Transaction List × Search Alignment</p>
+            <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 leading-tight">
+                Architectural Reassessment for Transaction List &amp; Search Integration
+            </h1>
+            <p class="mt-4 text-lg text-slate-600 max-w-3xl">
+                Executive briefing to align Cross-Product, Search, Utilities, and Digital Channels on a single path forward that balances user workflows, SLA expectations, and platform constraints.
+            </p>
+        </header>
+
+        <section aria-labelledby="summary" class="mb-12">
+            <div class="bg-slate-900 text-slate-100 rounded-3xl shadow-xl p-6 sm:p-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-500 text-white text-xl font-bold">TL</span>
+                    <h2 id="summary" class="text-xl font-semibold tracking-tight">Compressed Signal Burst</h2>
+                </div>
+                <div class="tl-dr-grid text-sm sm:text-[0.95rem] leading-snug">
+                    <div class="bg-white/10 border border-white/20 rounded-2xl p-4">
+                        <p class="font-semibold uppercase tracking-[0.2em] text-xs text-indigo-200 mb-2">Decision Trigger</p>
+                        <p>Deep coupling of transaction list &amp; search means siloed fixes fail → demand integrated architecture workshop 10/1.</p>
+                    </div>
+                    <div class="bg-white/10 border border-white/20 rounded-2xl p-4">
+                        <p class="font-semibold uppercase tracking-[0.2em] text-xs text-indigo-200 mb-2">Timeline Risk</p>
+                        <p>Option B (search orchestration) still unsized; Q1 delivery jeopardized until SLA + effort locked.</p>
+                    </div>
+                    <div class="bg-white/10 border border-white/20 rounded-2xl p-4">
+                        <p class="font-semibold uppercase tracking-[0.2em] text-xs text-indigo-200 mb-2">Core Blocker</p>
+                        <p>SOR may reject new MQ load; requires escalation to CDP + clear problem statement this week.</p>
+                    </div>
+                    <div class="bg-white/10 border border-white/20 rounded-2xl p-4">
+                        <p class="font-semibold uppercase tracking-[0.2em] text-xs text-indigo-200 mb-2">User Lens</p>
+                        <p>Single vs. multi-account, view-all, and clear-search flows must work seamlessly across all options.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section aria-labelledby="decision-matrix" class="mb-16">
+            <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+                <h2 id="decision-matrix" class="text-2xl font-bold text-slate-900">Decision Matrix Snapshot</h2>
+                <p class="text-sm text-slate-500 max-w-xl">Use this as the framing device for Wednesday’s working session—each row expands with progressive disclosure for rapid triage.</p>
+            </div>
+            <div class="mt-6 overflow-hidden rounded-3xl border border-indigo-100 bg-white shadow-lg">
+                <div class="grid grid-cols-1 divide-y divide-indigo-50">
+                    <details open class="group">
+                        <summary class="grid sm:grid-cols-5 gap-4 items-center px-4 sm:px-6 py-4 cursor-pointer bg-indigo-50/60 group-open:bg-white transition">
+                            <div class="sm:col-span-1 flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold">A</span>
+                                <span class="font-semibold">SOR Integration via MQ</span>
+                            </div>
+                            <p class="text-sm text-slate-500 sm:col-span-1">Cross-Product API adds direct MQ connections into SOR.</p>
+                            <p class="text-sm font-semibold text-rose-600 sm:col-span-1">Risk: CDP blocking MQ load</p>
+                            <p class="text-sm text-slate-500 sm:col-span-1">Timeline: Extends beyond Q1</p>
+                            <p class="text-sm text-slate-500 sm:col-span-1">Sizing: Large (integration + migration + regression)</p>
+                        </summary>
+                        <div class="px-6 pb-6 bg-white">
+                            <div class="grid sm:grid-cols-2 gap-4 text-sm text-slate-600">
+                                <div class="bg-indigo-50 rounded-2xl p-4 border border-indigo-100">
+                                    <p class="font-semibold text-indigo-700 mb-2">Work Required</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>Stand up new MQ integration layer with hardened failover.</li>
+                                        <li>Refactor Cross-Product API contracts; cutover traffic from DDA history.</li>
+                                        <li>Requalify downstream consumers for new payload schema.</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-rose-50 rounded-2xl p-4 border border-rose-100">
+                                    <p class="font-semibold text-rose-700 mb-2">Key Questions</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>Can SOR absorb additional MQ load without jeopardizing DDA Primary initiative?</li>
+                                        <li>What SLA would SOR commit to during batch hours?</li>
+                                        <li>How do we mitigate regression risk across multi-channel clients?</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="group">
+                        <summary class="grid sm:grid-cols-5 gap-4 items-center px-4 sm:px-6 py-4 cursor-pointer bg-indigo-50/60 group-open:bg-white transition">
+                            <div class="sm:col-span-1 flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold">B</span>
+                                <span class="font-semibold">Search Orchestration</span>
+                            </div>
+                            <p class="text-sm text-slate-500 sm:col-span-1">Search team orchestrates list vs. search responses.</p>
+                            <p class="text-sm font-semibold text-amber-600 sm:col-span-1">Risk: Undefined SLA &amp; unsized effort</p>
+                            <p class="text-sm text-slate-500 sm:col-span-1">Timeline: Q1 jeopardized until sizing complete</p>
+                            <p class="text-sm text-slate-500 sm:col-span-1">Sizing: Medium-High (pending discovery)</p>
+                        </summary>
+                        <div class="px-6 pb-6 bg-white">
+                            <div class="grid sm:grid-cols-2 gap-4 text-sm text-slate-600">
+                                <div class="bg-amber-50 rounded-2xl p-4 border border-amber-100">
+                                    <p class="font-semibold text-amber-700 mb-2">Work Required</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>Build bifurcated orchestration: DDA History for list, Cross-Product for search.</li>
+                                        <li>Update swagger contracts &amp; search ranking logic.</li>
+                                        <li>Utilities deliver problem statements, flows, and SLA expectations.</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
+                                    <p class="font-semibold text-slate-700 mb-2">Open Questions</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>What latency budget do we have during nightly batch windows?</li>
+                                        <li>How do we ensure consistent UX between search results and default list?</li>
+                                        <li>Does Search own monitoring &amp; failover logic or share with Cross-Product?</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                    <details class="group">
+                        <summary class="grid sm:grid-cols-5 gap-4 items-center px-4 sm:px-6 py-4 cursor-pointer bg-indigo-50/60 group-open:bg-white transition">
+                            <div class="sm:col-span-1 flex items-center gap-2">
+                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-indigo-100 text-indigo-700 font-bold">C</span>
+                                <span class="font-semibold">Cross-Product Calls DDA History</span>
+                            </div>
+                            <p class="text-sm text-slate-500 sm:col-span-1">Cross-Product invokes DDA Transaction History API directly.</p>
+                            <p class="text-sm font-semibold text-amber-600 sm:col-span-1">Risk: Additional latency &amp; upstream ripple</p>
+                            <p class="text-sm text-slate-500 sm:col-span-1">Timeline: Extends beyond Q1</p>
+                            <p class="text-sm text-slate-500 sm:col-span-1">Sizing: Medium (logic + perf optimization)</p>
+                        </summary>
+                        <div class="px-6 pb-6 bg-white">
+                            <div class="grid sm:grid-cols-2 gap-4 text-sm text-slate-600">
+                                <div class="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+                                    <p class="font-semibold text-emerald-700 mb-2">Work Required</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>Add conditional routing + caching in Cross-Product services.</li>
+                                        <li>Normalize payloads for single &amp; multi-account contexts.</li>
+                                        <li>Run latency testing; optimize for &lt;= target SLA.</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-rose-50 rounded-2xl p-4 border border-rose-100">
+                                    <p class="font-semibold text-rose-700 mb-2">Key Questions</p>
+                                    <ul class="list-disc list-inside space-y-1">
+                                        <li>What is the acceptable additive latency (current estimate ~50ms)?</li>
+                                        <li>How does this impact upstream batching and analytics feeds?</li>
+                                        <li>Can we reuse monitoring from DDA history or do we duplicate?</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            </div>
+        </section>
+
+        <section aria-labelledby="problem" class="mb-16">
+            <details open class="rounded-3xl border border-indigo-100 bg-white shadow-lg">
+                <summary class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-5">
+                    <div>
+                        <h2 id="problem" class="text-2xl font-bold text-slate-900">Problem Statement &amp; Urgency</h2>
+                        <p class="text-sm text-slate-500">Why we paused execution and what must be true before we resume.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-2 text-sm text-indigo-600">
+                        <span>Expand brief</span>
+                        <span aria-hidden="true">↕</span>
+                    </span>
+                </summary>
+                <div class="px-6 pb-6 text-sm sm:text-base text-slate-600 space-y-4">
+                    <p>The transaction list is the canonical experience customers rely on for daily money movement monitoring. Embedding search inside the list reshapes navigation patterns, caching assumptions, and real-time data freshness. Any misalignment introduces inconsistent workflows, duplicate latency, and the potential to violate channel SLAs.</p>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+                            <h3 class="font-semibold text-indigo-700 mb-2">Why Now</h3>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Q4 planning locks next week; we need a single architectural bet.</li>
+                                <li>Q1 commitments assumed reusing Cross-Product API pipelines—no longer viable.</li>
+                                <li>SOR scalability questions unresolved; risk accumulates daily.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-rose-50 border border-rose-100 rounded-2xl p-4">
+                            <h3 class="font-semibold text-rose-700 mb-2">Success Criteria</h3>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Approved SLA for transaction list load (baseline &amp; peak).</li>
+                                <li>Aligned ownership for orchestration, monitoring, and failover.</li>
+                                <li>Documented user workflows and parity expectations across channels.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <section aria-labelledby="architecture" class="mb-16">
+            <details class="rounded-3xl border border-indigo-100 bg-white shadow-lg">
+                <summary class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-5">
+                    <div>
+                        <h2 id="architecture" class="text-2xl font-bold text-slate-900">Architectural Flows &amp; Touchpoints</h2>
+                        <p class="text-sm text-slate-500">Visualize the coupling across systems to inform trade-offs.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-2 text-sm text-indigo-600">
+                        <span>Show / Hide flows</span>
+                        <span aria-hidden="true">↕</span>
+                    </span>
+                </summary>
+                <div class="px-6 pb-6 text-sm sm:text-base text-slate-600 space-y-6">
+                    <div class="grid gap-6">
+                        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-5">
+                            <h3 class="font-semibold text-slate-800 mb-3">Current-State Interaction Map</h3>
+                            <ol class="list-decimal list-inside space-y-1">
+                                <li>User launches transaction list → Cross-Product API fetches DDA history cache.</li>
+                                <li>Search queries route to Search service → indexes rely on Cross-Product payloads.</li>
+                                <li>Utilities supply orchestration metadata → ensures workflow parity across channels.</li>
+                            </ol>
+                        </div>
+                        <div class="bg-white border border-indigo-100 rounded-2xl p-5 shadow-inner">
+                            <h3 class="font-semibold text-indigo-700 mb-3">Impact Radar by Option</h3>
+                            <div class="grid sm:grid-cols-3 gap-4 text-xs sm:text-sm">
+                                <div class="rounded-2xl border border-indigo-200 bg-indigo-50 p-4">
+                                    <p class="font-semibold text-indigo-700 mb-2">Option A</p>
+                                    <p>Shifts orchestration to Cross-Product + SOR; reduces Search complexity but raises infra debt and MQ load.</p>
+                                </div>
+                                <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+                                    <p class="font-semibold text-amber-700 mb-2">Option B</p>
+                                    <p>Search becomes orchestrator; adds logic for stateful list/search blending; risk concentrated in SLA clarity.</p>
+                                </div>
+                                <div class="rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+                                    <p class="font-semibold text-emerald-700 mb-2">Option C</p>
+                                    <p>Cross-Product handles dual data sources; moderate latency hit; ensures API consistency across channels.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-900 text-slate-100 rounded-2xl p-5">
+                            <h3 class="font-semibold text-indigo-200 mb-3">SLA Dependencies</h3>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Define acceptable list load time (baseline &lt; 1.5s? peak?).</li>
+                                <li>Clarify search-to-list switch cost &amp; caching policy.</li>
+                                <li>Document batch-hour degradation envelope &amp; failback triggers.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <section aria-labelledby="workflows" class="mb-16">
+            <details class="rounded-3xl border border-indigo-100 bg-white shadow-lg">
+                <summary class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-5">
+                    <div>
+                        <h2 id="workflows" class="text-2xl font-bold text-slate-900">Priority User Workflows &amp; Use Cases</h2>
+                        <p class="text-sm text-slate-500">Each scenario must be represented in architectural sizing.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-2 text-sm text-indigo-600">
+                        <span>Toggle workflows</span>
+                        <span aria-hidden="true">↕</span>
+                    </span>
+                </summary>
+                <div class="px-6 pb-6 text-sm sm:text-base text-slate-600 space-y-4">
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="bg-white border border-indigo-100 rounded-2xl p-4 shadow-inner">
+                            <h3 class="font-semibold text-indigo-700 mb-2">List-Centric Journeys</h3>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Default account view → infinite scroll reliability.</li>
+                                <li>Multi-account toggle → consistent filters &amp; totals.</li>
+                                <li>View all transactions → caching + pagination alignment.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-white border border-indigo-100 rounded-2xl p-4 shadow-inner">
+                            <h3 class="font-semibold text-indigo-700 mb-2">Search-Centric Journeys</h3>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Inline search with instant suggestions &amp; results parity.</li>
+                                <li>Clear search → revert to cached list without flicker.</li>
+                                <li>Scoped search (single vs. multi-account) → consistent filtering.</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-2xl p-4">
+                        <h3 class="font-semibold text-indigo-700 mb-2">Edge Considerations</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Accessibility: maintain keyboard-first navigation + screen reader context when transitioning between list and search results.</li>
+                            <li>Offline / degraded mode: define messaging + retry logic when MQ or Search experiences latency.</li>
+                            <li>Analytics continuity: ensure instrumentation persists across views for conversion tracking.</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <section aria-labelledby="risks" class="mb-16">
+            <details class="rounded-3xl border border-rose-100 bg-white shadow-lg">
+                <summary class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-5">
+                    <div>
+                        <h2 id="risks" class="text-2xl font-bold text-rose-700">Risk Register &amp; Mitigations</h2>
+                        <p class="text-sm text-rose-500">Highlight blockers that require executive escalation.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-2 text-sm text-rose-600">
+                        <span>Show risk plan</span>
+                        <span aria-hidden="true">↕</span>
+                    </span>
+                </summary>
+                <div class="px-6 pb-6 text-sm sm:text-base text-slate-600 space-y-4">
+                    <div class="grid sm:grid-cols-3 gap-4">
+                        <div class="rounded-2xl border border-rose-100 bg-rose-50 p-4">
+                            <p class="font-semibold text-rose-700 mb-2">SOR MQ Capacity</p>
+                            <p class="text-sm">Formalize problem statement to CDP; request capacity assessment &amp; mitigation options.</p>
+                            <p class="mt-2 text-xs uppercase tracking-[0.2em] text-rose-500">Owner: Cross-Product</p>
+                        </div>
+                        <div class="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+                            <p class="font-semibold text-amber-700 mb-2">SLA Ambiguity</p>
+                            <p class="text-sm">Define baseline/peak targets in workshop; add measurement plan + instrumentation updates.</p>
+                            <p class="mt-2 text-xs uppercase tracking-[0.2em] text-amber-500">Owner: Utilities</p>
+                        </div>
+                        <div class="rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
+                            <p class="font-semibold text-indigo-700 mb-2">Search Ownership</p>
+                            <p class="text-sm">Clarify if Search assumes orchestration or remains index provider; align support model.</p>
+                            <p class="mt-2 text-xs uppercase tracking-[0.2em] text-indigo-500">Owner: Search</p>
+                        </div>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <section aria-labelledby="session" class="mb-16">
+            <details class="rounded-3xl border border-emerald-100 bg-white shadow-lg" open>
+                <summary class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-5">
+                    <div>
+                        <h2 id="session" class="text-2xl font-bold text-emerald-700">Wednesday 10/1 Working Session Agenda (60 min)</h2>
+                        <p class="text-sm text-emerald-500">Designed for rapid decision enablement.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-2 text-sm text-emerald-600">
+                        <span>Review flow</span>
+                        <span aria-hidden="true">↕</span>
+                    </span>
+                </summary>
+                <div class="px-6 pb-6 text-sm sm:text-base text-slate-600 space-y-6">
+                    <ol class="list-decimal list-inside space-y-2">
+                        <li><strong>5 min</strong> – Reconfirm problem statement, urgency, and success criteria.</li>
+                        <li><strong>10 min</strong> – Walk the decision matrix; capture delta questions per option.</li>
+                        <li><strong>15 min</strong> – Deep dive on SLA expectations (baseline, peak, degraded modes).</li>
+                        <li><strong>15 min</strong> – Map architectural flows with user workflows (single, multi-account, view-all, clear search).</li>
+                        <li><strong>10 min</strong> – Assign action owners, escalation paths, and re-baseline timeline.</li>
+                        <li><strong>5 min</strong> – Confirm next checkpoints &amp; communication plan to executives.</li>
+                    </ol>
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl p-4">
+                        <h3 class="font-semibold text-emerald-700 mb-2">Pre-Read Package</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Revised executive email framing urgency + decision matrix.</li>
+                            <li>Option-specific architecture diagrams (drafted prior to session).</li>
+                            <li>User workflow storyboards for search/list transitions.</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <section aria-labelledby="slide" class="mb-20">
+            <details class="rounded-3xl border border-indigo-100 bg-white shadow-lg" open>
+                <summary class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 px-6 py-5">
+                    <div>
+                        <h2 id="slide" class="text-2xl font-bold text-slate-900">Single-Slide Executive Narrative</h2>
+                        <p class="text-sm text-slate-500">Design + content outline to summarize options, problem, flows, and use cases.</p>
+                    </div>
+                    <span class="inline-flex items-center gap-2 text-sm text-indigo-600">
+                        <span>View slide plan</span>
+                        <span aria-hidden="true">↕</span>
+                    </span>
+                </summary>
+                <div class="px-6 pb-6 text-sm sm:text-base text-slate-600 space-y-6">
+                    <div class="grid sm:grid-cols-2 gap-6">
+                        <div class="rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
+                            <h3 class="font-semibold text-indigo-700 mb-2">Slide Layout</h3>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li><strong>Title Bar:</strong> “Decision Needed: Transaction List × Search Architecture” with date + logos.</li>
+                                <li><strong>Left Column (40% width):</strong> Problem statement + urgency bullets.</li>
+                                <li><strong>Center Band (35% width):</strong> Mini swimlane diagram showing user journey → system touchpoints → SLA guardrails.</li>
+                                <li><strong>Right Column (25% width):</strong> Decision matrix heatmap (Options A/B/C) with risk colors.</li>
+                                <li><strong>Footer:</strong> Use case icons (single account, multi-account, clear search) + Wednesday session CTA.</li>
+                            </ul>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                            <h3 class="font-semibold text-slate-800 mb-2">Content Checklist</h3>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>Problem statement highlighting coupling &amp; Q1 risk.</li>
+                                <li>Icons representing Options A, B, C with one-line implication each.</li>
+                                <li>Journey arrows: User → Cross-Product → Search/SOR → Channels.</li>
+                                <li>Use case badges (“Single Account,” “Multi-Account,” “View All,” “Clear Search”).</li>
+                                <li>Action footer: “Decide path on 10/1 – owners: Cross-Product, Search, Utilities, Digital Channels.”</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200 bg-white p-4">
+                        <h3 class="font-semibold text-slate-800 mb-2">Design Guidance</h3>
+                        <ul class="list-disc list-inside space-y-1">
+                            <li>Color palette: Indigo for Cross-Product, Amber for Search, Emerald for DDA History, Rose for risks.</li>
+                            <li>Use thin separators and iconography to keep slide readable; avoid dense paragraphs.</li>
+                            <li>Highlight the unsized SLA risk in amber pill with “Action: Quantify before committing Q1 plan.”</li>
+                            <li>Annotate swimlane with latency budget callouts (baseline vs. peak).</li>
+                            <li>Include meeting QR or short link for quick calendar access.</li>
+                        </ul>
+                    </div>
+                </div>
+            </details>
+        </section>
+
+        <footer class="pb-10 text-center text-xs text-slate-400">
+            Crafted by Chris Cruz · Last updated October 2025
+        </footer>
+    </div>
+</body>
+</html>
