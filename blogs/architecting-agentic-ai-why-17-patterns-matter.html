@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecting Agentic AI: Why 17 Patterns Matter | ChrisCruz.ai</title>
+    <meta name="description" content="Explore Khan's 17 agentic AI patterns, when to deploy each, and how to mix them into resilient, scalable multi-agent systems."/>
+    <meta name="keywords" content="agentic AI patterns, multi-agent systems, Tree of Thoughts, AI orchestration, reflexive agents"/>
+    <meta name="author" content="Chris Cruz"/>
+    <meta property="og:title" content="Architecting Agentic AI: Why 17 Patterns Matter"/>
+    <meta property="og:description" content="A builder's guide to the recurring agentic patterns powering modern AI systems, complete with trade-offs, hybrids, and implementation tips."/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:url" content="https://chriscruz.ai/blogs/architecting-agentic-ai-why-17-patterns-matter.html"/>
+    <meta property="og:image" content="https://chriscruz.ai/images/agentic-ai-patterns.jpg"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Architecting Agentic AI: Why 17 Patterns Matter"/>
+    <meta name="twitter:description" content="Summaries, trade-offs, and implementation playbooks for 17 recurring agentic AI architectures."/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: radial-gradient(circle at top, #0b1026 0%, #020205 45%, #020102 100%);
+            color: #e5e7ff;
+        }
+        .glass-card {
+            background: rgba(15, 23, 42, 0.65);
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+            backdrop-filter: blur(18px);
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #6366f1, #ec4899, #f97316);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .grid-line {
+            background: linear-gradient(90deg, rgba(99,102,241,0.4) 0%, rgba(236,72,153,0.2) 51%, rgba(249,115,22,0.4) 100%);
+            height: 2px;
+        }
+        .tag {
+            background: rgba(99, 102, 241, 0.18);
+            border: 1px solid rgba(129, 140, 248, 0.4);
+            color: #c7d2fe;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+            padding: 16px;
+            text-align: left;
+        }
+        th {
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.75rem;
+            color: rgba(226, 232, 240, 0.7);
+        }
+        tr:hover {
+            background: rgba(79, 70, 229, 0.12);
+        }
+        .callout {
+            border-left: 4px solid #f97316;
+            background: rgba(15, 23, 42, 0.8);
+        }
+    </style>
+</head>
+<body>
+    <div class="max-w-5xl mx-auto px-5 sm:px-8 lg:px-12 py-8 sm:py-12 lg:py-16">
+        <nav class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-12 text-sm font-semibold text-indigo-300">
+            <a href="../index.html" class="inline-flex items-center gap-1 hover:text-indigo-100 transition-colors">
+                <span aria-hidden="true">←</span>
+                <span>Back to Home</span>
+            </a>
+            <a href="index.html" class="inline-flex items-center gap-1 hover:text-indigo-100 transition-colors">
+                <span>Browse All Articles</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        </nav>
+
+        <header class="text-center mb-16">
+            <div class="inline-flex items-center gap-3 px-4 py-2 rounded-full tag text-xs font-semibold uppercase tracking-[0.25em]">
+                <span>Agentic Architectures</span>
+                <span class="text-slate-400">•</span>
+                <span>Dec 6, 2025</span>
+            </div>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-black leading-tight mt-6">
+                Architecting Agentic AI: <span class="gradient-text">Why 17 Patterns Matter</span>
+            </h1>
+            <p class="max-w-3xl mx-auto text-lg sm:text-xl text-slate-300 mt-6">
+                Modern AI systems are no longer a single monolithic model. They are orchestrations of tools, agents, critics, and feedback loops. Khan’s catalog of 17 agentic patterns gives builders the shared vocabulary to assemble these pieces with intention. Here’s how to use that lens to ship resilient, adaptive systems.
+            </p>
+        </header>
+
+        <section class="glass-card rounded-3xl p-8 sm:p-10 mb-16">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                <div class="lg:col-span-2 space-y-6 text-slate-200">
+                    <h2 class="text-2xl font-bold text-indigo-200">Why patterns matter</h2>
+                    <p>
+                        Patterns force clarity. Instead of improvising bespoke agent stacks each time, you can reference proven coordination templates: ensembles for resilience, Tree of Thoughts for exploration, reflexive critics for self-checks, or orchestration layers for adaptivity. Shared language accelerates design reviews, debugging, and stakeholder buy-in.
+                    </p>
+                    <p>
+                        Treat the 17 patterns as LEGO bricks. Mix, extend, and remix them depending on complexity, risk tolerance, and compute budgets. The goal is architectural discipline, not dogma.
+                    </p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 border border-indigo-500/40">
+                    <h3 class="text-sm font-semibold tracking-[0.25em] uppercase text-indigo-200 mb-4">Quick Lens</h3>
+                    <ul class="space-y-3 text-sm text-slate-200">
+                        <li class="flex items-start gap-3"><span class="text-indigo-300 mt-1">◆</span>Start with a base pattern that matches problem scope, then layer critics or reflexive loops only where failure is costly.</li>
+                        <li class="flex items-start gap-3"><span class="text-indigo-300 mt-1">◆</span>Instrument every hand-off; opacity grows exponentially with each agent hop.</li>
+                        <li class="flex items-start gap-3"><span class="text-indigo-300 mt-1">◆</span>Compute is a product requirement. Budget tokens, latency, and fallback behavior before launch.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <div class="grid-line mb-8"></div>
+            <h2 class="text-3xl font-bold mb-6">Major Agentic Patterns at a Glance</h2>
+            <p class="text-slate-300 mb-8">
+                Khan outlines 17 motifs. Below are seven foundational ones you’ll reach for first—complete with intuition, strengths, and risks.
+            </p>
+            <div class="overflow-hidden rounded-3xl glass-card">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="w-1/5">Pattern</th>
+                            <th class="w-1/3">Core Idea</th>
+                            <th class="w-1/4">Strengths</th>
+                            <th class="w-1/4">Risks</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm sm:text-base">
+                        <tr>
+                            <td class="font-semibold text-indigo-200">Multi-Agent System</td>
+                            <td>Specialized agents collaborate or hand off tasks via shared tools.</td>
+                            <td>Modularity, parallel work, reusable components.</td>
+                            <td>Coordination overhead, complex messaging contracts.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold text-indigo-200">Ensemble Decision</td>
+                            <td>Multiple agents propose answers; a voter aggregates the best.</td>
+                            <td>Robustness, diversity, natural fit for A/B comparisons.</td>
+                            <td>Requires trustworthy scoring logic, higher latency.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold text-indigo-200">Tree of Thoughts</td>
+                            <td>Branch reasoning into multiple paths, evaluate, then prune.</td>
+                            <td>Deeper exploration, creative leaps, less greedy search.</td>
+                            <td>Token explosion without heuristics; needs guardrails.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold text-indigo-200">ReAct Loop</td>
+                            <td>Interleave reflection (“think”) and tool calls (“act”).</td>
+                            <td>Great for sequential decisions and live tool use.</td>
+                            <td>May loop without progress; requires intervention triggers.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold text-indigo-200">Meta-Control</td>
+                            <td>An orchestrator agent assigns subgoals or swaps policies.</td>
+                            <td>Dynamic adaptability, clear separation of concerns.</td>
+                            <td>Controller becomes single point of failure; hard to tune.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold text-indigo-200">Reflexive Self-Assessment</td>
+                            <td>Agents estimate uncertainty, flag gaps, or retry proactively.</td>
+                            <td>Safer outputs, audit trail for regulators.</td>
+                            <td>Can spiral into analysis paralysis without thresholds.</td>
+                        </tr>
+                        <tr>
+                            <td class="font-semibold text-indigo-200">Critic / Reviewer</td>
+                            <td>Dedicated reviewer agents evaluate, red-team, or rewrite.</td>
+                            <td>Catch regressions, codify organizational quality bars.</td>
+                            <td>Requires termination rules; critics can disagree endlessly.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold mb-6">When to Reach for Each Pattern (or Blend Them)</h2>
+            <div class="space-y-8 text-slate-300">
+                <div class="glass-card rounded-3xl p-8 space-y-4">
+                    <h3 class="text-xl font-semibold text-indigo-200">Anchor to Problem Complexity</h3>
+                    <p>Simple tasks? Start with a single agent or lightweight ensemble. Multi-stage workflows like underwriting or pharma diligence demand orchestrators and selective Tree-of-Thought exploration.</p>
+                </div>
+                <div class="glass-card rounded-3xl p-8 space-y-4">
+                    <h3 class="text-xl font-semibold text-indigo-200">Budget Compute Like a Product Manager</h3>
+                    <p>Set hard caps on branches, retries, and critic passes. Build dashboards that show tokens spent per stage so you can prune aggressively without losing coverage.</p>
+                </div>
+                <div class="glass-card rounded-3xl p-8 space-y-4">
+                    <h3 class="text-xl font-semibold text-indigo-200">Design for Robustness and Auditability</h3>
+                    <p>Healthcare, finance, or safety-critical domains benefit from reflexive loops, dual reviewers, or failover ensembles. Record confidence scores and rationales for every hop.</p>
+                </div>
+                <div class="glass-card rounded-3xl p-8 space-y-4">
+                    <h3 class="text-xl font-semibold text-indigo-200">Mix Patterns Thoughtfully</h3>
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Orchestrator decomposes the request → hand off to specialist agents.</li>
+                        <li>For each subtask, run an ensemble to surface diverse answers.</li>
+                        <li>Route the winner through a critic; low confidence triggers a Tree-of-Thought re-run.</li>
+                        <li>Loop the orchestrator back in when critics stall or deadlines near.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold mb-6">Implementation Advice & Pitfalls</h2>
+            <div class="grid gap-6 md:grid-cols-2">
+                <div class="glass-card rounded-3xl p-7 space-y-4 text-slate-200">
+                    <h3 class="text-lg font-semibold text-indigo-200">Keep Interfaces Surgical</h3>
+                    <p>Define JSON contracts or typed events for every hand-off. The clearer the schema, the easier it is to swap agents, throttle retries, or stage migrations.</p>
+                    <div class="callout rounded-2xl p-5 text-sm text-slate-300">
+                        <strong class="text-orange-300">Debug Tip:</strong> Log both input and output schemas. Use schema drift alerts to catch regressions before they cascade.
+                    </div>
+                </div>
+                <div class="glass-card rounded-3xl p-7 space-y-4 text-slate-200">
+                    <h3 class="text-lg font-semibold text-indigo-200">Instrument Relentlessly</h3>
+                    <p>Multi-agent systems fail silently. Ship dashboards that show agent hop counts, critic pass rates, and average token spend per loop.</p>
+                </div>
+                <div class="glass-card rounded-3xl p-7 space-y-4 text-slate-200">
+                    <h3 class="text-lg font-semibold text-indigo-200">Control Feedback Loops</h3>
+                    <p>Critic chains and reflexive reviewers can oscillate forever. Add max iteration caps, decaying confidence scores, or human-in-the-loop interrupts.</p>
+                </div>
+                <div class="glass-card rounded-3xl p-7 space-y-4 text-slate-200">
+                    <h3 class="text-lg font-semibold text-indigo-200">Test Adversarially</h3>
+                    <p>Deliberately sabotage an agent to see whether ensembles, critics, and orchestrators recover. Reliability is a team sport.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold mb-6">Why the Pattern Lens Unlocks Momentum</h2>
+            <div class="glass-card rounded-3xl p-8 space-y-5 text-slate-300">
+                <p><strong class="text-indigo-200">Shared Vocabulary:</strong> Teams can say “ensemble + critic + orchestrator” and instantly picture the flow. Less ambiguity, faster design decisions.</p>
+                <p><strong class="text-indigo-200">Reusability:</strong> Once you build a killer summarizer or evaluator, you can redeploy it anywhere the pattern reappears.</p>
+                <p><strong class="text-indigo-200">Scaling:</strong> As agent counts grow, pattern awareness helps you anticipate load, failure modes, and governance needs.</p>
+                <p><strong class="text-indigo-200">Education:</strong> New teammates learn your system faster when it maps to recognizable archetypes.</p>
+            </div>
+        </section>
+
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold mb-6">Open Questions I&apos;m Tracking</h2>
+            <div class="grid gap-6 md:grid-cols-2">
+                <div class="glass-card rounded-3xl p-7 space-y-3 text-slate-300">
+                    <h3 class="text-lg font-semibold text-indigo-200">Scalability vs. Interpretability</h3>
+                    <p>Richer pattern stacks often blur causality. Expect more work on traceability standards and agent-level provenance.</p>
+                </div>
+                <div class="glass-card rounded-3xl p-7 space-y-3 text-slate-300">
+                    <h3 class="text-lg font-semibold text-indigo-200">Safety Guarantees</h3>
+                    <p>How do we certify a system that lets autonomous agents self-repair? Formal methods and constraint-checking critics are early answers.</p>
+                </div>
+                <div class="glass-card rounded-3xl p-7 space-y-3 text-slate-300">
+                    <h3 class="text-lg font-semibold text-indigo-200">Pattern Selection Automation</h3>
+                    <p>Meta-controllers that choose the right architecture for each request remain mostly manual. Expect meta-learning breakthroughs here.</p>
+                </div>
+                <div class="glass-card rounded-3xl p-7 space-y-3 text-slate-300">
+                    <h3 class="text-lg font-semibold text-indigo-200">Emergent Behavior</h3>
+                    <p>Large agent networks can manifest unexpected politics. Simulations and sandboxed rehearsals are becoming mandatory.</p>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center text-sm text-slate-500 pt-12 border-t border-slate-700/40">
+            <p>Want a deeper dive? DM me on <a href="https://www.linkedin.com/in/chriscruzai" class="text-indigo-300 hover:text-indigo-100">LinkedIn</a> or explore more in the <a href="index.html" class="text-indigo-300 hover:text-indigo-100">Empire Blog archive</a>.</p>
+        </footer>
+    </div>
+</body>
+</html>
