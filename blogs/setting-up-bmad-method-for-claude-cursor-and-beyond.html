@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setting up BMad Method for Claude, Cursor, and Beyond — My Full Workflow and Lessons Learned - Chris Cruz</title>
+    <meta name="description" content="How I install and configure the BMad Method for Claude, Cursor, and agent-driven workflows across product, dev, and QA."/>
+    <meta name="keywords" content="BMad Method, Claude, Cursor, AI agents, product workflow, installation guide"/>
+    <meta name="author" content="Chris Cruz"/>
+    <meta property="og:title" content="Setting up BMad Method for Claude, Cursor, and Beyond"/>
+    <meta property="og:description" content="A progressive disclosure walkthrough of my BMad Method installation, configuration, and lessons learned."/>
+    <meta property="og:type" content="article"/>
+    <meta property="og:url" content="https://chriscruz.ai/blogs/setting-up-bmad-method-for-claude-cursor-and-beyond.html"/>
+    <meta property="og:image" content="https://chriscruz.ai/images/bmad-method-claude-cursor.jpg"/>
+    <meta name="twitter:card" content="summary_large_image"/>
+    <meta name="twitter:title" content="Setting up BMad Method for Claude, Cursor, and Beyond"/>
+    <meta name="twitter:description" content="Step-by-step BMad Method setup covering agents, bundles, and IDE integration."/>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0b1220;
+            color: #f5f8ff;
+        }
+        .gradient-title {
+            background: linear-gradient(120deg, #4f46e5, #ec4899, #38bdf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        details[open] summary svg {
+            transform: rotate(180deg);
+        }
+        summary::-webkit-details-marker {
+            display: none;
+        }
+    </style>
+</head>
+<body class="text-[#d4dcff]">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 md:px-10 py-8 md:py-16">
+        <nav class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-10 text-sm font-semibold">
+            <a href="../index.html" class="inline-flex items-center gap-1 text-sky-300 hover:text-sky-200 transition-colors">
+                <span aria-hidden="true">←</span>
+                <span>Back to Home</span>
+            </a>
+            <a href="index.html" class="inline-flex items-center gap-1 text-[#d4dcff] hover:text-white transition-colors">
+                <span>Browse All Articles</span>
+                <span aria-hidden="true">→</span>
+            </a>
+        </nav>
+
+        <header class="text-center mb-16">
+            <p class="uppercase tracking-[0.35em] text-xs text-sky-300 mb-4">Agent-Driven Product Ops</p>
+            <h1 class="text-4xl md:text-6xl font-black gradient-title mb-4">Setting up BMad Method for Claude, Cursor, and Beyond — My Full Workflow and Lessons Learned</h1>
+            <p class="text-lg md:text-xl text-slate-200 max-w-3xl mx-auto">A progressive disclosure walkthrough for builders who want a unified, multi-agent pipeline that connects PRDs, architecture, development, and QA across Claude, Cursor, and web chat surfaces.</p>
+        </header>
+
+        <section class="mb-16 bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl">
+            <h2 class="text-2xl md:text-3xl font-bold text-white mb-4">⚡ Quick Pulse</h2>
+            <p class="text-slate-200 mb-4">You can treat this guide like an expanding ladder. Start with the essentials and open each tier as you’re ready for deeper configuration. The entire setup took me under 20 minutes once I knew the flow.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm">
+                <div class="bg-black/30 border border-white/10 rounded-2xl p-4">
+                    <p class="text-xs uppercase tracking-wide text-indigo-300 mb-1">Core Command</p>
+                    <p class="font-semibold text-white break-all">npx bmad-method install</p>
+                </div>
+                <div class="bg-black/30 border border-white/10 rounded-2xl p-4">
+                    <p class="text-xs uppercase tracking-wide text-indigo-300 mb-1">Bundles Path</p>
+                    <p class="font-semibold text-white break-words">/Users/chriscruz/Dropbox/Github/BMAD/web-bundles</p>
+                </div>
+                <div class="bg-black/30 border border-white/10 rounded-2xl p-4">
+                    <p class="text-xs uppercase tracking-wide text-indigo-300 mb-1">Agents Activated</p>
+                    <p class="font-semibold text-white">pm, po, sm, architect, dev, qa, ux-expert, analyst, bmad-master, bmad-orchestrator</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="space-y-6">
+            <details class="bg-black/40 border border-white/10 rounded-3xl p-6" open>
+                <summary class="flex items-center justify-between cursor-pointer">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] text-indigo-300">Layer 1</p>
+                        <h2 class="text-2xl font-bold text-white">Starting the Journey: What Is BMad and Why Use It?</h2>
+                    </div>
+                    <svg class="w-5 h-5 text-indigo-200 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+                <div class="mt-4 space-y-4 text-slate-200 leading-relaxed">
+                    <p>BMad is a modular, opinionated framework built for AI-powered product development. I lean on it for weekly sprints that cycle through PRDs, architecture, sharded stories, and QA gates—exactly the kind of iterative flow modern AI teams live in.</p>
+                    <p>Because it already understands multi-agent orchestration, the method snaps into platforms like Claude, Cursor, and ChatGPT without duct tape. Think of it as a playbook plus automation spine that keeps product, dev, architecture, and QA in sync.</p>
+                    <a href="https://www.youtube.com/watch?v=fD8NLPU0WYU" class="inline-flex items-center gap-2 text-sky-300 hover:text-sky-200 font-semibold" target="_blank" rel="noopener">▶️ Watch the BMad Method demo</a>
+                </div>
+            </details>
+
+            <details class="bg-black/40 border border-white/10 rounded-3xl p-6">
+                <summary class="flex items-center justify-between cursor-pointer">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] text-rose-300">Layer 2</p>
+                        <h2 class="text-2xl font-bold text-white">Installation — Step by Step</h2>
+                    </div>
+                    <svg class="w-5 h-5 text-rose-200 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+                <div class="mt-4 space-y-6 text-slate-200 leading-relaxed">
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">a. Run the Installer</h3>
+                        <p>Kick off the interactive wizard with:</p>
+<pre class="bg-black/60 border border-white/10 rounded-2xl p-4 text-sm overflow-auto"><code>npx bmad-method install</code></pre>
+                        <p>This command seeds the .bmad-core directory, prompts for key options, and scaffolds rules you’ll reuse everywhere.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">b. Project Directory Selection</h3>
+                        <blockquote class="border-l-4 border-sky-400 pl-4 italic text-slate-100">Enter the full path to your project directory where BMad should be installed:</blockquote>
+                        <p>I pointed it at the actual repo I open in Cursor and Claude Code:</p>
+<pre class="bg-black/60 border border-white/10 rounded-2xl p-4 text-sm overflow-auto"><code>/Users/chriscruz/Dropbox/Github/BMAD</code></pre>
+                        <p>Pro tip: choose your main project root so agent rules, docs, and bundles live exactly where your IDE expects them.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">c. PRD Sharding</h3>
+                        <blockquote class="border-l-4 border-rose-400 pl-4 italic text-slate-100">Will the PRD (Product Requirements Document) be sharded into multiple files?</blockquote>
+                        <p>BMad is flexible—stick to a single PRD if you’re small, or shard into modular files for enterprise-scale automation. I weigh project size and iteration speed; both choices plug into the same agent loop.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">d. IDE Configuration (Multiselect)</h3>
+                        <blockquote class="border-l-4 border-amber-400 pl-4 italic text-slate-100">Which IDE(s) do you want to configure?</blockquote>
+                        <p>Navigate with the arrow keys, toggle with <span class="font-semibold">SPACE</span>, and confirm with <span class="font-semibold">ENTER</span>. I selected <span class="font-semibold">Cursor</span> and keep an eye out for native Claude Code support. If you miss one, hit <span class="font-semibold">N</span> at the confirmation prompt and rerun.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">e. Web Bundles for Claude, ChatGPT, Gemini</h3>
+                        <blockquote class="border-l-4 border-emerald-400 pl-4 italic text-slate-100">Would you like to include pre-built web bundles? (standalone files for ChatGPT, Claude, Gemini)</blockquote>
+                        <p>I say <span class="font-semibold uppercase tracking-wide">YES</span> every time. The installer generates ready-to-upload bundles so you can activate BMad agents in web chat. Drop the bundle into Claude or ChatGPT, follow the instructions, and your agents spin up instantly.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-semibold text-white mb-2">f. Bundle Directory</h3>
+                        <blockquote class="border-l-4 border-sky-400 pl-4 italic text-slate-100">Enter directory for web bundles: (/Users/chriscruz/Dropbox/Github/BMAD/web-bundles)</blockquote>
+                        <p>I take the default path. Keeping bundles next to the repo makes versioning and sharing painless.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="bg-black/40 border border-white/10 rounded-3xl p-6">
+                <summary class="flex items-center justify-between cursor-pointer">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] text-sky-300">Layer 3</p>
+                        <h2 class="text-2xl font-bold text-white">What the Installer Did</h2>
+                    </div>
+                    <svg class="w-5 h-5 text-sky-200 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+                <div class="mt-4 space-y-4 text-slate-200 leading-relaxed">
+                    <ul class="list-disc list-inside space-y-2">
+                        <li>Installed web bundles to <code class="bg-black/60 border border-white/10 rounded px-2 py-1">/Users/chriscruz/Dropbox/Github/BMAD/web-bundles</code>.</li>
+                        <li>Generated agent rulebooks for <span class="font-semibold">ux-expert, sm, qa, po, pm, dev, bmad-orchestrator, bmad-master, architect, analyst</span>.</li>
+                        <li>Configured Cursor instructions so I can call agents with <code class="bg-black/60 border border-white/10 rounded px-2 py-1">@pm</code>, <code class="bg-black/60 border border-white/10 rounded px-2 py-1">@architect</code>, and more.</li>
+                        <li>Provisioned the <code class="bg-black/60 border border-white/10 rounded px-2 py-1">.bmad-core</code> directory with workflow logic, prompt scaffolds, and documentation.</li>
+                    </ul>
+                </div>
+            </details>
+
+            <details class="bg-black/40 border border-white/10 rounded-3xl p-6">
+                <summary class="flex items-center justify-between cursor-pointer">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] text-emerald-300">Layer 4</p>
+                        <h2 class="text-2xl font-bold text-white">My Next Steps (And Yours!)</h2>
+                    </div>
+                    <svg class="w-5 h-5 text-emerald-200 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+                <div class="mt-4 space-y-6 text-slate-200 leading-relaxed">
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                        <h3 class="text-lg font-semibold text-white mb-2">1. Read the user guide</h3>
+                        <p>The docs live at <code class="bg-black/60 border border-white/10 rounded px-2 py-1">docs/user-guide.md</code> and <code class="bg-black/60 border border-white/10 rounded px-2 py-1">.bmad-core/user-guide.md</code>. They outline agent commands, sharding patterns, and quality gates.</p>
+                        <a href="https://github.com/bmad-code-org/BMAD-METHOD/blob/main/docs/user-guide.md" class="inline-flex items-center gap-2 text-sky-300 hover:text-sky-200 font-semibold" target="_blank" rel="noopener">📘 Open the GitHub User Guide</a>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                        <h3 class="text-lg font-semibold text-white mb-2">2. Invoke agents everywhere</h3>
+                        <ul class="list-disc list-inside space-y-2">
+                            <li><span class="font-semibold">Cursor & Claude Code:</span> summon agents with <code class="bg-black/60 border border-white/10 rounded px-2 py-1">@pm</code>, <code class="bg-black/60 border border-white/10 rounded px-2 py-1">@architect</code>, or their slash-command equivalents.</li>
+                            <li><span class="font-semibold">Web apps (Claude, ChatGPT, Gemini):</span> upload or paste the bundle instructions and watch the agent network boot in seconds.</li>
+                        </ul>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-5">
+                        <h3 class="text-lg font-semibold text-white mb-2">3. Run the workflow</h3>
+                        <p>Define your PRD, shard user stories, ship code with dev + architect guardrails, and let QA agents close the loop. Everything is logged, replayable, and ready for the next sprint.</p>
+                    </div>
+                </div>
+            </details>
+
+            <details class="bg-black/40 border border-white/10 rounded-3xl p-6">
+                <summary class="flex items-center justify-between cursor-pointer">
+                    <div>
+                        <p class="text-xs uppercase tracking-[0.3em] text-amber-300">Layer 5</p>
+                        <h2 class="text-2xl font-bold text-white">Why This Rocks</h2>
+                    </div>
+                    <svg class="w-5 h-5 text-amber-200 transition-transform" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                </summary>
+                <div class="mt-4 space-y-4 text-slate-200 leading-relaxed">
+                    <ul class="list-disc list-inside space-y-3">
+                        <li><span class="font-semibold">Agent-first development:</span> Every phase—from requirements to QA—is standardized, templated, and ready to spin up on demand.</li>
+                        <li><span class="font-semibold">Multi-platform reach:</span> Claude, Cursor, ChatGPT, Gemini, or any IDE that honors agent instructions are instantly aligned.</li>
+                        <li><span class="font-semibold">Power-user approved:</span> The consistent context stream means I can be PM, architect, and dev without context switching chaos.</li>
+                    </ul>
+                    <p class="text-slate-100 font-semibold">TL;DR: BMad is lightweight to install, heavy on leverage. Once your agents are in play, you can build, iterate, and ship like an AI-native team.</p>
+                </div>
+            </details>
+        </section>
+
+        <section class="mt-16 bg-gradient-to-r from-indigo-500/20 via-rose-500/20 to-sky-500/20 border border-white/10 rounded-3xl p-8 text-center">
+            <h2 class="text-3xl font-bold text-white mb-4">Let the Agents Do the Heavy Lifting</h2>
+            <p class="text-slate-200 max-w-2xl mx-auto mb-6">Kick off your next product sprint with BMad at the core. The orchestration spine keeps PRDs, architecture, dev, and QA humming in unison across every AI surface you use.</p>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <a href="https://github.com/bmad-code-org/BMAD-METHOD/blob/main/docs/user-guide.md" target="_blank" rel="noopener" class="px-6 py-3 rounded-full bg-sky-500/80 hover:bg-sky-500 text-white font-semibold transition">Review the Playbook</a>
+                <a href="../index.html" class="px-6 py-3 rounded-full border border-white/30 hover:border-white text-white font-semibold transition">Return to ChrisCruz.ai</a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>
