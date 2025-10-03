@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>How I'm Rebuilding My Productivity System With AI | ChrisCruz.ai</title>
+    <meta name="description" content="Rebuild a productivity system with AI as a silent partner while keeping things simple. Learn the reset, backbone practices, and how AI fits in.">
+    <meta name="author" content="Christopher Manuel Cruz-Guzman">
+    <meta property="og:title" content="How I'm Rebuilding My Productivity System With AI">
+    <meta property="og:description" content="Discover the backbone of a simple productivity system enhanced by AI.">
+    <meta property="og:type" content="article">
+    <meta property="og:image" content="https://chriscruz.ai/images/og-image.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&family=Source+Serif+4:opsz,wght@10..80,400;10..80,500;10..80,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            color-scheme: light;
+            --page-bg: #fbfbfa;
+            --article-bg: #ffffff;
+            --text-color: #222222;
+            --muted-text: #6e6e6e;
+            --accent: #1a8917;
+            --border-color: #e8e8e8;
+            --max-width: 760px;
+            --transition: 240ms ease;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Source Serif 4', Georgia, serif;
+            background: var(--page-bg);
+            color: var(--text-color);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header.site-header {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .site-header .inner {
+            max-width: var(--max-width);
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1.5rem;
+        }
+
+        .site-title {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-color);
+            text-decoration: none;
+        }
+
+        .site-nav a {
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            color: var(--muted-text);
+            text-decoration: none;
+            margin-left: 1rem;
+            transition: color var(--transition);
+        }
+
+        .site-nav a:hover {
+            color: var(--text-color);
+        }
+
+        main {
+            padding: 3.5rem 1.5rem 5rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        article {
+            background: var(--article-bg);
+            padding: 3rem 3.25rem;
+            max-width: var(--max-width);
+            border-radius: 18px;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.04);
+        }
+
+        @media (max-width: 768px) {
+            article {
+                padding: 2.5rem 1.75rem;
+            }
+            .site-header .inner {
+                padding: 0.85rem 1.25rem;
+            }
+            main {
+                padding: 2rem 1rem 4rem;
+            }
+        }
+
+        .eyebrow {
+            font-family: 'Inter', sans-serif;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.18em;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', 'Times New Roman', serif;
+            font-weight: 700;
+            font-size: clamp(2.5rem, 4vw, 3.5rem);
+            line-height: 1.15;
+            margin: 0 0 0.75rem;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: var(--muted-text);
+            margin-bottom: 2rem;
+        }
+
+        .meta-row {
+            display: flex;
+            align-items: center;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            color: var(--muted-text);
+            gap: 0.75rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .meta-row span::after {
+            content: '•';
+            margin-left: 0.75rem;
+        }
+
+        .meta-row span:last-child::after {
+            content: '';
+            margin: 0;
+        }
+
+        .hero-callout {
+            font-size: 1.2rem;
+            font-style: italic;
+            margin-bottom: 2.5rem;
+            padding-left: 1.5rem;
+            border-left: 3px solid var(--accent);
+        }
+
+        section.collapsible-section {
+            border-top: 1px solid var(--border-color);
+            padding: 2.5rem 0;
+        }
+
+        section.collapsible-section:first-of-type {
+            border-top: none;
+            padding-top: 0;
+        }
+
+        section.collapsible-section h2 {
+            font-family: 'Playfair Display', 'Times New Roman', serif;
+            font-size: 2rem;
+            margin: 0 0 0.75rem;
+        }
+
+        .section-intro {
+            color: var(--muted-text);
+            margin-bottom: 1.5rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+        }
+
+        .section-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.55rem 1.1rem;
+            border-radius: 999px;
+            border: 1px solid var(--border-color);
+            background: #f6f6f4;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: background var(--transition), border-color var(--transition), transform var(--transition);
+        }
+
+        .section-toggle:hover,
+        .section-toggle:focus {
+            background: #ffffff;
+            border-color: rgba(26, 137, 23, 0.4);
+            transform: translateY(-1px);
+        }
+
+        .section-toggle svg {
+            transition: transform var(--transition);
+        }
+
+        .section-toggle[aria-expanded="true"] svg {
+            transform: rotate(180deg);
+        }
+
+        .section-body {
+            margin-top: 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            transition: max-height 360ms ease, opacity 240ms ease;
+        }
+
+        .section-body.open {
+            opacity: 1;
+        }
+
+        p {
+            margin: 0 0 1.5rem;
+            font-size: 1.08rem;
+        }
+
+        ol {
+            counter-reset: list-counter;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        ol li {
+            counter-increment: list-counter;
+            margin-bottom: 1.85rem;
+            padding-left: 2.75rem;
+            position: relative;
+        }
+
+        ol li::before {
+            content: counter(list-counter);
+            position: absolute;
+            left: 0;
+            top: 0.2rem;
+            background: rgba(26, 137, 23, 0.1);
+            color: var(--accent);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+        }
+
+        .list-title {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 1.05rem;
+            margin-bottom: 0.45rem;
+        }
+
+        .highlight-box {
+            background: #f8f8f6;
+            border-radius: 14px;
+            padding: 1.5rem 1.75rem;
+            margin: 2rem 0;
+            border: 1px solid rgba(26, 137, 23, 0.18);
+        }
+
+        .highlight-box ul {
+            margin: 0.75rem 0 0;
+            padding-left: 1.1rem;
+        }
+
+        .highlight-box li {
+            margin-bottom: 0.75rem;
+        }
+
+        .closing {
+            font-style: italic;
+            font-size: 1.15rem;
+            color: #404040;
+        }
+
+        .share-row {
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .share-label {
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.95rem;
+            letter-spacing: 0.02em;
+            color: #333333;
+        }
+
+        .share-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .share-buttons a {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            text-decoration: none;
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            padding: 0.5rem 1rem;
+            background: #ffffff;
+            transition: border-color var(--transition), transform var(--transition);
+        }
+
+        .share-buttons a:hover {
+            border-color: rgba(26, 137, 23, 0.4);
+            transform: translateY(-1px);
+        }
+
+        footer {
+            margin: 3rem 0 0;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
+            color: var(--muted-text);
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .meta-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.35rem;
+            }
+            .meta-row span::after {
+                display: none;
+            }
+            .share-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="site-header" role="banner">
+        <div class="inner">
+            <a class="site-title" href="../index.html">ChrisCruz.ai</a>
+            <nav class="site-nav" aria-label="Primary Navigation">
+                <a href="../blogs/index.html">Writing</a>
+                <a href="../projects/index.html">Projects</a>
+                <a href="../contact.html">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <article>
+            <p class="eyebrow">Productivity Systems</p>
+            <h1>How I’m Rebuilding My Productivity System With AI (and Keeping It Simple)</h1>
+            <p class="subtitle">After burning out on a bloated tech stack, I rebuilt my productivity system from the ground up—leaning on GTD, Pomodoro, and a quiet AI teammate that keeps me focused on what matters.</p>
+            <div class="meta-row" aria-label="Article metadata">
+                <span>Published January 24, 2026</span>
+                <span>6 min read</span>
+                <span>By Christopher Manuel Cruz-Guzman</span>
+            </div>
+            <p class="hero-callout">“Productivity should feel like momentum, not maintenance. I rebuilt my system so the basics stay sharp and AI fills in the friction.”</p>
+
+            <section class="collapsible-section" id="reset">
+                <h2>Why I Needed a Reset</h2>
+                <p class="section-intro">The moment I realized my system was running me instead of the other way around.</p>
+                <button class="section-toggle" aria-expanded="true" aria-controls="reset-body">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 9l7 7 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="toggle-text">Hide section</span>
+                </button>
+                <div class="section-body open" id="reset-body">
+                    <p>A few months ago, “productivity” became a costume for busyness. I was hopping between tools, juggling tasks, and mistaking motion for progress. My notes were scattered everywhere, and my task list felt more like a graveyard than a roadmap.</p>
+                    <p>The turning point came when I finally asked myself the uncomfortable question: <em>Does my system make it easier to focus on what matters—or harder?</em> Anything that didn’t make the cut was removed. Apps, workflows, clever shortcuts. I kept only what passed that filter.</p>
+                    <p>That reset cleared space to build again, this time intentionally—and with AI playing a supporting role rather than stealing the show.</p>
+                </div>
+            </section>
+
+            <section class="collapsible-section" id="backbone">
+                <h2>The Backbone of My New System</h2>
+                <p class="section-intro">Ten practices that compound when they stay simple and consistent.</p>
+                <button class="section-toggle" aria-expanded="false" aria-controls="backbone-body">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 9l7 7 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="toggle-text">Read this section</span>
+                </button>
+                <div class="section-body" id="backbone-body">
+                    <p>The system works because it’s boring on purpose. I didn’t reinvent GTD, Pomodoro, or the Eisenhower Matrix—I just integrated them into one loop. Here’s the exact backbone I run every week:</p>
+                    <ol>
+                        <li>
+                            <div class="list-title">Capture Everything</div>
+                            <p>Every thought, task, email, or stray idea lands in one trusted spot—usually Todoist or my notebook. The moment it’s captured, my brain is free to focus on execution.</p>
+                        </li>
+                        <li>
+                            <div class="list-title">Clarify Daily</div>
+                            <p>Each morning, I scan the inbox: do it, delegate it, defer it, or delete it. Clarity beats volume.</p>
+                        </li>
+                        <li>
+                            <div class="list-title">Prioritize Ruthlessly</div>
+                            <p>The Eisenhower Matrix filters my list. Urgent and important items ship first. Busywork gets cut before it reaches my calendar.</p>
+                        </li>
+                        <li>
+                            <div class="list-title">Batch Similar Tasks</div>
+                            <p>I group emails, meetings, and admin work. Fewer context switches means more flow.</p>
+                        </li>
+                        <li>
+                            <div class="list-title">Time-Block With Pomodoro</div>
+                            <p>Ninety-minute deep work blocks, broken into 25/5 Pomodoros, keep me in rhythm without burning out.</p>
+                        </li>
+                        <li>
+                            <div class="list-title">Define Clear Next Actions</div>
+                            <p>Vague tasks stall momentum. I write “draft email to client” instead of “work on project” so I always know the next step.</p>
+                        </li>
+                        <li>
+                            <div class="list-title">Weekly Review (Sundays)</div>
+                            <p>Every Sunday, I reset: calendar, goals, open loops. Monday starts clean.</p>
+                        </li>
+                        <li>
+                            <div class="list-title">Limit Distractions</div>
+                            <p>Notifications stay off during focus blocks. Website blockers stand guard when needed. If it doesn’t help me focus, it’s gone.</p>
+                        </li>
+                        <li>
+                            <div class="list-title">Delegate and Automate</div>
+                            <p>AI handles repetitive tasks—meeting summaries, email drafts, tagging action items. Delegation stopped feeling heavy.</p>
+                        </li>
+                        <li>
+                            <div class="list-title">Reflect Daily</div>
+                            <p>Five minutes every night to record what worked and what didn’t. The system gets sharper one reflection at a time.</p>
+                        </li>
+                    </ol>
+                </div>
+            </section>
+
+            <section class="collapsible-section" id="ai-fit">
+                <h2>Where AI Fits In</h2>
+                <p class="section-intro">AI acts like a quiet teammate that removes friction instead of adding noise.</p>
+                <button class="section-toggle" aria-expanded="false" aria-controls="ai-body">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 9l7 7 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="toggle-text">Read this section</span>
+                </button>
+                <div class="section-body" id="ai-body">
+                    <p>The biggest shift was reframing AI as a silent partner, not a shiny toy. It doesn’t replace the fundamentals—it reinforces them.</p>
+                    <div class="highlight-box" role="note" aria-label="AI assists I rely on">
+                        <strong>How AI supports the loop:</strong>
+                        <ul>
+                            <li><strong>Drafts follow-ups</strong> so I never burn minutes staring at a blank cursor.</li>
+                            <li><strong>Suggests next actions</strong> whenever a task reads vague or oversized.</li>
+                            <li><strong>Automates micro-workflows</strong> like tagging tasks, prepping meeting agendas, or surfacing past notes.</li>
+                        </ul>
+                    </div>
+                    <p>Think of it like having a coach who never gets tired of repeating the basics. My job is to run the play. AI makes sure the ball is always in my hands when it matters.</p>
+                </div>
+            </section>
+
+            <section class="collapsible-section" id="finale">
+                <h2>Final Thoughts: Systems Should Breathe</h2>
+                <p class="section-intro">Momentum comes from tiny steps taken consistently—not from complicated dashboards.</p>
+                <button class="section-toggle" aria-expanded="false" aria-controls="finale-body">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 9l7 7 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <span class="toggle-text">Read this section</span>
+                </button>
+                <div class="section-body" id="finale-body">
+                    <p>Productivity systems aren’t monuments—they’re living things. They breathe with you. The foundation stays simple: capture, clarify, prioritize, batch, block, reflect. Everything else flexes as life changes.</p>
+                    <p class="closing">If your current setup feels overwhelming, don’t build something brand new overnight. Try one 90-minute deep work block tomorrow. Reflect at night. Repeat. Tiny steps compound into real momentum—that’s been my reset.</p>
+                </div>
+            </section>
+
+            <div class="share-row">
+                <div class="share-label">Share this story</div>
+                <div class="share-buttons" role="group" aria-label="Share this article">
+                    <a href="#" aria-label="Share on X (formerly Twitter)">🐦 <span>X</span></a>
+                    <a href="#" aria-label="Share on LinkedIn">🔗 <span>LinkedIn</span></a>
+                    <a href="#" aria-label="Share via email">✉️ <span>Email</span></a>
+                </div>
+            </div>
+
+            <footer>
+                © 2026 ChrisCruz.ai — built for systems thinkers.
+            </footer>
+        </article>
+    </main>
+
+    <script>
+        const toggles = document.querySelectorAll('.section-toggle');
+
+        const syncHeight = (body, isOpen) => {
+            if (isOpen) {
+                body.classList.add('open');
+                body.style.maxHeight = `${body.scrollHeight}px`;
+                body.setAttribute('aria-hidden', 'false');
+            } else {
+                body.classList.remove('open');
+                body.style.maxHeight = '0px';
+                body.setAttribute('aria-hidden', 'true');
+            }
+        };
+
+        toggles.forEach(button => {
+            const section = button.closest('.collapsible-section');
+            const body = section.querySelector('.section-body');
+            const textEl = button.querySelector('.toggle-text');
+
+            const updateText = (expanded) => {
+                textEl.textContent = expanded ? 'Hide section' : 'Read this section';
+            };
+
+            const expanded = button.getAttribute('aria-expanded') === 'true';
+            updateText(expanded);
+            syncHeight(body, expanded);
+
+            button.addEventListener('click', () => {
+                const isExpanded = button.getAttribute('aria-expanded') === 'true';
+                const nextState = !isExpanded;
+                button.setAttribute('aria-expanded', String(nextState));
+                updateText(nextState);
+                syncHeight(body, nextState);
+            });
+        });
+
+        window.addEventListener('resize', () => {
+            document.querySelectorAll('.section-body.open').forEach(body => {
+                body.style.maxHeight = `${body.scrollHeight}px`;
+            });
+        });
+    </script>
+</body>
+</html>
